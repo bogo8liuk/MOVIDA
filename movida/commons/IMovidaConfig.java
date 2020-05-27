@@ -29,7 +29,7 @@ public interface IMovidaConfig {
 	 * @param a l'algoritmo da selezionare
 	 * @return <code>true</code> se la configurazione è stata modificata, <code>false</code> in caso contrario
 	 */
-	public void setSort(SortingAlgorithm a);
+	public boolean setSort(SortingAlgorithm a);
 
 	/**
 	 * Seleziona l'implementazione del dizionario 
@@ -40,5 +40,5 @@ public interface IMovidaConfig {
 	 * @param m l'implementazione da selezionare
 	 * @return <code>true</code> se la configurazione è stata modificata, <code>false</code> in caso contrario
 	 */
-	public void setMap(MapImplementation m);
+	public boolean setMap(MapImplementation m);
 }
