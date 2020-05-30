@@ -20,9 +20,9 @@ public interface IMovidaSearch {
 	 * Ricerca film per titolo. 
 	 * 
 	 * Restituisce i film il cui titolo contiene la stringa 
-	 * <code>title</code> passata come parametro.
+	 * title passata come parametro.
 	 * 
-	 * Per il match esatto usare il metodo <code>getMovieByTitle(String s)</code>
+	 * Per il match esatto usare il metodo getMovieByTitle(String s)
 	 * 
 	 * Restituisce un vettore vuoto se nessun film rispetta il criterio di ricerca.  
 	 *  
@@ -35,7 +35,7 @@ public interface IMovidaSearch {
 	 * Ricerca film per anno. 
 	 * 
 	 * Restituisce i film usciti in sala nell'anno 
-	 * <code>anno</code> passato come parametro.
+	 * anno passato come parametro.
 	 *  
 	 * Restituisce un vettore vuoto se nessun film rispetta il criterio di ricerca.  
 	 *  
@@ -47,7 +47,7 @@ public interface IMovidaSearch {
 	/**
 	 * Ricerca film per regista. 
 	 * 
-	 * Restituisce i film diretti dal regista il cui nome è passato come parametro. 
+	 * Restituisce i film diretti dal regista il cui nome e' passato come parametro. 
 	 *  
 	 * Restituisce un vettore vuoto se nessun film rispetta il criterio di ricerca.  
 	 *  
@@ -60,7 +60,7 @@ public interface IMovidaSearch {
 	 * Ricerca film per attore. 
 	 * 
 	 * Restituisce i film a cui ha partecipato come attore 
-	 * la persona il cui nome è passato come parametro. 
+	 * la persona il cui nome e' passato come parametro. 
 	 *  
 	 * Restituisce un vettore vuoto se nessun film rispetta il criterio di ricerca.  
 	 *  
@@ -70,12 +70,12 @@ public interface IMovidaSearch {
 	public Movie[] searchMoviesStarredBy(String name);
 
 	/**
-	 * Ricerca film più votati. 
+	 * Ricerca film piu' votati. 
 	 * 
-	 * Restituisce gli <code>N</code> film che hanno 
-	 * ricevuto più voti, in ordine decrescente di voti.
+	 * Restituisce gli N film che hanno 
+	 * ricevuto piu' voti, in ordine decrescente di voti.
 	 * 
-	 * Se il numero di film totali è minore di N restituisce tutti i film,
+	 * Se il numero di film totali e' minore di N restituisce tutti i film,
 	 * comunque in ordine.
 	 *   
 	 * @param N numero di film che la ricerca deve resistuire  
@@ -84,12 +84,12 @@ public interface IMovidaSearch {
 	public Movie[] searchMostVotedMovies(Integer N);
 
 	/**
-	 * Ricerca film più recenti. 
+	 * Ricerca film piu' recenti. 
 	 * 
-	 * Restituisce gli <code>N</code> film più recenti,
+	 * Restituisce gli N film piu' recenti,
 	 * in base all'anno di uscita in sala confrontato con l'anno corrente.
 	 * 
-	 * Se il numero di film totali è minore di N restituisce tutti i film,
+	 * Se il numero di film totali  minore di N restituisce tutti i film,
 	 * comunque in ordine.
 	 *   
 	 * @param N numero di film che la ricerca deve resistuire
@@ -98,12 +98,12 @@ public interface IMovidaSearch {
 	public Movie[] searchMostRecentMovies(Integer N);
 
 	/**
-	 * Ricerca gli attori più attivi. 
+	 * Ricerca gli attori piu' attivi. 
 	 * 
-	 * Restituisce gli <code>N</code> attori che hanno partecipato al numero 
-	 * più alto di film
+	 * Restituisce gli N attori che hanno partecipato al numero 
+	 * piu' alto di film
 	 * 
-	 * Se il numero di attori è minore di N restituisce tutti gli attori,
+	 * Se il numero di attori e' minore di N restituisce tutti gli attori,
 	 * comunque in ordine.
 	 *
 	 * @param N numero di attori che la ricerca deve resistuire

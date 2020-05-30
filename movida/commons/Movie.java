@@ -12,10 +12,10 @@ package movida.commons;
  * Classe usata per rappresentare un film
  * nell'applicazione Movida.
  * 
- * Un film è identificato in modo univoco dal titolo 
+ * Un film e' identificato in modo univoco dal titolo 
  * case-insensitive, senza spazi iniziali e finali, senza spazi doppi. 
  * 
- * La classe può essere modicata o estesa ma deve implementare tutti i metodi getter
+ * La classe puo' essere modicata o estesa ma deve implementare tutti i metodi getter
  * per recupare le informazioni caratterizzanti di un film.
  * 
  */

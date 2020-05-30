@@ -22,7 +22,7 @@ public interface IMovidaCollaborations {
 	 * 
 	 * Restituisce gli attori che hanno partecipato 
 	 * ad almeno un film con l'attore 
-	 * <code>actor</code> passato come parametro.
+	 * actor passato come parametro.
 	 *  
 	 * @param actor attore di cui cercare i collaboratori diretti
 	 * @return array di persone
@@ -34,7 +34,7 @@ public interface IMovidaCollaborations {
 	 * 
 	 * Restituisce gli attori che hanno
 	 * collaborazioni dirette o indirette
-	 * con l'attore <code>actor</code> passato come parametro.
+	 * con l'attore actor passato come parametro.
 	 * 
 	 * Vedi slide per maggiori informazioni su collaborazioni e team.
 	 *  
@@ -46,12 +46,12 @@ public interface IMovidaCollaborations {
 	/**
 	 * Identificazione dell'insieme di collaborazioni 
 	 * caratteristiche (ICC) del team di cui un attore fa parte
-	 * e che ha lo score complessivo più alto
+	 * e che ha lo score complessivo piu' alto
 	 * 
 	 * Vedi slide per maggiori informazioni su score e ICC.
 	 *  
 	 * Si noti che questo metodo richiede l'invocazione 
-	 * del metodo precedente <code>getTeamOf(Person actor)</code>
+	 * del metodo precedente getTeamOf(Person actor)
 	 *  
 	 * @param actor attore di cui individuare il team
 	 * @return array di collaborazioni
