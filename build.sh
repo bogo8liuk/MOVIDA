@@ -26,9 +26,17 @@ function undo_build {
 }
 
 case "$1" in
-    "-b")
+    "-b" | "-bmyco" | "-myco")
     javac ${path}/movida/commons/*.java
     javac ${path}/movida/borghicremona/*.java
+    ;;
+
+    "-my" | "-bmy")
+    javac ${path}/movida/borghicremona/*.java
+    ;;
+
+    "-co" | "-bco")
+    javac ${path}/movida/commons/*.java
     ;;
 
     "-u")
