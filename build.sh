@@ -1,16 +1,19 @@
 #!/usr/bin/env bash
 
-set -e
-
 path="$(dirname `realpath "${BASH_SOURCE[0]}"`)"
+movida_path="${path}/movida"
+bc_path="${path}/movida/borghicremona"
+commons_path="${path}/movida/commons"
+hashmap_path="${path}/movida/borghicremona/hashmap"
 
 function undo_build {
     read -p "You are deleting all the compiled files. Are you sure to continue [Y/n]? " -n 1 user_in
     case "${user_in}" in
         "Y" | "y" | "")
         echo ""
-        rm ${path}/movida/borghicremona/*.class
-        rm ${path}/movida/commons/*.class
+        rm ${hashmap_path}/*.class
+        rm ${bc_path}/*.class
+        rm ${commons_path}/*.class
         ;;
 
         "N" | "n")
@@ -26,17 +29,23 @@ function undo_build {
 }
 
 case "$1" in
-    "-b" | "-bmyco" | "-myco")
-    javac ${path}/movida/commons/*.java
-    javac ${path}/movida/borghicremona/*.java
+    "-b" | "-b=all")
+    javac ${hashmap_path}/*.java
+    javac ${bc_path}/*.java
+    javac ${commons_path}/*.java
     ;;
 
-    "-my" | "-bmy")
-    javac ${path}/movida/borghicremona/*.java
+    "-b=borghicremona")
+    javac ${hashmap_path}/*.java
+    javac ${bc_path}/*.java
     ;;
 
-    "-co" | "-bco")
-    javac ${path}/movida/commons/*.java
+    "-b=commons")
+    javac ${commons_path}/*.java
+    ;;
+
+    "-b=hashmap"*)
+    javac ${hashmap_path}/*.java
     ;;
 
     "-u")
@@ -44,7 +53,6 @@ case "$1" in
     ;;        
 
     *)
-    javac ${path}/movida/commons/*.java
-    javac ${path}/movida/borghicremona/*.java
+    echo "Empty or invalid option"
     ;;
 esac
