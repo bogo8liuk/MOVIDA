@@ -1,35 +1,39 @@
 package movida.borghicremona.hashmap;
 
 import movida.borghicremona.Dictionary;
-import movida.borghicremona.Element;
+import movida.borghicremona.KeyValueElement;
 
 public class HashMap implements Dictionary {
-    private Element[] table;
+    private KeyValueElement[] table;
 
     public HashMap(int length) {
         if (0 <= length)
-            this.table = new Element[length];
+            this.table = new KeyValueElement[length];
     }
 
-    public Integer hash(String key) {
-        return 256;  // to quiet the compiler
+    public int hash(String key) {
+        return 0;
     }
 
     public boolean search(String key) {
         return false;   // to quiet the compiler
     }
 
+    private void rehash() {
+        
+    }
+
     private void grow(int quantity) {
         if (0 >= quantity) return;
 
-        Element[] oldTable = this.table;
+        KeyValueElement[] oldTable = this.table;
         int newLength = this.table.length + quantity;
-        Element[] newTable = new Element[newLength];
+        KeyValueElement[] newTable = new KeyValueElement[newLength];
         this.table = newTable;
         //TODO: insertion and rehashing of newTable
     }
 
-    public void insert(Element item) {
+    public void insert(KeyValueElement item) {
 
     }
 

@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 path="$(dirname `realpath "${BASH_SOURCE[0]}"`)"
 movida_path="${path}/movida"
 bc_path="${path}/movida/borghicremona"
@@ -45,11 +47,13 @@ case "$1" in
     ;;
 
     "-b=hashmap"*)
-    javac ${hashmap_path}/*.java
+    javac ${hashmap_path}/*.java        # This will cause the compilation of some files in "movida/borghicremona/" path, because of dependencies
     ;;
 
     "-u")
+    set +e
     undo_build
+    set -e
     ;;        
 
     *)
