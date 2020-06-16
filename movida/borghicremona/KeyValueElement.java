@@ -1,15 +1,20 @@
 package movida.borghicremona;
 
 public class KeyValueElement {
-    final private String key;
-    private Object data;
+    final protected Comparable key;
+    protected Object data;
 
-    public KeyValueElement(String key, Object data) {
+    public KeyValueElement() {
+        this.key = null;
+        this.data = null;
+    }
+
+    public KeyValueElement(Comparable key, Object data) {
         this.key = key;
         this.data = data;
     }
 
-    public String getKey() {
+    public Comparable getKey() {
         return this.key;
     }
 }
