@@ -1,9 +1,9 @@
 package movida.borghicremona;
 
 public interface Dictionary {
-    public boolean search(String key);
+    public boolean search(Comparable key);
 
-    public void insert(StringKeyValueElement item);
+    public void insert(KeyValueElement item);
 
-    public void delete(String key);
+    public void delete(Comparable key);
 }
