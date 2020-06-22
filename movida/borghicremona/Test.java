@@ -5,7 +5,7 @@ import movida.borghicremona.hashmap.HashMap;
 public class Test {
 
     private static void __hashTest(String toHash, HashMap h, Integer[] store, int index) {
-        int hashTmp = h.hash(toHash) % h.length();
+        int hashTmp = HashMap.hash(toHash) % h.length();
         store[index] = hashTmp;
         System.out.println(toHash + ": " + hashTmp);
     }

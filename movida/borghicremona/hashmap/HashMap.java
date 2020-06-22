@@ -25,7 +25,7 @@ public class HashMap implements Dictionary {
         else return 0;
     }
 
-    public int hash(String key) {
+    public static int hash(String key) {
         try {
             if (null == key) throw new IllegalArgumentException("Cannot have an empty key");
         } catch (IllegalArgumentException exception) {
