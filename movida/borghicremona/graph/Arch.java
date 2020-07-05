@@ -1,16 +1,18 @@
 package movida.borghicremona.graph;
 
 public class Arch {
-    private Vertex vertexA;
-    private Vertex vertexB;
+    private Comparable nodeA;
+    private Comparable nodeB;
 
-    public Arch(Vertex vertexA, Vertex vertexB) {
-        this.vertexA = vertexA;
-        this.vertexB = vertexB;
+    public Arch(Comparable nodeA, Comparable nodeB) {
+        this.nodeA = nodeA;
+        this.nodeB = nodeB;
     }
 
-    public VertexCouple getArchVertexes() {
-        VertexCouple couple = new VertexCouple(this.vertexA, this.vertexB);
+    public Comparable[] getArchNodes() {
+        Comparable[] couple = new Comparable[2];
+        couple[0] = this.nodeA;
+        couple[1] = this.nodeB;
         return couple;    
     }
 }
