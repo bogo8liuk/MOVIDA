@@ -6,11 +6,40 @@ import java.util.List;
 
 public class NonOrientedGraph implements Graph {
     static private class __couple_list {
-        private KeyValueElement couple;
+        private Object value;
         private List<Integer> list;
     }
 
     private __couple_list[] adjacencyList;
+
+	private void __assertNodeExists(int node) {
+        try {
+            if (this.adjacencyList.length <= node || 0 > node) throw new IllegalArgumentException("Nonexistent node");
+        } catch(IllegalArgumentException exception) {
+            System.err.println(exception.getMessage());
+        }
+	}
+
+	private void __assertArchExists(Arch arch) {
+		int[] couple = arch.getArchNodes(); // TODO: it does not compile!!!
+
+		try {
+			if (this.adjacencyList.length <= couple[0] || 0 > couple[0]) throw new IllegalArgumentException("Nonexistent arch");
+
+			boolean found = false;
+			for (int n = 0; this.adjacencyList[couple[0]].list.size() > n; ++n) {
+				if (this.adjacencyList[couple[0]].list.get(n) == couple[1]) {
+					found = true;
+					break;
+				}
+			}
+
+			if (!found) throw new IllegalArgumentException("Nonexistent arch");
+
+		} catch(IllegalArgumentException exception) {
+			System.err.println(exception.getMessage());
+		}
+	}
 
     public int nodesNumber() {
         return this.adjacencyList.length;
@@ -26,25 +55,13 @@ public class NonOrientedGraph implements Graph {
     }
 
     public int grade(int node) {
-        try {
-            if (this.adjacencyList.length <= node || 0 > node) throw new RuntimeException("Nonexistent node");
-        } catch(RuntimeException exception) {
-            System.err.println(exception.getMessage());
-        }
-        int adjacencyNodes = 0;
+		__assertNodeExists(node);
 
-        for (int n: this.adjacencyList[node].list)
-            ++adjacencyNodes;
-
-        return adjacencyNodes;
+        return this.adjacencyList[node].list.size();
     }
 
     public Arch[] incidentArchs(int node) {
-        try {
-            if (this.adjacencyList.length <= node || 0 > node) throw new RuntimeException("Nonexistent node");
-        } catch(RuntimeException exception) {
-            System.err.println(exception.getMessage());
-        }
+		__assertNodeExists(node);
         Arch[] archs = new Arch[this.adjacencyList[node].list.size()];
 
         for (int n = 0; this.adjacencyList[node].list.size() > n; ++n) {
@@ -55,4 +72,10 @@ public class NonOrientedGraph implements Graph {
 
         return archs;
     }
+
+	public int[] edges(Arch arch) {
+		__assertArchExists(arch);
+
+		return arch.getArchNodes(); // TODO: it does not compile!!!
+	}
 }
