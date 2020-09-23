@@ -7,6 +7,7 @@ movida_path="${path}/movida"
 bc_path="${path}/movida/borghicremona"
 commons_path="${path}/movida/commons"
 hashmap_path="${path}/movida/borghicremona/hashmap"
+graph_path="${path}/movida/borghicremona/graph"
 
 function undo_build {
     read -p "You are deleting all the compiled files. Are you sure to continue [Y/n]? " -n 1 user_in
@@ -16,6 +17,7 @@ function undo_build {
         rm ${hashmap_path}/*.class
         rm ${bc_path}/*.class
         rm ${commons_path}/*.class
+		rm ${graph_path}/*.class
         ;;
 
         "N" | "n")
@@ -46,9 +48,13 @@ case "$1" in
     javac ${commons_path}/*.java
     ;;
 
-    "-b=hashmap"*)
+    "-b=hashmap")
     javac ${hashmap_path}/*.java        # This will cause the compilation of some files in "movida/borghicremona/" path, because of dependencies
     ;;
+
+	"-b=graph")
+	javac ${graph_path}/*.java
+	;;
 
     "-u")
     set +e
