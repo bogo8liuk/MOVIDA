@@ -15,9 +15,9 @@ public interface Graph {
 
     public int opposite(int node, Arch arch);
 
-    public boolean areAdjacent(int[] couple);
+    public boolean areAdjacent(int nodeA, int nodeB);
 
-    public void addNode(KeyValueElement node);
+    public void addNode(int node, Object data);
 
     public void addArch(int node0, int node1);
 
