@@ -52,9 +52,9 @@ case "$1" in
     javac ${hashmap_path}/*.java        # This will cause the compilation of some files in "movida/borghicremona/" path, because of dependencies
     ;;
 
-	"-b=graph")
-	javac ${graph_path}/*.java
-	;;
+    "-b=graph")
+    javac ${graph_path}/*.java
+    ;;
 
     "-u")
     set +e

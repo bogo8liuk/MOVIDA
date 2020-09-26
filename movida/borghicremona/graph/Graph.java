@@ -19,7 +19,7 @@ public interface Graph {
 
     public void addNode(int node, Object data);
 
-    public void addArch(int node0, int node1);
+    public void addArch(int nodeA, int nodeB);
 
     public void removeNode(int node);
 

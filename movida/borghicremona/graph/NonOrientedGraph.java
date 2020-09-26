@@ -3,6 +3,9 @@ package movida.borghicremona.graph;
 import movida.borghicremona.KeyValueElement;
 import java.lang.RuntimeException;
 import java.util.List;
+import java.util.LinkedList;
+
+// TODO: We grant that if a node exists(it concerns also the case the node is not empty), his "list" member is instantiated
 
 public class NonOrientedGraph implements Graph {
     static private class __couple_list {
@@ -39,6 +42,7 @@ public class NonOrientedGraph implements Graph {
 				throw new IllegalArgumentException("Nonexistent arch");
 
 			boolean found = false;
+
 			for (int n = 0; this.adjacencyList[couple[0]].list.size() > n; ++n) {
 				if (this.adjacencyList[couple[0]].list.get(n) == couple[1]) {
 					found = true;
@@ -68,7 +72,7 @@ public class NonOrientedGraph implements Graph {
         int counter = 0;
 
         for (__couple_list k: this.adjacencyList)
-			if (null != k.list)
+			if (!k.emptyNode)
             	counter += k.list.size();
 
         return counter / 2;
@@ -82,9 +86,6 @@ public class NonOrientedGraph implements Graph {
 
     public Arch[] incidentArchs(int node) {
 		__assertNodeExists(node);
-
-		if (null == this.adjacencyList[node].list)
-			return null;
 
         Arch[] archs = new Arch[this.adjacencyList[node].list.size()];
 
@@ -110,14 +111,19 @@ public class NonOrientedGraph implements Graph {
 		int[] couple = arch.getArchNodes();
 		if (couple[0] == node)
 			return couple[1];
+
 		else if (couple[1] == node)
 			return couple[0];
+
 		else {
 			try {
 				throw new IllegalArgumentException("The node does not belong to the arch");
 			} catch (IllegalArgumentException exception) {
 				System.err.println(exception.getMessage());
 			}
+
+			// This is unreachable
+			return -1;
 		}
 	}
 
@@ -151,14 +157,14 @@ public class NonOrientedGraph implements Graph {
 		if (this.adjacencyList.length > node) {
 			this.adjacencyList[node].emptyNode = false;
 			this.adjacencyList[node].value = data;
-			this.adjacencyList[node].list = null;
+			this.adjacencyList[node].list = new LinkedList<Integer>();
 
 		} else {
 			__couple_list[] newVector = new __couple_list[node + 1];
 
 			newVector[node].emptyNode = false;
 			newVector[node].value = data;
-			newVector[node].list = null;
+			newVector[node].list = new LinkedList<Integer>();
 
 			int oldLength = this.adjacencyList.length;
 			for (int n = 0; node > n; ++n) {
@@ -173,5 +179,21 @@ public class NonOrientedGraph implements Graph {
 
 			this.adjacencyList = newVector;
 		}
+	}
+
+	public void addArch(int nodeA, int nodeB) {
+		__assertNodeExists(nodeA);
+		__assertNodeExists(nodeB);
+
+		this.adjacencyList[nodeA].list.add(nodeB);
+		this.adjacencyList[nodeB].list.add(nodeA);
+	}
+
+	public void removeNode(int node) {
+
+	}
+
+	public void removeArch(Arch arch) {
+
 	}
 }
