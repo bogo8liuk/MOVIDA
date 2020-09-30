@@ -2,8 +2,9 @@ package movida.borghicremona.graph;
 
 import movida.borghicremona.KeyValueElement;
 import java.lang.RuntimeException;
-import java.util.List;
-import java.util.LinkedList;
+import java.util.*;
+//import java.util.List;
+//import java.util.LinkedList;
 
 // TODO: We grant that if a node exists(it concerns also the case the node is not empty), his "list" member is instantiated
 
@@ -12,6 +13,12 @@ public class NonOrientedGraph implements Graph {
 		public boolean emptyNode;
         public Object value;
         public List<Integer> list;
+
+		public __couple_list() {
+			emptyNode = true;
+			value = null;
+			list = null;
+		}
     }
 
     private __couple_list[] adjacencyList;
@@ -55,6 +62,10 @@ public class NonOrientedGraph implements Graph {
 		} catch(IllegalArgumentException exception) {
 			System.err.println(exception.getMessage());
 		}
+	}
+
+	public NonOrientedGraph() {
+		this.adjacencyList = new __couple_list[15];
 	}
 
     public int nodesNumber() {
@@ -189,11 +200,26 @@ public class NonOrientedGraph implements Graph {
 		this.adjacencyList[nodeB].list.add(nodeA);
 	}
 
-	public void removeNode(int node) {
-
+	private void __removeArch(Integer nodeA, Integer nodeB) {
+		this.adjacencyList[nodeA].list.remove(nodeB);
+		this.adjacencyList[nodeB].list.remove(nodeA);
 	}
 
 	public void removeArch(Arch arch) {
+		__assertArchExists(arch);
 
+		int[] couple = arch.getArchNodes();
+		__removeArch(couple[0], couple[1]);
+	}
+
+	public void removeNode(int node) {
+		__assertNodeExists(node);
+
+		Iterator<Integer> iter = this.adjacencyList[node].list.iterator();
+
+		while (iter.hasNext())
+			__removeArch(node, iter.next());
+
+		this.adjacencyList[node].emptyNode = true;
 	}
 }
