@@ -4,71 +4,83 @@ import movida.borghicremona.hashmap.HashMap;
 
 public class Test {
 
-    private static void __hashTest(String toHash, HashMap h, Integer[] store, int index) {
-        int hashTmp = HashMap.hash(toHash) % h.length();
+	/**
+	 * It prints the hash value of a string and it stores it in a vector of integers in a given position.
+	 *
+	 * @param toHash String from which it gets the hash value.
+	 * @param h Instance of an open addressing hashmap.
+	 * @param store Vector of integers where the hash value of toHash is stored.
+	 * @param index Index of the vector where the hash value has to be stored.
+	 *
+	 * @attention This function should not be called and there's no check of the index value.
+	 */
+    private static void __hashTest(String toHash, int length, Integer[] store, int index) {
+        int hashTmp = HashMap.hash(toHash) % length;
         store[index] = hashTmp;
         System.out.println(toHash + ": " + hashTmp);
     }
 
-    public static void collisionTestHashMap(int length) {
-        if (0 >= length) return;
-        HashMap hashmap = new HashMap(length);
+	/**
+	 * It prints the results of collisions between 50 names, given the hash function of HashMap class.
+	 */
+    public static void collisionTestHashMap() {
 
-        System.out.println("Testing the number of collision with an hashmap with " + length + " elements and 50 different strings:\n");
+        System.out.println("Testing the number of collision with an hashmap with " + 50 + " elements and 50 different strings:\n");
 
-        Integer[] hashValues = new Integer[hashmap.length()];
+        Integer[] hashValues = new Integer[50];
         int index = 0;
 
-        __hashTest("Scottie Pippen", hashmap, hashValues, index++);
-        __hashTest("Patrick Ewing", hashmap, hashValues, index++);
-        __hashTest("Hakeem Olajuwon", hashmap, hashValues, index++);
-        __hashTest("Allen Iverson", hashmap, hashValues, index++);
-        __hashTest("Juan Carlos Navarro", hashmap, hashValues, index++);
-        __hashTest("Carmelo Anthony", hashmap, hashValues, index++);
-        __hashTest("Zion Williamson", hashmap, hashValues, index++);
-        __hashTest("Oscar Schmidt", hashmap, hashValues, index++);
-        __hashTest("JaVale McGee", hashmap, hashValues, index++);
-        __hashTest("Rudy Gobert", hashmap, hashValues, index++);
-        __hashTest("Lebron James", hashmap, hashValues, index++);
-        __hashTest("Kobe Bryant", hashmap, hashValues, index++);
-        __hashTest("Carlton Myers", hashmap, hashValues, index++);
-        __hashTest("Yao Ming", hashmap, hashValues, index++);
-        __hashTest("Ja Morant", hashmap, hashValues, index++);
-        __hashTest("Kelly Olynyk", hashmap, hashValues, index++);
-        __hashTest("John Stockton", hashmap, hashValues, index++);
-        __hashTest("Nando De Colo", hashmap, hashValues, index++);
-        __hashTest("Kevin Garnett", hashmap, hashValues, index++);
-        __hashTest("Tim Duncan", hashmap, hashValues, index++);
-        __hashTest("Manu Ginobili", hashmap, hashValues, index++);
-        __hashTest("Vasilis Spanoulis", hashmap, hashValues, index++);
-        __hashTest("Dario Saric", hashmap, hashValues, index++);
-        __hashTest("Chris Bosh", hashmap, hashValues, index++);
-        __hashTest("Danilo Gallinari", hashmap, hashValues, index++);
-        __hashTest("Dirk Nowitzki", hashmap, hashValues, index++);
-        __hashTest("James Harden", hashmap, hashValues, index++);
-        __hashTest("Joakim Noah", hashmap, hashValues, index++);
-        __hashTest("Pete Maravich", hashmap, hashValues, index++);
-        __hashTest("Chauncey Billups", hashmap, hashValues, index++);
-        __hashTest("Jeremy Lin", hashmap, hashValues, index++);
-        __hashTest("Boris Diaw", hashmap, hashValues, index++);
-        __hashTest("Stephen Curry", hashmap, hashValues, index++);
-        __hashTest("Nikola Jokic", hashmap, hashValues, index++);
-        __hashTest("Michael Jordan", hashmap, hashValues, index++);
-        __hashTest("Shaquille O'Neal", hashmap, hashValues, index++);
-        __hashTest("Ray Allen", hashmap, hashValues, index++);
-        __hashTest("Klay Thompson", hashmap, hashValues, index++);
-        __hashTest("Glenn Robinson III", hashmap, hashValues, index++);
-        __hashTest("Marco Belinelli", hashmap, hashValues, index++);
-        __hashTest("Tim Hardaway Jr.", hashmap, hashValues, index++);
-        __hashTest("Dennis Rodman", hashmap, hashValues, index++);
-        __hashTest("Steve Nash", hashmap, hashValues, index++);
-        __hashTest("Nathan Jawai", hashmap, hashValues, index++);
-        __hashTest("Nate Robinson", hashmap, hashValues, index++);
-        __hashTest("Felipe Reyes", hashmap, hashValues, index++);
-        __hashTest("Bol Bol", hashmap, hashValues, index++);
-        __hashTest("Paul Pierce", hashmap, hashValues, index++);
-        __hashTest("Chris Paul", hashmap, hashValues, index++);
-        __hashTest("Jason Kidd", hashmap, hashValues, index++);
+		// Printing the results of the number of collisions given by the strings of names of random people
+        __hashTest("Scottie Pippen", 50, hashValues, index++);
+        __hashTest("Patrick Ewing", 50, hashValues, index++);
+        __hashTest("Hakeem Olajuwon", 50, hashValues, index++);
+        __hashTest("Allen Iverson", 50, hashValues, index++);
+        __hashTest("Juan Carlos Navarro", 50, hashValues, index++);
+        __hashTest("Carmelo Anthony", 50, hashValues, index++);
+        __hashTest("Zion Williamson", 50, hashValues, index++);
+        __hashTest("Oscar Schmidt", 50, hashValues, index++);
+        __hashTest("JaVale McGee", 50, hashValues, index++);
+        __hashTest("Rudy Gobert", 50, hashValues, index++);
+        __hashTest("Lebron James", 50, hashValues, index++);
+        __hashTest("Kobe Bryant", 50, hashValues, index++);
+        __hashTest("Carlton Myers", 50, hashValues, index++);
+        __hashTest("Yao Ming", 50, hashValues, index++);
+        __hashTest("Ja Morant", 50, hashValues, index++);
+        __hashTest("Kelly Olynyk", 50, hashValues, index++);
+        __hashTest("John Stockton", 50, hashValues, index++);
+        __hashTest("Nando De Colo", 50, hashValues, index++);
+        __hashTest("Kevin Garnett", 50, hashValues, index++);
+        __hashTest("Tim Duncan", 50, hashValues, index++);
+        __hashTest("Manu Ginobili", 50, hashValues, index++);
+        __hashTest("Vasilis Spanoulis", 50, hashValues, index++);
+        __hashTest("Dario Saric", 50, hashValues, index++);
+        __hashTest("Chris Bosh", 50, hashValues, index++);
+        __hashTest("Danilo Gallinari", 50, hashValues, index++);
+        __hashTest("Dirk Nowitzki", 50, hashValues, index++);
+        __hashTest("James Harden", 50, hashValues, index++);
+        __hashTest("Joakim Noah", 50, hashValues, index++);
+        __hashTest("Pete Maravich", 50, hashValues, index++);
+        __hashTest("Chauncey Billups", 50, hashValues, index++);
+        __hashTest("Jeremy Lin", 50, hashValues, index++);
+        __hashTest("Boris Diaw", 50, hashValues, index++);
+        __hashTest("Stephen Curry", 50, hashValues, index++);
+        __hashTest("Nikola Jokic", 50, hashValues, index++);
+        __hashTest("Michael Jordan", 50, hashValues, index++);
+        __hashTest("Shaquille O'Neal", 50, hashValues, index++);
+        __hashTest("Ray Allen", 50, hashValues, index++);
+        __hashTest("Klay Thompson", 50, hashValues, index++);
+        __hashTest("Glenn Robinson III", 50, hashValues, index++);
+        __hashTest("Marco Belinelli", 50, hashValues, index++);
+        __hashTest("Tim Hardaway Jr.", 50, hashValues, index++);
+        __hashTest("Dennis Rodman", 50, hashValues, index++);
+        __hashTest("Steve Nash", 50, hashValues, index++);
+        __hashTest("Nathan Jawai", 50, hashValues, index++);
+        __hashTest("Nate Robinson", 50, hashValues, index++);
+        __hashTest("Felipe Reyes", 50, hashValues, index++);
+        __hashTest("Bol Bol", 50, hashValues, index++);
+        __hashTest("Paul Pierce", 50, hashValues, index++);
+        __hashTest("Chris Paul", 50, hashValues, index++);
+        __hashTest("Jason Kidd", 50, hashValues, index++);
 
         System.out.println("");
 
@@ -90,6 +102,12 @@ public class Test {
         System.out.println("");
     }
 
+	/**
+	 * It tests the consistency of HashMap data structure, printing every successful result.
+	 *
+	 * @attention It throws an Exception if the status is not consistent.
+	 * @attention There's no warranty that successful return of this function makes the implementation of HashMap correct.
+	 */
     public static void implementationTestHashMap() throws Exception {
         System.out.println("Testing the implementation of HashMap\n");
 
@@ -188,15 +206,15 @@ public class Test {
         hashmap.printTable();
         System.out.println("");
 
-        System.out.println("HashMap implementation is correct!");
+        System.out.println("HashMap implementation test terminated successfully!");
     }
 
     public static void main(String[] args) {
 
-        // To test the number of collisions due to hash function
-        collisionTestHashMap(50);
+        // To test the number of collisions due to hash function of HashMap class.
+        collisionTestHashMap();
 
-        // To test the implementation of Dictionary interface is correct
+        // To test the implementation of Dictionary interface is correct.
         try {
             implementationTestHashMap();
         } catch (Exception exception) {
