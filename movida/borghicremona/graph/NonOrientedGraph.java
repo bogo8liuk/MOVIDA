@@ -222,4 +222,8 @@ public class NonOrientedGraph implements Graph {
 
 		this.adjacencyList[node].emptyNode = true;
 	}
+	
+	public void breadthFirstVisit(NodeOperation item) {
+		
+	}
 }

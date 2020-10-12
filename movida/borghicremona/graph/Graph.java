@@ -24,4 +24,8 @@ public interface Graph {
     public void removeNode(int node);
 
     public void removeArch(Arch arch);
+
+	public void breadthFirstVisit(NodeOperation item);
+
+	public void depthFirstVisit(NodeOperation item);
 }
