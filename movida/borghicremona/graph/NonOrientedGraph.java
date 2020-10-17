@@ -13,11 +13,13 @@ public class NonOrientedGraph implements Graph {
 		public boolean emptyNode;
         public Object value;
         public List<Integer> list;
+		public boolean mark;		
 
 		public __couple_list() {
 			emptyNode = true;
 			value = null;
 			list = null;
+			mark = false;
 		}
     }
 
@@ -223,7 +225,41 @@ public class NonOrientedGraph implements Graph {
 		this.adjacencyList[node].emptyNode = true;
 	}
 	
-	public void breadthFirstVisit(NodeOperation item) {
+	private static void apply(NodeOperation item, int node) {
+		item.operation(node);
+	}
+	
+	public VisitTree breadthFirstVisit(NodeOperation item, int start) {
+		__assertNodeExists(start);
+
+		VisitTree tree = new VisitTree(start);
+		VisitTree currentNode = tree;
+		LinkedList<Integer> queue = new LinkedList<Integer>(); 
 		
+		queue.add(start);
+		this.adjacencyList[start].mark = true;
+		
+		while (0 < queue.size()) {
+			Integer n = queue.remove();
+			int node = n.intValue();
+			// TODO currentNode = 
+			
+			apply(item, node);
+			Iterator<Integer> iter = this.adjacencyList[node].list.iterator();
+			
+			while (iter.hasNext()) { 
+				if (!this.adjacencyList[iter.next()].mark) {
+					this.adjacencyList[iter.next()].mark = true;
+					queue.add(iter.next());
+					tree.addChild(iter.next(), currentNode);
+				}		 
+			}
+		}
+
+		return tree;
+	}
+
+	public void depthFirstVisit(NodeOperation item) {
+
 	}
 }

@@ -1,7 +1,7 @@
 package movida.borghicremona.graph;
 
-public interface NodeOperation <T,U> {
+public interface NodeOperation {
 
-	public T operation(int node, U... args);
+	public void operation(int node);
 
 }
