@@ -66,6 +66,24 @@ public class NonOrientedGraph implements Graph {
 		}
 	}
 
+	private void __assertInexistentArch(int nodeA, int nodeB) {
+		try {
+			if (!(this.adjacencyList[nodeA].emptyNode || 0 > nodeA || this.adjacencyList.length <= nodeA)) {
+				if (!(this.adjacencyList[nodeB].emptyNode || 0 > nodeB || this.adjacencyList.length <= nodeB)) {
+					boolean found = false;
+
+					Iterator<Integer> iter = this.adjacencyList[nodeA].list.iterator();
+					while (iter.hasNext()) {
+						if (iter.next() == nodeB)
+							throw new IllegalArgumentException("Already existent arch between the two node");
+					}
+				}
+			}
+		} catch (IllegalArgumentException exception) {
+			System.err.println(exception.getMessage());
+		}
+	}
+
 	public NonOrientedGraph() {
 		this.adjacencyList = new __couple_list[15];
 	}
@@ -197,6 +215,7 @@ public class NonOrientedGraph implements Graph {
 	public void addArch(int nodeA, int nodeB) {
 		__assertNodeExists(nodeA);
 		__assertNodeExists(nodeB);
+		__assertInexistentArch(nodeA, nodeB);
 
 		this.adjacencyList[nodeA].list.add(nodeB);
 		this.adjacencyList[nodeB].list.add(nodeA);
@@ -254,6 +273,10 @@ public class NonOrientedGraph implements Graph {
 					tree.addChild(iter.next(), currentNode);
 				}		 
 			}
+		}
+
+		for (__couple_list k: this.adjacencyList) {
+			k.mark = false;
 		}
 
 		return tree;
