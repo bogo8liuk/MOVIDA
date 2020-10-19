@@ -261,17 +261,18 @@ public class NonOrientedGraph implements Graph {
 		while (0 < queue.size()) {
 			Integer n = queue.remove();
 			int node = n.intValue();
-			currentNode = tree.getTree(node, currentNode);
+			currentNode = tree.getTree(node);
 			
 			apply(item, node);
 			Iterator<Integer> iter = this.adjacencyList[node].list.iterator();
 			
-			while (iter.hasNext()) { 
-				if (!this.adjacencyList[iter.next()].mark) {
-					this.adjacencyList[iter.next()].mark = true;
+			while (iter.hasNext()) {
+				__couple_list currentItem = this.adjacencyList[iter.next()];
+				if (!currentItem.mark && !currentItem.emptyNode) {
+					currentItem.mark = true;
 					queue.add(iter.next());
 					tree.addChild(iter.next(), currentNode);
-				}		 
+				}
 			}
 		}
 

@@ -54,21 +54,24 @@ public class VisitTree {
 		__visit(item, this);
 	}
 
-	VisitTree getTree(int node, VisitTree parent) {
-		if (null == parent)
-			return this;
-
-		if (null == parent.children)
+	private static VisitTree __getTree(int node, VisitTree tree) {
+		if (null == tree)
 			return null;
 
-		for (int i = 0; parent.children.size() > i; ++i) {
-			VisitTree currentTree = parent.children.get(i);
+		if (tree.node == node)
+			return tree;
 
-			if (currentTree.node == node) {
-				return currentTree;
-			}
+		if (null != tree.children) {
+			Iterator<VisitTree> iter = tree.children.iterator();
+
+			while (iter.hasNext())
+				return __getTree(node, iter.next());
 		}
 
 		return null;
+	}
+
+	VisitTree getTree(int node) {
+		return __getTree(node, this);
 	}
 }
