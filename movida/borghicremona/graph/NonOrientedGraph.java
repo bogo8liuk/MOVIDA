@@ -233,7 +233,7 @@ public class NonOrientedGraph implements Graph {
 		__assertNodeExists(start);
 
 		VisitTree tree = new VisitTree(start);
-		VisitTree currentNode = tree;
+		VisitTree currentNode = null;
 		LinkedList<Integer> queue = new LinkedList<Integer>(); 
 		
 		queue.add(start);
@@ -242,7 +242,7 @@ public class NonOrientedGraph implements Graph {
 		while (0 < queue.size()) {
 			Integer n = queue.remove();
 			int node = n.intValue();
-			// TODO currentNode = 
+			currentNode = tree.getTree(node, currentNode);
 			
 			apply(item, node);
 			Iterator<Integer> iter = this.adjacencyList[node].list.iterator();

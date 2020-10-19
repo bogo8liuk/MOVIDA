@@ -53,4 +53,22 @@ public class VisitTree {
 	public void visit(NodeOperation item) {
 		__visit(item, this);
 	}
+
+	VisitTree getTree(int node, VisitTree parent) {
+		if (null == parent)
+			return this;
+
+		if (null == parent.children)
+			return null;
+
+		for (int i = 0; parent.children.size() > i; ++i) {
+			VisitTree currentTree = parent.children.get(i);
+
+			if (currentTree.node == node) {
+				return currentTree;
+			}
+		}
+
+		return null;
+	}
 }
