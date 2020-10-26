@@ -15,6 +15,8 @@ public class Abr implements Dictionary {
         this.rightChild = null;
     }
     //gestione valori uguali ?
+	// soluzione 1: decidiamo arbitrariamente di metterli sempre o a destra o a sinistra
+	// soluzione 2: decidiamo di aggiungere un contatore di fianco al valore del nodo, che indica quanti nodi hanno quel valore 
     public void insert(KeyValueElement Value) {
         Abr node = root;
         while (null != node) {
