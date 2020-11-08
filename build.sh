@@ -9,6 +9,7 @@ commons_path="${path}/movida/commons"
 hashmap_path="${path}/movida/borghicremona/hashmap"
 graph_path="${path}/movida/borghicremona/graph"
 
+
 function undo_build {
     read -p "You are deleting all the compiled files. Are you sure to continue [Y/n]? " -n 1 user_in
     case "${user_in}" in

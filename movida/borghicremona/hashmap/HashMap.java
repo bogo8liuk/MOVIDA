@@ -4,10 +4,19 @@ import movida.borghicremona.Dictionary;
 import movida.borghicremona.KeyValueElement;
 import java.lang.Exception;
 
+/**
+ * Open addressing hashmap.
+ * ATTENTION! Instances of this class use keys only with type String. Using a different type may cause
+ * inconsistent state of an object or the throwing of particular exceptions. 
+ */
 public class HashMap implements Dictionary {
     private KeyValueElement[] table;
+
+	// Deafult hash value, necessary for hash function.
     private final static int HASH = 7;
     private final static int MAXINT = 2147483647;
+
+	// Label to replace removed elements.
     private final static KeyValueElement _DELETED_ = new KeyValueElement("_DELETED_", null);
 
     public HashMap(int length) {
@@ -36,6 +45,7 @@ public class HashMap implements Dictionary {
 
         for (int i = 0; i < key.length(); ++i) {
             h = h * 31 + key.charAt(i);
+			// To avoid overflows
             if (h < 0) h = (h + MAXINT) + 1;
         }
 
@@ -58,6 +68,7 @@ public class HashMap implements Dictionary {
         int index = hash((String) key) % this.table.length;
         boolean found = false;
 
+		// Linear inspection: every time the inspection gets a collision, the index is incremented by 1.
         for (int attempt = 0; this.table.length > attempt; ++attempt) {
             int i = (index + attempt) % this.table.length;
 
@@ -73,9 +84,20 @@ public class HashMap implements Dictionary {
         return found;
     }
 
+	/**
+	 * If the table is not full, it inserts an item.
+	 *
+	 * @param item the element to insert.
+	 * @param index the starting point of the table for attempting the insertion.
+	 *
+	 * @attention Passing an index not calculated with hash function may lead at an inconsistent state.
+	 *
+	 * @return true if the insertion is successful, false otherwise.
+	 */
     private boolean __insert(KeyValueElement item, int index) {
         boolean inserted = false;
 
+		// Linear inspection: every time the inspection gets a collision, the index is incremented by 1.
         for (int attempt = 0; this.table.length > attempt; ++attempt) {
             int i = (index + attempt) % this.table.length;
 
@@ -88,7 +110,15 @@ public class HashMap implements Dictionary {
 
         return inserted;
     }
-
+  
+	/**
+	 * It moves the items of an old hashmap in a new bigger (in size) one.
+	 *
+	 * @param oldTable previous hashmap containing the items to recalculate.
+	 *
+	 * @attention This function should be invoked only when the length of the hashmap is increased,
+	 * passing the instance of the previous table.
+	 */
     private void rehash(KeyValueElement[] oldTable) {
         for (int oldIndex = 0; oldTable.length > oldIndex; ++oldIndex) {
             int index = hash((String) oldTable[oldIndex].getKey()) % this.table.length;
@@ -97,6 +127,13 @@ public class HashMap implements Dictionary {
         }
     }
 
+	/**
+	 * It increases the length of the hashmap, preserving the state of all the items.
+	 *
+	 * @param quantity value of which the length of the hashmap has to increase.
+	 *
+	 * @attention This function should be called only when the hashmap is full.
+	 */
     private void grow(int quantity) {
         if (0 >= quantity) return;
 
@@ -123,6 +160,7 @@ public class HashMap implements Dictionary {
         int index = hash((String) item.getKey()) % this.table.length;
         boolean inserted = __insert(item, index);
 
+		// In this case the table is full, so its length must be increased.
         if (!inserted) {
             grow(10);
             insert(item);
@@ -146,6 +184,7 @@ public class HashMap implements Dictionary {
 
         if (null == this.table[index]) return;
 
+		// Linear inspection: every time the inspection gets a collision, the index is incremented by 1
         for (int attempt = 0; this.table.length > attempt; ++attempt) {
             int i = (index + attempt) % this.table.length;
 
