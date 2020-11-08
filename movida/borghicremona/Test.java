@@ -8,7 +8,7 @@ public class Test {
 	 * It prints the hash value of a string and it stores it in a vector of integers in a given position.
 	 *
 	 * @param toHash String from which it gets the hash value.
-	 * @param h Instance of an open addressing hashmap.
+	 * @param length Size of a hypothetical hashmap.
 	 * @param store Vector of integers where the hash value of toHash is stored.
 	 * @param index Index of the vector where the hash value has to be stored.
 	 *
