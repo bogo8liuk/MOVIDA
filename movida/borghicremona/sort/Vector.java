@@ -65,4 +65,8 @@ public class Vector<T extends Comparable<T>> {
 	public void quickSort() {
 		__quickSort(this.vector, 0, this.vector.length - 1);
 	}
+
+	public T[] getArray() {
+		return this.vector;
+	}
 }
