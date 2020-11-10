@@ -4,11 +4,11 @@ set -e
 
 path="$(dirname `realpath "${BASH_SOURCE[0]}"`)"
 movida_path="${path}/movida"
-bc_path="${path}/movida/borghicremona"
-commons_path="${path}/movida/commons"
-hashmap_path="${path}/movida/borghicremona/hashmap"
-graph_path="${path}/movida/borghicremona/graph"
-
+bc_path="${movida_path}/borghicremona"
+commons_path="${movida_path}/commons"
+hashmap_path="${bc_path}/hashmap"
+graph_path="${bc_path}/graph"
+sort_path="${bc_path}/sort"
 
 function undo_build {
     read -p "You are deleting all the compiled files. Are you sure to continue [Y/n]? " -n 1 user_in
@@ -19,6 +19,7 @@ function undo_build {
         rm ${bc_path}/*.class
         rm ${commons_path}/*.class
 		rm ${graph_path}/*.class
+		rm ${sort_path}/*.class
         ;;
 
         "N" | "n")
@@ -35,14 +36,18 @@ function undo_build {
 
 case "$1" in
     "-b" | "-b=all")
-    javac ${hashmap_path}/*.java
     javac ${bc_path}/*.java
+    javac ${hashmap_path}/*.java
+	javac ${graph_path}/*.java
+	javac ${sort_path}/*.java
     javac ${commons_path}/*.java
     ;;
 
     "-b=borghicremona")
-    javac ${hashmap_path}/*.java
     javac ${bc_path}/*.java
+    javac ${hashmap_path}/*.java
+	javac ${graph_path}/*.java
+	javac ${sort_path}/*.java
     ;;
 
     "-b=commons")
@@ -56,6 +61,10 @@ case "$1" in
     "-b=graph")
     javac ${graph_path}/*.java
     ;;
+
+	"-b=sort")
+	javac ${sort_path}/*.java
+	;;
 
     "-u")
     set +e

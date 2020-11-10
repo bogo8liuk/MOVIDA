@@ -1,6 +1,7 @@
 package movida.borghicremona;
 
 import movida.borghicremona.hashmap.HashMap;
+import movida.borghicremona.sort.Vector;
 
 public class Test {
 
@@ -206,8 +207,124 @@ public class Test {
         hashmap.printTable();
         System.out.println("");
 
-        System.out.println("HashMap implementation test terminated successfully!");
+        System.out.println("HashMap implementation test terminated successfully!\n");
     }
+
+	/**
+	 * It checks if an array of Integers is sorted.
+	 *
+	 * @param array Array to check.
+	 * @return true if array is sorted, false otherwise.
+	 */
+	private static boolean isSorted(Integer[] array) {
+		for (int i = 0; array.length - 1 > i; ++i) {
+
+			if (array[i] > array[i + 1])
+				return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * It prints the content of an array.
+	 *
+	 * @param array Array to print.
+	 */
+	private static void printV(Integer[] array) {
+		for (Integer i: array)
+			System.out.print(i + " ");
+		System.out.println("");
+	}
+
+	/**
+	 * It tests the success of the sorting algorithms, printing every successful result.
+	 *
+	 * @attention It throws an exception if a case where an array is not sorted occur.
+	 * @attention There's no warranty that successful return of this function makes the implementation of Vector correct.
+	 */
+	public static void implementationTestSort() throws Exception {
+		Integer i = new Integer(1);
+		Vector<Integer> v;
+
+		Integer[] array1 = {9, 8, 2, 4, 14, 1, 2, 8, 13, 5, 3};
+		v = new Vector<Integer>(array1);
+		System.out.println("array" + i);
+		printV(array1);
+		v.selectionSort();
+		if (!isSorted(array1))
+			throw new Exception("array" + i + " is not sorted");
+		printV(array1);
+		++i;
+
+		Integer[] array2 = {2, 0};
+		v = new Vector<Integer>(array2);
+		System.out.println("array" + i);
+		printV(array2);
+		v.selectionSort();
+		if (!isSorted(array2))
+			throw new Exception("array" + i + " is not sorted");
+		printV(array2);
+		++i;
+
+		Integer[] array3 = {3};
+		v = new Vector<Integer>(array3);
+		System.out.println("array" + i);
+		printV(array3);
+		v.selectionSort();
+		if (!isSorted(array3))
+			throw new Exception("array" + i + " is not sorted");
+		printV(array3);
+		++i;
+
+		Integer[] array4 = {10, 1, 4, 12, 13, 9, 9, 2, 1, 4, 17, 11, 12, 6, 5, 3, 10};
+		v = new Vector<Integer>(array4);
+		System.out.println("array" + i);
+		printV(array4);
+		v.quickSort();
+		if (!isSorted(array4))
+			throw new Exception("array" + i + " is not sorted");
+		printV(array4);
+		++i;
+
+		Integer[] array5 = {3, 0};
+		v = new Vector<Integer>(array5);
+		System.out.println("array" + i);
+		printV(array5);
+		v.quickSort();
+		if (!isSorted(array5))
+			throw new Exception("array" + i + " is not sorted");
+		printV(array5);
+		++i;
+
+		Integer[] array6 = {1, 2};
+		v = new Vector<Integer>(array6);
+		System.out.println("array" + i);
+		printV(array6);
+		v.quickSort();
+		if (!isSorted(array6))
+			throw new Exception("array" + i + " is not sorted");
+		printV(array6);
+		++i;
+
+		Integer[] array7 = {10};
+		v = new Vector<Integer>(array7);
+		System.out.println("array" + i);
+		printV(array7);
+		v.quickSort();
+		if (!isSorted(array7))
+			throw new Exception("array" + i + " is not sorted");
+		printV(array7);
+
+		System.out.println("retry with already sorted array1");
+		v = new Vector<Integer>(array1);
+		printV(array1);
+		v.quickSort();
+		if (!isSorted(array7))
+			throw new Exception("array" + i + " is not sorted");
+
+		System.out.println("\nSorting algorithms implementation test terminated successfully!\n");
+	}
 
     public static void main(String[] args) {
 
@@ -219,6 +336,15 @@ public class Test {
             implementationTestHashMap();
         } catch (Exception exception) {
             System.err.println(exception.getMessage());
+			System.exit(-1);
         }
+
+		// To test the sorting algorithms really sort arrays.
+		try {
+			implementationTestSort();
+		} catch (Exception exception) {
+			System.err.println(exception.getMessage());
+			System.exit(-1);
+		}
     }
 }
