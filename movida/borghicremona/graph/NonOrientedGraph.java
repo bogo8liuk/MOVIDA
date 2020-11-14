@@ -31,6 +31,7 @@ public class NonOrientedGraph implements Graph {
 				throw new IllegalArgumentException("Nonexistent node");
         } catch(IllegalArgumentException exception) {
             System.err.println(exception.getMessage());
+			System.exit(-1);
         }
 	}
 
@@ -40,6 +41,7 @@ public class NonOrientedGraph implements Graph {
 				throw new IllegalArgumentException("Already existent node");
 		} catch(IllegalArgumentException exception) {
 			System.err.println(exception.getMessage());
+			System.exit(-1);
 		}
 	}
 
@@ -63,6 +65,7 @@ public class NonOrientedGraph implements Graph {
 
 		} catch(IllegalArgumentException exception) {
 			System.err.println(exception.getMessage());
+			System.exit(-1);
 		}
 	}
 
@@ -81,6 +84,7 @@ public class NonOrientedGraph implements Graph {
 			}
 		} catch (IllegalArgumentException exception) {
 			System.err.println(exception.getMessage());
+			System.exit(-1);
 		}
 	}
 
@@ -151,6 +155,7 @@ public class NonOrientedGraph implements Graph {
 				throw new IllegalArgumentException("The node does not belong to the arch");
 			} catch (IllegalArgumentException exception) {
 				System.err.println(exception.getMessage());
+				System.exit(-1);
 			}
 
 			// This is unreachable

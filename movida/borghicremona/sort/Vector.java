@@ -4,6 +4,13 @@ public class Vector<T extends Comparable<T>> {
 	private T[] vector;
 
 	public Vector(T[] array) {
+		try {
+			if (null == array) throw new IllegalArgumentException("Array must be instantiated");
+		} catch (IllegalArgumentException exception) {
+			System.err.println(exception.getMessage());
+			System.exit(-1);
+		}
+
 		this.vector = array;
 	}
 

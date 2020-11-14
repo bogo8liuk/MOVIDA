@@ -19,11 +19,44 @@ public class HashMap implements Dictionary {
 	// Label to replace removed elements.
     private final static KeyValueElement _DELETED_ = new KeyValueElement("_DELETED_", null);
 
+	/**
+	 * If the key has null value, it throws an IllegalArgumentException and it handles it, terminating the process.
+	 *
+	 * @param key Value to check
+	 */
+	private static void __assertNotNullKey(Comparable key) {
+        try {
+            if (null == key) throw new IllegalArgumentException("Cannot have an empty key");
+        } catch (IllegalArgumentException exception) {
+            System.err.println(exception.getMessage());
+			System.exit(-1);
+        }
+	}
+
+	/**
+	 * If the key has a value equal to _DELETED_ label, it throws an IllegalArgumentException and it handles it,
+	 * terminating the process.
+	 *
+	 * @param key Value to check
+	 *
+	 * @attention key parameter is casted to String, so passing a Comparable different from type String is a
+	 * non-checked runtime error.
+	 */
+	private static void __assertNotDeletedKey(Comparable key) {
+        try {
+            if ("_DELETED_" == (String) key) throw new IllegalArgumentException("Illegal key");
+        } catch (IllegalArgumentException exception) {
+            System.err.println(exception.getMessage());
+			System.exit(-1);
+        }
+	}
+
     public HashMap(int length) {
         try {
             if (0 >= length) throw new IllegalArgumentException("Cannot have a negative length");
         } catch (IllegalArgumentException exception) {
             System.err.println(exception.getMessage());
+			System.exit(-1);
         }
 
         this.table = new KeyValueElement[length];
@@ -35,11 +68,7 @@ public class HashMap implements Dictionary {
     }
 
     public static int hash(String key) {
-        try {
-            if (null == key) throw new IllegalArgumentException("Cannot have an empty key");
-        } catch (IllegalArgumentException exception) {
-            System.err.println(exception.getMessage());
-        }
+		__assertNotNullKey(key);
 
         int h = HASH;
 
@@ -53,17 +82,8 @@ public class HashMap implements Dictionary {
     }
 
     public boolean search(Comparable key) {
-        try {
-            if (null == key) throw new IllegalArgumentException("Cannot have an empty key");
-        } catch (IllegalArgumentException exception) {
-            System.err.println(exception.getMessage());
-        }
-
-        try {
-            if ("_DELETED_" == (String) key) throw new IllegalArgumentException("Illegal key");
-        } catch (IllegalArgumentException exception) {
-            System.err.println(exception.getMessage());
-        }
+		__assertNotNullKey(key);
+		__assertNotDeletedKey(key);
 
         int index = hash((String) key) % this.table.length;
         boolean found = false;
@@ -145,17 +165,8 @@ public class HashMap implements Dictionary {
     }
 
     public void insert(KeyValueElement item) {
-        try {
-            if (null == item.getKey()) throw new IllegalArgumentException("Cannot have an empty key");
-        } catch (IllegalArgumentException exception) {
-            System.err.println(exception.getMessage());
-        }
-
-        try {
-            if ("_DELETED_" == (String) item.getKey()) throw new IllegalArgumentException("Illegal key");
-        } catch (IllegalArgumentException exception) {
-            System.err.println(exception.getMessage());
-        }
+		__assertNotNullKey(item.getKey());
+		__assertNotDeletedKey(item.getKey());
 
         int index = hash((String) item.getKey()) % this.table.length;
         boolean inserted = __insert(item, index);
@@ -168,17 +179,8 @@ public class HashMap implements Dictionary {
     }
 
     public void delete(Comparable key) {
-        try {
-            if (null == key) throw new IllegalArgumentException("Cannot have an empty key");
-        } catch (IllegalArgumentException exception) {
-            System.err.println(exception.getMessage());
-        }
-
-        try {
-            if ("_DELETED_" == (String) key) throw new IllegalArgumentException("Illegal key");
-        } catch (IllegalArgumentException exception) {
-            System.err.println(exception.getMessage());
-        }
+		__assertNotNullKey(key);
+		__assertNotDeletedKey(key);
 
         int index = hash((String) key) % this.table.length;
 

@@ -240,7 +240,7 @@ public class Test {
 	/**
 	 * It tests the success of the sorting algorithms, printing every successful result.
 	 *
-	 * @attention It throws an exception if a case where an array is not sorted occur.
+	 * @attention It throws an Exception if a case where an array is not sorted occurs.
 	 * @attention There's no warranty that successful return of this function makes the implementation of Vector correct.
 	 */
 	public static void implementationTestSort() throws Exception {
