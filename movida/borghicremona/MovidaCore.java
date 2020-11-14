@@ -2,7 +2,7 @@ package movida.borghicremona;
 
 import movida.commons.*;
 
-public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch {
+public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMovidaCollaborations {
 	public boolean setSort(SortingAlgorithm algorithm) {
 
 	}
@@ -76,6 +76,18 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch {
 	}
 
 	public Person[] searchMostActiveActors(Integer N) {
+
+	}
+
+	public Person[] getDirectCollaboratorsOf(Person actor) {
+
+	}
+
+	public Person[] getTeamOf(Person actor) {
+
+	}
+
+	public Collaboration[] maximizeCollaborationInTheTeamOf(Person actor) {
 
 	}
 }
