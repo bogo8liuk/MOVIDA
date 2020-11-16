@@ -1,45 +1,63 @@
 package movida.borghicremona.abr;
 
 import movida.borghicremona.Dictionary;
-import movida.borghicremona.abr.Node;
+import movida.borghicremona.KeyValueElement;
+import movida.borghicremona.abr.Node;	
 import java.lang;
 
 public class Abr implements Dictionary {
-    private KeyValueElement nodeValue;
-    private Abr left;
-    private Abr right;
+    private Node root;
 
-    public Abr(KeyValueElement nodeValue) {
-        this.nodeValue = nodeValue;
-        this.left = null;
-        this.right = null;
+
+    public Abr() {
+        this.root = null;
     }
-    //gestione valori uguali ?
-	// soluzione 1: decidiamo arbitrariamente di metterli sempre o a destra o a sinistra
-	// soluzione 2: decidiamo di aggiungere un contatore di fianco al valore del nodo, che indica quanti nodi hanno quel valore 
-    public void insert(KeyValueElement value) {
+
+	public Abr(Node node) {
+		this.root = node;
+	} 
+
+    private void __insert(KeyValueElement node) {
+		try {
+            if (null == node) throw new IllegalArgumentException("cannot insert empty node");
+        } catch (IllegalArgumentException exception) {
+            System.err.println(exception.getMessage());
+        }
+
         Abr node = root;
+
         while (null != node) {
-            if (value.compareTo(node.nodeValue) < 0)
-                node = node.left;
+            if (value.compareTo(node.value) < 0)
+                node = this.left;
             else {
-                if (value.compareTo(node.nodeValue()) > 0)
-                    node = node.right;
+                if (value.compareTo(node.value()) > 0)
+                    node = this.right;
                 else 
                     return;
                 }
         }
-        node = new Abr(value);
+
+        node = new Abr(node);
     }
     
-    public boolean search(KeyValueElement value) {
-        Abr node = root;
+    public void insert(KeyValueElement node) {
+            __insert(node);       
+        }
+
+    private boolean __search(KeyValueElement key) {
+		try {
+            if (null == key) throw new IllegalArgumentException("Cannot search null key");
+        } catch (IllegalArgumentException exception) {
+            System.err.println(exception.getMessage());
+        }   
+
+		Abr node = root;
         boolean found = false;
         while ((null != node) && (!found)) {
-            if (value.compareTo(node.nodeValue) < 0)
+            if (key.compareTo(node.value) < 0)
                 node = node.left;
             else {
-                if (value.compareTo(Node.nodeValue) > 0)
+                if (key.compareTo(node.value) > 0)
                     node = node.right;
                 else
                     found = true;
@@ -48,12 +66,63 @@ public class Abr implements Dictionary {
         return found;
     }
 	
+	public boolean search(KeyValueElement key) {
+		__search(key);
+	}
+
+	private void __insertTree(Node treeRoot, Node addedTreeRoot) {
+		Node parent = null;
+		while (null != treeRoot) {
+			parent = treeRoot; treeRoot = treeRoot.getLeftChild();
+		}
+		if (null != parent) parent.setLeftChild(addedTreeRoot);
+	}
+
+	public void delete(KeyValueElement key) throws TreeException {
+		if (key.compareTo(root.getValue()) == 0 )
+			insert(root.getRightChild(), root.getLeftChild());
+		else {
+			if (key.compareTo(root.getValue()) < 0 )
+				__delete(key, root, root.getLeftChild());
+			else
+				__delete(key, root, root.getRightChild());
+		}
+	}
+
+	private void __delete(KeyValueElement key, Node parent, Node currentNode) throws TreeException {
+		if (null == currentNode) throw new TreeException("node inexistent");
+		
+		if (key.compareTo(currentNode.getValue()) < 0)
+			__delete(key, currentNode, currentNode.getLeftChild());
+		else {
+			if (key.compareTo(currentNode.getValue()) > 0)
+			__delete(key, currentNode, currentNode.getRightChild());
+			else { 
+				Node temp;
+				if (null == currentNode.getRightChild())
+				temp = currentNode.getLeftChild();
+				else {
+					temp = currentNode.getRightChild();
+					__insertTree(currentNode.getRightChild(), currentNode.getLeftChild() );
+				}
+			if (parent.getLeftChild() == currentNode)
+				parent.setLeftChild(temp);
+			else
+				parent.setRightChild(temp);
+			}
+		} 
+	}
+
+/*	protected Node __max(Abr n) {
+		while (null != n && null != n.getRightChild(n)) {
+			n = n.right;
+		}
+		return n;
+	}
 	
+	private Node __min(Node n) {
 	
-    public void delete(KeyValueElement value) throws TreeException {
-    
-    }
+
+}*/
 
 }
-
-
