@@ -6,79 +6,111 @@ import movida.borghicremona.abr.Node;
 import java.lang;
 
 public class Abr implements Dictionary {
-    private Node root;
+	private KeyValueElement entry;
+	private Abr parent;
+	private Abr leftChild;
+	private Abr rightChild;
 
+	private static void __assertNotNullData(KeyValueElement item) {
+		try {
+			if (null == item) throw new IllegalArgumentException("Invalid data: aborting");
+		} catch (IllegalArgumentException exception) {
+			System.err.println(exception.getMessage());
+			System.exit(-1);
+		}
+	}
 
-    public Abr() {
-        this.root = null;
+	private static void __assertNotNullKey(Comparable key) {
+		try {
+			if (null == key) throw new IllegalArgumentException("Invalid key: aborting");
+		} catch (IllegalArgumentException exception) {
+			System.err.println(exception.getMessage());
+			System.exit(-1);
+		}
+	}
+
+	public Abr(KeyValueElement item) {
+		this.entry = item;
+		this.parent = null;
+		this.leftChild = null;
+		this.rightChild = null;
+	}
+
+	/**
+	 * It instantiates a new Abr object, defining the parent.
+	 *
+	 * @param item Element representing the node.
+	 * @param parent Current node's parent.
+	 *
+	 * @attention It may lead to an unwanted state of the object.
+	 */
+	private Abr(KeyValueElement item, Abr parent) {
+		this.entry = item;
+		this.parent = parent;
+		this.leftChild = null;
+		this.rightChild = null;
+	}
+
+	/**
+	 * It creates a new node, according to the rules defined by binary search trees.
+	 *
+	 * @param item Element representing the node to insert.
+	 * @param tree Instance where item has to be inserted.
+	 * @param parent The parent of the node to create
+	 *
+	 * @attention It may lead to an inconsistent state of Abr: do not use this method.
+	 */
+    private void __insert(KeyValueElement item, Abr tree, Abr parent) {
+		if (null == tree)
+			tree = new Abr(item, parent);
+
+		else {
+			Integer diff = item.getKey().compareTo(tree.entry.getKey());
+
+			// It does not allow duplicated keys
+			if (0 == diff)
+				return;
+
+			else if (0 < diff)
+				__insert(item, tree.leftChild, tree);
+
+			else
+				__insert(item, tree.rightChild, tree);
+		}
     }
 
-	public Abr(Node node) {
-		this.root = node;
-	} 
+	public void insert(KeyValueElement item) {
+		__assertNotNullData(item);
+		__assertNotNullKey(item);
 
-    private void __insert(KeyValueElement node) {
-		try {
-            if (null == node) throw new IllegalArgumentException("cannot insert empty node");
-        } catch (IllegalArgumentException exception) {
-            System.err.println(exception.getMessage());
-        }
+		__insert(item, this, this.parent);
+	}
 
-        Abr node = root;
+    private boolean __search(Comparable key, Abr tree) {
+		if (null == tree)
+			return false;
 
-        while (null != node) {
-            if (value.compareTo(node.value) < 0)
-                node = this.left;
-            else {
-                if (value.compareTo(node.value()) > 0)
-                    node = this.right;
-                else 
-                    return;
-                }
-        }
+		else {
+			Integer diff = key.compareTo(tree.entry.getKey());
 
-        node = new Abr(node);
-    }
-    
-    public void insert(KeyValueElement node) {
-            __insert(node);       
-        }
+			if (0 == diff)
+				return true;
 
-    private boolean __search(KeyValueElement key) {
-		try {
-            if (null == key) throw new IllegalArgumentException("Cannot search null key");
-        } catch (IllegalArgumentException exception) {
-            System.err.println(exception.getMessage());
-        }   
+			else if (0 > diff)
+				return __search(key, tree.leftChild);
 
-		Abr node = root;
-        boolean found = false;
-        while ((null != node) && (!found)) {
-            if (key.compareTo(node.value) < 0)
-                node = node.left;
-            else {
-                if (key.compareTo(node.value) > 0)
-                    node = node.right;
-                else
-                    found = true;
-            }
-        }
-        return found;
+			else
+				return __search(key, tree.rightChild);
+		}
     }
 	
-	public boolean search(KeyValueElement key) {
-		__search(key);
+	public boolean search(Comparable key) {
+		__assertNotNullKey(key);
+
+		return __search(key, this);
 	}
 
-	private void __insertTree(Node treeRoot, Node addedTreeRoot) {
-		Node parent = null;
-		while (null != treeRoot) {
-			parent = treeRoot; treeRoot = treeRoot.getLeftChild();
-		}
-		if (null != parent) parent.setLeftChild(addedTreeRoot);
-	}
-
-	public void delete(KeyValueElement key) throws TreeException {
+	public void delete(Comparable key) {
 		if (key.compareTo(root.getValue()) == 0 )
 			insert(root.getRightChild(), root.getLeftChild());
 		else {
