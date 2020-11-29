@@ -130,7 +130,7 @@ public class HashMap implements Dictionary {
 
         return inserted;
     }
-  
+
 	/**
 	 * It moves the items of an old hashmap in a new bigger (in size) one.
 	 *
