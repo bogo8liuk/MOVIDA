@@ -245,4 +245,25 @@ public class Abr implements Dictionary {
 
 		__delete(key, this);
 	}
+
+	/**
+	 * See inOrderVisitPrint().
+	 */
+	private void __inOrderVisitPrint(Abr tree) {
+		if (null == tree)
+			return;
+
+		else {
+			__inOrderVisitPrint(tree.leftChild);
+			System.out.println(tree.entry.getKey());
+			__inOrderVisitPrint(tree.rightChild);
+		}
+	}
+
+	/**
+	 * It prints the key for each node of the tree, using a in-order visit.
+	 */
+	public void inOrderVisitPrint() {
+		__inOrderVisitPrint(this);
+	}
 }
