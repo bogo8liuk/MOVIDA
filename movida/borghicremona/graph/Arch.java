@@ -1,16 +1,18 @@
 package movida.borghicremona.graph;
 
 public class Arch {
-    private Vertex vertexA;
-    private Vertex vertexB;
+    private int nodeA;
+    private int nodeB;
 
-    public Arch(Vertex vertexA, Vertex vertexB) {
-        this.vertexA = vertexA;
-        this.vertexB = vertexB;
+    public Arch(int nodeA, int nodeB) {
+        this.nodeA = nodeA;
+        this.nodeB = nodeB;
     }
 
-    public VertexCouple getArchVertexes() {
-        VertexCouple couple = new VertexCouple(this.vertexA, this.vertexB);
+    public int[] getArchNodes() {
+        int[] couple = new int[2];
+        couple[0] = this.nodeA;
+        couple[1] = this.nodeB;
         return couple;    
     }
 }

@@ -1,25 +1,29 @@
 package movida.borghicremona.graph;
 
+import movida.borghicremona.KeyValueElement;
+
 public interface Graph {
-    public int vertexNumber();
+    public int nodesNumber();
    
     public int archsNumber();
 
-    public int grade(Vertex vertex);
+    public int grade(int node);
  
-    public Arch[] incidentArchs(Vertex vertex);
+    public Arch[] incidentArchs(int node);
 
-    public VertexCouple edges(Arch arch);
+    public int[] edges(Arch arch);
 
-    public Vertex opposite(Vertex vertex, Arch arch);
+    public int opposite(int node, Arch arch);
 
-    public boolean areAdjacent(VertexCouple couple);
+    public boolean areAdjacent(int nodeA, int nodeB);
 
-    public void addVertex(Vertex vertex);
+    public void addNode(int node, Object data);
 
-    public void addArch(VertexCouple couple);
+    public void addArch(int nodeA, int nodeB);
 
-    public void removeVertex(Vertex vertex);
+    public void removeNode(int node);
 
     public void removeArch(Arch arch);
+
+	public VisitTree breadthFirstVisit(NodeOperation item, int start);
 }
