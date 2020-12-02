@@ -2,6 +2,7 @@ package movida.borghicremona;
 
 import movida.borghicremona.hashmap.HashMap;
 import movida.borghicremona.sort.Vector;
+import movida.borghicremona.bstree.BinarySearchTree;
 
 public class Test {
 
@@ -326,6 +327,149 @@ public class Test {
 		System.out.println("\nSorting algorithms implementation test terminated successfully!\n");
 	}
 
+	private static void implementationTestBSTree() throws Exception {
+		System.out.println("Inserting node with key 70");
+		KeyValueElement init = new KeyValueElement(70, null);
+		BinarySearchTree tree = new BinarySearchTree(init);
+
+		KeyValueElement x1 = new KeyValueElement(64, null);
+		KeyValueElement x2 = new KeyValueElement(8, null);
+		KeyValueElement x3 = new KeyValueElement(9, null);
+		KeyValueElement x4 = new KeyValueElement(73, null);
+		KeyValueElement x5 = new KeyValueElement(107, null);
+		KeyValueElement x6 = new KeyValueElement(22, null);
+		KeyValueElement x7 = new KeyValueElement(91, null);
+		KeyValueElement x8 = new KeyValueElement(90, null);
+		KeyValueElement x9 = new KeyValueElement(89, null);
+		KeyValueElement x10 = new KeyValueElement(30, null);
+		KeyValueElement x11 = new KeyValueElement(60, null);
+
+		System.out.println("Deleting and reinserting node with key 70");
+		tree.delete(70);
+		tree.insert(init);
+
+		System.out.println("");
+		System.out.println("Printing out the tree");
+		tree.inOrderVisitPrint();
+		System.out.println("");
+
+		System.out.println("Inserting node with key 64");
+		tree.insert(x1);
+		System.out.println("Inserting node with key 8");
+		tree.insert(x2);
+
+		System.out.println("");
+		System.out.println("Printing out the tree");
+		tree.inOrderVisitPrint();
+		System.out.println("");
+
+		if (tree.search(9))
+			throw new Exception("Key 9 has not been inserted: aborting");
+
+		System.out.println("Inserting node with key 9");
+		tree.insert(x3);
+
+		if (!tree.search(9))
+			throw new Exception("Key 9 has been inserted: aborting");
+
+		System.out.println("Inserting node with key 73");
+		tree.insert(x4);
+		System.out.println("Inserting node with key 107");
+		tree.insert(x5);
+		System.out.println("Inserting node with key 22");
+		tree.insert(x6);
+		System.out.println("Re-inserting node with key 22");
+		tree.insert(x6);
+
+		if (!tree.search(22))
+			throw new Exception("Key 22 has been inserted: aborting");
+
+		System.out.println("");
+		System.out.println("Printing out the tree");
+		tree.inOrderVisitPrint();
+		System.out.println("");
+
+		System.out.println("Deleting node with key 70");
+		tree.delete(70);
+
+		if (tree.search(70))
+			throw new Exception("Key 70 has been deleted: aborting");
+
+		System.out.println("Deleting node with key 73");
+		tree.delete(73);
+
+		if (tree.search(73))
+			throw new Exception("Key 73 has been deleted: aborting");
+
+		System.out.println("Deleting node with key 8");
+		tree.delete(8);
+
+		if (tree.search(8))
+			throw new Exception("Key 8 has been deleted: aborting");
+
+		System.out.println("");
+		System.out.println("Printing out the tree");
+		tree.inOrderVisitPrint();
+		System.out.println("");
+
+		System.out.println("Inserting node with key 70");
+		tree.insert(init);
+		System.out.println("Inserting node with key 8");
+		tree.insert(x2);
+		System.out.println("Inserting node with key 73");
+		tree.insert(x4);
+
+		System.out.println("");
+		System.out.println("Printing out the tree");
+		tree.inOrderVisitPrint();
+		System.out.println("");
+
+		System.out.println("Deleting node with key 22");
+		tree.delete(22);
+
+		if (tree.search(22))
+			throw new Exception("BinarySearchTree does not allow duplicates: aborting");
+
+		System.out.println("Inserting node with key 91");
+		tree.insert(x7);
+		System.out.println("Inserting node with key 90");
+		tree.insert(x8);
+		System.out.println("Inserting node with key 89");
+		tree.insert(x9);
+		System.out.println("Inserting node with key 30");
+		tree.insert(x10);
+		System.out.println("Inserting node with key 60");
+		tree.insert(x11);
+
+		System.out.println("");
+		System.out.println("Printing out the tree");
+		tree.inOrderVisitPrint();
+		System.out.println("");
+
+		System.out.println("Deleting node with key 60");
+		tree.delete(60);
+		System.out.println("Deleting node with key 107");
+		tree.delete(107);
+
+		if (tree.search(60) || tree.search(107))
+			throw new Exception("Key 60 and key 107 have been deleted: aborting");
+
+		System.out.println("");
+		System.out.println("Printing out the tree");
+		tree.inOrderVisitPrint();
+		System.out.println("");
+
+		System.out.println("Deleting node with key 1000");
+		tree.delete(1000);
+
+		System.out.println("");
+		System.out.println("Printing out the tree");
+		tree.inOrderVisitPrint();
+		System.out.println("");
+
+		System.out.println("\nBinarySearchTree test terminated\n");
+	}
+
     public static void main(String[] args) {
 
         // To test the number of collisions due to hash function of HashMap class.
@@ -342,6 +486,13 @@ public class Test {
 		// To test the sorting algorithms really sort arrays.
 		try {
 			implementationTestSort();
+		} catch (Exception exception) {
+			System.err.println(exception.getMessage());
+			System.exit(-1);
+		}
+
+		try {
+			implementationTestBSTree();
 		} catch (Exception exception) {
 			System.err.println(exception.getMessage());
 			System.exit(-1);

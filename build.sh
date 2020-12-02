@@ -9,6 +9,7 @@ commons_path="${movida_path}/commons"
 hashmap_path="${bc_path}/hashmap"
 graph_path="${bc_path}/graph"
 sort_path="${bc_path}/sort"
+bstree_path="${bc_path}/bstree"
 
 function undo_build {
     read -p "You are deleting all the compiled files. Are you sure to continue [Y/n]? " -n 1 user_in
@@ -20,6 +21,7 @@ function undo_build {
         rm ${commons_path}/*.class
 		rm ${graph_path}/*.class
 		rm ${sort_path}/*.class
+		rm ${bstree_path}/*.class
         ;;
 
         "N" | "n")
@@ -36,11 +38,12 @@ function undo_build {
 
 case "$1" in
     "-b" | "-b=all")
+    javac ${commons_path}/*.java
     javac ${bc_path}/*.java
     javac ${hashmap_path}/*.java
 	javac ${graph_path}/*.java
 	javac ${sort_path}/*.java
-    javac ${commons_path}/*.java
+	javac ${bstree_path}/*.java
     ;;
 
     "-b=borghicremona")
@@ -48,6 +51,7 @@ case "$1" in
     javac ${hashmap_path}/*.java
 	javac ${graph_path}/*.java
 	javac ${sort_path}/*.java
+	javac ${bstree_path}/*.java
     ;;
 
     "-b=commons")
@@ -64,6 +68,10 @@ case "$1" in
 
 	"-b=sort")
 	javac ${sort_path}/*.java
+	;;
+
+	"-b=bstree")
+	javac ${bstree_path}/*.java
 	;;
 
     "-u")

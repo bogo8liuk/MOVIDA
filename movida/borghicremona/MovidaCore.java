@@ -1,9 +1,10 @@
 package movida.borghicremona;
 
+import java.io.File;
 import movida.commons.*;
-import movida.borghicremona.hashmap;
-import movida.borghicremona.graph;
-import movida.borghicremona.sort;
+import movida.borghicremona.hashmap.HashMap;
+import movida.borghicremona.graph.NonOrientedGraph;
+import movida.borghicremona.sort.Vector;
 
 public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMovidaCollaborations {
 	private MapImplementation dictionary;
@@ -96,7 +97,7 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 
 	}
 
-	public void saveToFile() {
+	public void saveToFile(File f) {
 		
 	}
 
@@ -105,70 +106,86 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 	}
 
 	public int countMovies() {
-
+		return 1;
 	}
 
 	public int countPeople() {
+		return 1;
 
 	}
 
 	public boolean deleteMovieByTitle(String title) {
+		return true;
 
 	}
 
 	public Movie getMovieByTitle(String title) {
+		return null;
 
 	}
 
 	public Person getPersonByName(String name) {
 
+		return null;
 	}
 
 	public Movie[] getAllMovies() {
 
+		return null;
 	}
 
 	public Person[] getAllPeople() {
 
+		return null;
 	}
 
 	public Movie[] searchMoviesByTitle(String title) {
 
+		return null;
 	}
 
 	public Movie[] searchMoviesInYear(Integer year) {
 
+		return null;
 	}
 
 	public Movie[] searchMoviesDirectedBy(String name) {
 
+		return null;
 	}
 
 	public Movie[] searchMoviesStarredBy(String name) {
 
+		return null;
 	}
 
 	public Movie[] searchMostVotedMovies(Integer N) {
 
+		return null;
 	}
 
 	public Movie[] searchMostRecentMovies(Integer N) {
 
+		return null;
 	}
 
 	public Person[] searchMostActiveActors(Integer N) {
 
+		return null;
 	}
 
 	public Person[] getDirectCollaboratorsOf(Person actor) {
 
+		return null;
 	}
 
 	public Person[] getTeamOf(Person actor) {
 
+		return null;
 	}
 
-	public Collaboration[] maximizeCollaborationInTheTeamOf(Person actor) {
+	public Collaboration[] maximizeCollaborationsInTheTeamOf(Person actor) {
 
+		return null;
 	}
 }
