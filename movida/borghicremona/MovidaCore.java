@@ -3,19 +3,20 @@ package movida.borghicremona;
 import java.io.File;
 import movida.commons.*;
 import movida.borghicremona.hashmap.HashMap;
+import movida.borghicremona.bstree.BinarySearchTree;
 import movida.borghicremona.graph.NonOrientedGraph;
 import movida.borghicremona.sort.Vector;
 
 public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMovidaCollaborations {
 	private MapImplementation dictionary;
 	private SortingAlgorithm algorithm;
-	private HashMap hashmap;
-	// TODO: abr
+	private HashMap table;
+	private BinarySearchTree tree;
 	private NonOrientedGraph graph;
 
 	public MovidaCore() {
-		this.hashmap = null;
-		// TODO: abr
+		this.table = null;
+		this.tree = null;
 		this.graph = null; // TODO: (?)
 		this.dictionary = null;
 		this.algorithm = null;
@@ -68,14 +69,14 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 	public MovidaCore(SortingAlgorithm algorithm, MapImplementation map) {
 		try {
 			if (!__setSort(algorithm) || !__setMap(map))
-				throw new IllegalArgumentException("Impossible to allocate a MovidaCore instance");
+				throw new IllegalArgumentException("Impossible to allocate a MovidaCore instance: aborting");
 		} catch(IllegalArgumentException exception) {
 			System.err.println(exception.getMessage());
 			System.exit(-1);
 		}
 
-		this.hashmap = null;
-		// TODO: abr
+		this.table = null;
+		this.tree = null;
 		this.graph = null; // TODO: (?)
 	}
 

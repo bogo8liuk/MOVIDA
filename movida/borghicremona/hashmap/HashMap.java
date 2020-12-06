@@ -20,13 +20,27 @@ public class HashMap implements Dictionary {
     private final static KeyValueElement _DELETED_ = new KeyValueElement("_DELETED_", null);
 
 	/**
+	 * If the item has null value, it throws an IllegalArgumentException and it handles it, terminating the process.
+	 *
+	 * @param item Value to check.
+	 */
+	private static void __assertNotNullData(KeyValueElement item) {
+		try {
+			if (null == item) throw new IllegalArgumentException("Cannot have null data: aborting");
+		} catch(IllegalArgumentException exception) {
+			System.err.println(exception.getMessage());
+			System.exit(-1);
+		}
+	}
+
+	/**
 	 * If the key has null value, it throws an IllegalArgumentException and it handles it, terminating the process.
 	 *
 	 * @param key Value to check
 	 */
 	private static void __assertNotNullKey(Comparable key) {
         try {
-            if (null == key) throw new IllegalArgumentException("Cannot have an empty key");
+            if (null == key) throw new IllegalArgumentException("Cannot have a null key: aborting");
         } catch (IllegalArgumentException exception) {
             System.err.println(exception.getMessage());
 			System.exit(-1);
@@ -44,7 +58,7 @@ public class HashMap implements Dictionary {
 	 */
 	private static void __assertNotDeletedKey(Comparable key) {
         try {
-            if ("_DELETED_" == (String) key) throw new IllegalArgumentException("Illegal key");
+            if ("_DELETED_" == (String) key) throw new IllegalArgumentException("Illegal key: aborting");
         } catch (IllegalArgumentException exception) {
             System.err.println(exception.getMessage());
 			System.exit(-1);
@@ -53,7 +67,7 @@ public class HashMap implements Dictionary {
 
     public HashMap(int length) {
         try {
-            if (0 >= length) throw new IllegalArgumentException("Cannot have a negative length");
+            if (0 >= length) throw new IllegalArgumentException("Cannot have a negative length: aborting");
         } catch (IllegalArgumentException exception) {
             System.err.println(exception.getMessage());
 			System.exit(-1);
@@ -165,6 +179,7 @@ public class HashMap implements Dictionary {
     }
 
     public void insert(KeyValueElement item) {
+		__assertNotNullData(item);
 		__assertNotNullKey(item.getKey());
 		__assertNotDeletedKey(item.getKey());
 
