@@ -111,6 +111,7 @@ public class Test {
 	 * @attention There's no warranty that successful return of this function makes the implementation of HashMap correct.
 	 */
     public static void implementationTestHashMap() throws Exception {
+		String data = "data";
         System.out.println("Testing the implementation of HashMap\n");
 
         System.out.println("Hashmap of 10 elements");
@@ -119,7 +120,7 @@ public class Test {
         System.out.println("Insertion of 10 \"Tony Parker\" keys");
         int oldLen = hashmap.length();
         for (int i = 0; oldLen > i; ++i) {
-            KeyValueElement tp = new KeyValueElement("Tony Parker", null);
+            KeyValueElement tp = new KeyValueElement("Tony Parker", data);
             hashmap.insert(tp);
         }
         if (hashmap.length() != oldLen)
@@ -130,7 +131,7 @@ public class Test {
         System.out.println("");
 
         System.out.println("Insertion of \"DeAndre Jordan\" key");
-        KeyValueElement daj = new KeyValueElement("DeAndre Jordan", null);
+        KeyValueElement daj = new KeyValueElement("DeAndre Jordan", data);
         hashmap.insert(daj);
 
         if (hashmap.length() == oldLen)
@@ -143,16 +144,16 @@ public class Test {
         System.out.println("New hashmap of 10 elements created");
         hashmap = new HashMap(10);
 
-        if (hashmap.search("Russell Westbrook"))
-            throw new Exception("search() must return false if the table is empty");
+        if (null != hashmap.search("Russell Westbrook"))
+            throw new Exception("search() must return null if the table is empty");
 
         System.out.println("Insertion of \"Joe Johnson\" key");
         final String s = "Joe Johnson";
-        KeyValueElement jj = new KeyValueElement(s, null);
+        KeyValueElement jj = new KeyValueElement(s, data);
         hashmap.insert(jj);
 
-        if (!hashmap.search(s))
-            throw new Exception("search() must return true if its parameter is a key already inserted and not deleted");
+        if (null == hashmap.search(s))
+            throw new Exception("search() must return valid data if its parameter is a key already inserted and not deleted");
 
         System.out.println("");
         hashmap.printTable();
@@ -162,7 +163,7 @@ public class Test {
         int oldLen1 = hashmap.length();
         String t = "Bo McCalebb";
         for (int i = 0; 3 > i; ++i) {
-            KeyValueElement bmc = new KeyValueElement(t, null);
+            KeyValueElement bmc = new KeyValueElement(t, data);
             hashmap.insert(bmc);
         }
 
@@ -172,8 +173,8 @@ public class Test {
         System.out.println("Removal of \"Bo McCalebb\" key");
         hashmap.delete(t);
 
-        if (!hashmap.search(t))
-            throw new Exception("The searched key should have been inserted three times and deleted once, search() must return true");
+        if (null == hashmap.search(t))
+            throw new Exception("The searched key should have been inserted three times and deleted once, search() must return valid data");
 
         System.out.println("");
         hashmap.printTable();
@@ -183,25 +184,25 @@ public class Test {
         hashmap.delete(t);
         hashmap.delete(t);
 
-        if (hashmap.search(t))
-            throw new Exception("The elements with the searched key should have been removed all, search() must return false");
+        if (null != hashmap.search(t))
+            throw new Exception("The elements with the searched key should have been removed all, search() must return null");
 
         System.out.println("");
         hashmap.printTable();
         System.out.println("");
 
         System.out.println("Insertion of \"Bo McCalebb\" key");
-        KeyValueElement bmc = new KeyValueElement(t, null);
+        KeyValueElement bmc = new KeyValueElement(t, data);
         hashmap.insert(bmc);
 
         System.out.println("Insertion of 10 \"Bill Russell\" keys");
         int l = hashmap.length();
         for (int i = 0; l > i; ++i) {
-            KeyValueElement br = new KeyValueElement("Bill Russell", null);
+            KeyValueElement br = new KeyValueElement("Bill Russell", data);
             hashmap.insert(br);
         }
 
-        if (!hashmap.search(t))
+        if (null == hashmap.search(t))
             throw new Exception("The growing of the table must not affect the success of searching an existing key in the table");
 
         System.out.println("");
@@ -328,21 +329,23 @@ public class Test {
 	}
 
 	private static void implementationTestBSTree() throws Exception {
+		String data = "data";
+
 		System.out.println("Inserting node with key 70");
-		KeyValueElement init = new KeyValueElement(70, null);
+		KeyValueElement init = new KeyValueElement(70, data);
 		BinarySearchTree tree = new BinarySearchTree(init);
 
-		KeyValueElement x1 = new KeyValueElement(64, null);
-		KeyValueElement x2 = new KeyValueElement(8, null);
-		KeyValueElement x3 = new KeyValueElement(9, null);
-		KeyValueElement x4 = new KeyValueElement(73, null);
-		KeyValueElement x5 = new KeyValueElement(107, null);
-		KeyValueElement x6 = new KeyValueElement(22, null);
-		KeyValueElement x7 = new KeyValueElement(91, null);
-		KeyValueElement x8 = new KeyValueElement(90, null);
-		KeyValueElement x9 = new KeyValueElement(89, null);
-		KeyValueElement x10 = new KeyValueElement(30, null);
-		KeyValueElement x11 = new KeyValueElement(60, null);
+		KeyValueElement x1 = new KeyValueElement(64, data);
+		KeyValueElement x2 = new KeyValueElement(8, data);
+		KeyValueElement x3 = new KeyValueElement(9, data);
+		KeyValueElement x4 = new KeyValueElement(73, data);
+		KeyValueElement x5 = new KeyValueElement(107, data);
+		KeyValueElement x6 = new KeyValueElement(22, data);
+		KeyValueElement x7 = new KeyValueElement(91, data);
+		KeyValueElement x8 = new KeyValueElement(90, data);
+		KeyValueElement x9 = new KeyValueElement(89, data);
+		KeyValueElement x10 = new KeyValueElement(30, data);
+		KeyValueElement x11 = new KeyValueElement(60, data);
 
 		System.out.println("Deleting and reinserting node with key 70");
 		tree.delete(70);
@@ -363,13 +366,13 @@ public class Test {
 		tree.inOrderVisitPrint();
 		System.out.println("");
 
-		if (tree.search(9))
+		if (null != tree.search(9))
 			throw new Exception("Key 9 has not been inserted: aborting");
 
 		System.out.println("Inserting node with key 9");
 		tree.insert(x3);
 
-		if (!tree.search(9))
+		if (null == tree.search(9))
 			throw new Exception("Key 9 has been inserted: aborting");
 
 		System.out.println("Inserting node with key 73");
@@ -381,7 +384,7 @@ public class Test {
 		System.out.println("Re-inserting node with key 22");
 		tree.insert(x6);
 
-		if (!tree.search(22))
+		if (null == tree.search(22))
 			throw new Exception("Key 22 has been inserted: aborting");
 
 		System.out.println("");
@@ -392,19 +395,19 @@ public class Test {
 		System.out.println("Deleting node with key 70");
 		tree.delete(70);
 
-		if (tree.search(70))
+		if (null != tree.search(70))
 			throw new Exception("Key 70 has been deleted: aborting");
 
 		System.out.println("Deleting node with key 73");
 		tree.delete(73);
 
-		if (tree.search(73))
+		if (null != tree.search(73))
 			throw new Exception("Key 73 has been deleted: aborting");
 
 		System.out.println("Deleting node with key 8");
 		tree.delete(8);
 
-		if (tree.search(8))
+		if (null != tree.search(8))
 			throw new Exception("Key 8 has been deleted: aborting");
 
 		System.out.println("");
@@ -427,8 +430,8 @@ public class Test {
 		System.out.println("Deleting node with key 22");
 		tree.delete(22);
 
-		if (tree.search(22))
-			throw new Exception("BinarySearchTree does not allow duplicates: aborting");
+		if (null == tree.search(22))
+			throw new Exception("BinarySearchTree does allow duplicates: aborting");
 
 		System.out.println("Inserting node with key 91");
 		tree.insert(x7);
@@ -451,7 +454,7 @@ public class Test {
 		System.out.println("Deleting node with key 107");
 		tree.delete(107);
 
-		if (tree.search(60) || tree.search(107))
+		if ((null != tree.search(60)) || (null != tree.search(107)))
 			throw new Exception("Key 60 and key 107 have been deleted: aborting");
 
 		System.out.println("");

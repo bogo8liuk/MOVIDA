@@ -45,11 +45,7 @@ public class BinarySearchTree implements Dictionary {
 	    private void __insert(KeyValueElement item, Node tree) {
 			Integer diff = item.getKey().compareTo(tree.entry.getKey());
 
-			// It does not allow duplicated keys
-			if (0 == diff)
-				return;
-
-			else if (0 > diff) {
+			if (0 >= diff) {
 				if (null == tree.leftChild) {
 					tree.leftChild = new Node(item, tree);
 					return;
@@ -79,17 +75,17 @@ public class BinarySearchTree implements Dictionary {
 		 * @param key Key to search for.
 		 * @param tree Where to search for the key.
 		 *
-		 * @return true, if key is found, false otherwise.
+		 * @return the data associated with the key, if key is found, null otherwise.
 		 */
-	    private boolean __search(Comparable key, Node tree) {
+	    private Object __search(Comparable key, Node tree) {
 			if (null == tree)
-				return false;
+				return null;
 
 			else {
 				Integer diff = key.compareTo(tree.entry.getKey());
 
 				if (0 == diff)
-					return true;
+					return tree.entry.getValue();
 
 				else if (0 > diff)
 					return __search(key, tree.leftChild);
@@ -99,7 +95,7 @@ public class BinarySearchTree implements Dictionary {
 			}
 	    }
 
-		public boolean search(Comparable key) {
+		public Object search(Comparable key) {
 			return __search(key, this);
 		}
 
@@ -289,11 +285,15 @@ public class BinarySearchTree implements Dictionary {
 		}
 	}
 
+	public BinarySearchTree() {
+		this.root = new Node(null);
+	}
+
 	public BinarySearchTree(KeyValueElement item) {
 		this.root = new Node(item);
 	}
 
-	public boolean search(Comparable key) {
+	public Object search(Comparable key) {
 		__assertNotNullKey(key);
 
 		return this.root.search(key);

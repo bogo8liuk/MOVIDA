@@ -65,6 +65,13 @@ public class HashMap implements Dictionary {
         }
 	}
 
+	/**
+	 * It initializes the table with a default size of 20 elements.
+	 */
+	public HashMap() {
+		this.table = new KeyValueElement[20];
+	}
+
     public HashMap(int length) {
         try {
             if (0 >= length) throw new IllegalArgumentException("Cannot have a negative length: aborting");
@@ -95,27 +102,24 @@ public class HashMap implements Dictionary {
         return h;
     }
 
-    public boolean search(Comparable key) {
+    public Object search(Comparable key) {
 		__assertNotNullKey(key);
 		__assertNotDeletedKey(key);
 
         int index = hash((String) key) % this.table.length;
-        boolean found = false;
 
 		// Linear inspection: every time the inspection gets a collision, the index is incremented by 1.
         for (int attempt = 0; this.table.length > attempt; ++attempt) {
             int i = (index + attempt) % this.table.length;
 
-            if (null == this.table[i]) {
-                break;
-            }
-            else if ((String) this.table[i].getKey() == (String) key) {
-                found = true;
-                break;
-            }
+            if (null == this.table[i])
+				return null;
+
+            else if ((String) this.table[i].getKey() == (String) key)
+				return this.table[i].getValue();
         }
 
-        return found;
+        return null;
     }
 
 	/**
