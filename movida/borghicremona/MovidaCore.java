@@ -325,7 +325,6 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		Iterator<String> iter = lines.iterator();
 		String tmpTitle;
 		String tmpYear;
-		String tmpVotes;
 		String tmpCast;
 		String tmpDirector;
 
@@ -351,8 +350,25 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 						break;
 
 					case "Votes":
-						tmpVotes = keys[2];
-						//TODO: last case, so create Movie obj and insert every key
+						Integer votes = decode(keys[2]);
+						Integer year = decode(tmpYear);
+						Person director = new Person(tmpDirector);
+
+						String[] splitting = tmpCast.split(", ");
+						Person[] cast = new Person[(splitting.length / 2) + 1];
+						int j = 0;
+						for (int i = 0; splitting.length > i; ++i) {
+							if (", " == splitting[i])
+								continue;
+
+							cast[j++] = new Person(splitting[i]);
+						}
+
+						Movie movie = new Movie(tmpTitle, year, votes, cast, director);
+						String[] tmpKey = {tmpTitle, tmpYear, tmpDirector, tmpCast, keys[2]};
+						int i = 0;
+						for (KeyType t: KeyType.values())
+							doOn(INSERT, t, tmpKey[i++], movie);
 						break;
 
 					default:
