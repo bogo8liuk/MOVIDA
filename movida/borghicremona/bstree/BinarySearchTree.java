@@ -2,6 +2,7 @@ package movida.borghicremona.bstree;
 
 import movida.borghicremona.Dictionary;
 import movida.borghicremona.KeyValueElement;
+import movida.borghicremona.Assert;
 import java.lang.*;
 
 public class BinarySearchTree implements Dictionary {
@@ -267,24 +268,6 @@ public class BinarySearchTree implements Dictionary {
 
 	private Node root;
 
-	private static void __assertNotNullData(KeyValueElement item) {
-		try {
-			if (null == item) throw new IllegalArgumentException("Invalid data: aborting");
-		} catch (IllegalArgumentException exception) {
-			System.err.println(exception.getMessage());
-			System.exit(-1);
-		}
-	}
-
-	private static void __assertNotNullKey(Comparable key) {
-		try {
-			if (null == key) throw new IllegalArgumentException("Invalid key: aborting");
-		} catch (IllegalArgumentException exception) {
-			System.err.println(exception.getMessage());
-			System.exit(-1);
-		}
-	}
-
 	public BinarySearchTree() {
 		this.root = new Node(null);
 	}
@@ -294,20 +277,41 @@ public class BinarySearchTree implements Dictionary {
 	}
 
 	public Object search(Comparable key) {
-		__assertNotNullKey(key);
+		try {
+			Assert.notNullKey(key);
+	    } catch (IllegalArgumentException exception) {
+	        System.err.println(exception.getMessage());
+	        System.exit(-1);
+	     }
 
 		return this.root.search(key);
 	}
 
 	public void insert(KeyValueElement item) {
-		__assertNotNullData(item);
-		__assertNotNullKey(item.getKey());
+		try {
+			Assert.notNullData(item);
+	    } catch (IllegalArgumentException exception) {
+	        System.err.println(exception.getMessage());
+	        System.exit(-1);
+	     }
+	
+		try {
+			Assert.notNullKey(item.getKey());
+	    } catch (IllegalArgumentException exception) {
+	        System.err.println(exception.getMessage());
+	        System.exit(-1);
+	     }
 
 		this.root.insert(item);
 	}
 
 	public void delete(Comparable key) {
-		__assertNotNullKey(key);
+		try {
+			Assert.notNullKey(key);
+	    } catch (IllegalArgumentException exception) {
+	        System.err.println(exception.getMessage());
+	        System.exit(-1);
+	     }
 
 		Node newRoot = this.root.delete(key);
 		if (null != newRoot)

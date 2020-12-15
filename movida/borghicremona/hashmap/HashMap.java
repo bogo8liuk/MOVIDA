@@ -2,6 +2,7 @@ package movida.borghicremona.hashmap;
 
 import movida.borghicremona.Dictionary;
 import movida.borghicremona.KeyValueElement;
+import movida.borghicremona.Assert;
 import java.lang.Exception;
 
 /**
@@ -18,34 +19,6 @@ public class HashMap implements Dictionary {
 
 	// Label to replace removed elements.
     private final static KeyValueElement _DELETED_ = new KeyValueElement("_DELETED_", null);
-
-	/**
-	 * If the item has null value, it throws an IllegalArgumentException and it handles it, terminating the process.
-	 *
-	 * @param item Value to check.
-	 */
-	private static void __assertNotNullData(KeyValueElement item) {
-		try {
-			if (null == item) throw new IllegalArgumentException("Cannot have null data: aborting");
-		} catch(IllegalArgumentException exception) {
-			System.err.println(exception.getMessage());
-			System.exit(-1);
-		}
-	}
-
-	/**
-	 * If the key has null value, it throws an IllegalArgumentException and it handles it, terminating the process.
-	 *
-	 * @param key Value to check
-	 */
-	private static void __assertNotNullKey(Comparable key) {
-        try {
-            if (null == key) throw new IllegalArgumentException("Cannot have a null key: aborting");
-        } catch (IllegalArgumentException exception) {
-            System.err.println(exception.getMessage());
-			System.exit(-1);
-        }
-	}
 
 	/**
 	 * If the key has a value equal to _DELETED_ label, it throws an IllegalArgumentException and it handles it,
@@ -89,7 +62,12 @@ public class HashMap implements Dictionary {
     }
 
     public static int hash(String key) {
-		__assertNotNullKey(key);
+		try {
+			Assert.notNullKey(key);
+		} catch (IllegalArgumentException exception) {
+			System.err.println(exception.getMessage());
+			System.exit(-1);
+		}
 
         int h = HASH;
 
@@ -103,7 +81,12 @@ public class HashMap implements Dictionary {
     }
 
     public Object search(Comparable key) {
-		__assertNotNullKey(key);
+		try {
+			Assert.notNullKey(key);
+		} catch (IllegalArgumentException exception) {
+			System.err.println(exception.getMessage());
+			System.exit(-1);
+		}
 		__assertNotDeletedKey(key);
 
         int index = hash((String) key) % this.table.length;
@@ -183,8 +166,18 @@ public class HashMap implements Dictionary {
     }
 
     public void insert(KeyValueElement item) {
-		__assertNotNullData(item);
-		__assertNotNullKey(item.getKey());
+		try {
+			Assert.notNullData(item);
+		} catch (IllegalArgumentException exception) {
+			System.err.println(exception.getMessage());
+			System.exit(-1);
+		}
+		try {
+			Assert.notNullKey(item.getKey());
+		} catch (IllegalArgumentException exception) {
+			System.err.println(exception.getMessage());
+			System.exit(-1);
+		}
 		__assertNotDeletedKey(item.getKey());
 
         int index = hash((String) item.getKey()) % this.table.length;
@@ -198,7 +191,12 @@ public class HashMap implements Dictionary {
     }
 
     public void delete(Comparable key) {
-		__assertNotNullKey(key);
+		try {
+			Assert.notNullKey(key);
+		} catch (IllegalArgumentException exception) {
+			System.err.println(exception.getMessage());
+			System.exit(-1);
+		}
 		__assertNotDeletedKey(key);
 
         int index = hash((String) key) % this.table.length;
