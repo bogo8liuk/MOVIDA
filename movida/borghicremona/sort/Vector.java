@@ -1,5 +1,7 @@
 package movida.borghicremona.sort;
 
+import java.util.Random;
+
 public class Vector<T extends Comparable<T>> {
 	private T[] vector;
 
@@ -18,6 +20,16 @@ public class Vector<T extends Comparable<T>> {
 		T tmp = array[index1];
 		array[index1] = array[index2];
 		array[index2] = tmp;
+	}
+
+	public void shuffle() {
+		Integer length = this.vector.length;
+
+		for (int i = 0; length > i; ++i) {
+			Random rand = new Random();
+			int j = rand.nextInt(length);
+			swap(this, i, j);
+		}
 	}
 
 	public void selectionSort() {

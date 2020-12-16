@@ -279,10 +279,10 @@ public class BinarySearchTree implements Dictionary {
 	public Object search(Comparable key) {
 		try {
 			Assert.notNullKey(key);
-	    } catch (IllegalArgumentException exception) {
-	        System.err.println(exception.getMessage());
-	        System.exit(-1);
-	     }
+		} catch (IllegalArgumentException exception) {
+			System.err.println(exception.getMessage() + ": aborting");
+			System.exit(-1);
+		}
 
 		return this.root.search(key);
 	}
@@ -290,17 +290,17 @@ public class BinarySearchTree implements Dictionary {
 	public void insert(KeyValueElement item) {
 		try {
 			Assert.notNullData(item);
-	    } catch (IllegalArgumentException exception) {
-	        System.err.println(exception.getMessage());
-	        System.exit(-1);
-	     }
+		} catch (IllegalArgumentException exception) {
+			System.err.println(exception.getMessage() + ": aborting");
+			System.exit(-1);
+		}
 	
 		try {
 			Assert.notNullKey(item.getKey());
-	    } catch (IllegalArgumentException exception) {
-	        System.err.println(exception.getMessage());
-	        System.exit(-1);
-	     }
+		} catch (IllegalArgumentException exception) {
+			System.err.println(exception.getMessage() + ": aborting");
+			System.exit(-1);
+		}
 
 		this.root.insert(item);
 	}
@@ -308,10 +308,10 @@ public class BinarySearchTree implements Dictionary {
 	public void delete(Comparable key) {
 		try {
 			Assert.notNullKey(key);
-	    } catch (IllegalArgumentException exception) {
-	        System.err.println(exception.getMessage());
-	        System.exit(-1);
-	     }
+		} catch (IllegalArgumentException exception) {
+			System.err.println(exception.getMessage() + ": aborting");
+			System.exit(-1);
+		}
 
 		Node newRoot = this.root.delete(key);
 		if (null != newRoot)

@@ -65,7 +65,7 @@ public class HashMap implements Dictionary {
 		try {
 			Assert.notNullKey(key);
 		} catch (IllegalArgumentException exception) {
-			System.err.println(exception.getMessage());
+			System.err.println(exception.getMessage() + ": aborting");
 			System.exit(-1);
 		}
 
@@ -84,7 +84,7 @@ public class HashMap implements Dictionary {
 		try {
 			Assert.notNullKey(key);
 		} catch (IllegalArgumentException exception) {
-			System.err.println(exception.getMessage());
+			System.err.println(exception.getMessage() + ": aborting");
 			System.exit(-1);
 		}
 		__assertNotDeletedKey(key);
@@ -169,13 +169,13 @@ public class HashMap implements Dictionary {
 		try {
 			Assert.notNullData(item);
 		} catch (IllegalArgumentException exception) {
-			System.err.println(exception.getMessage());
+			System.err.println(exception.getMessage() + ": aborting");
 			System.exit(-1);
 		}
 		try {
 			Assert.notNullKey(item.getKey());
 		} catch (IllegalArgumentException exception) {
-			System.err.println(exception.getMessage());
+			System.err.println(exception.getMessage() + ": aborting");
 			System.exit(-1);
 		}
 		__assertNotDeletedKey(item.getKey());
@@ -194,7 +194,7 @@ public class HashMap implements Dictionary {
 		try {
 			Assert.notNullKey(key);
 		} catch (IllegalArgumentException exception) {
-			System.err.println(exception.getMessage());
+			System.err.println(exception.getMessage() + ": aborting");
 			System.exit(-1);
 		}
 		__assertNotDeletedKey(key);

@@ -322,8 +322,12 @@ public class Test {
 		v = new Vector<Integer>(array1);
 		printV(array1);
 		v.quickSort();
-		if (!isSorted(array7))
+		if (!isSorted(array1))
 			throw new Exception("array" + i + " is not sorted");
+
+		System.out.println("Shuffling the array1");
+		v.shuffle();
+		printV(array1);
 
 		System.out.println("\nSorting algorithms implementation test terminated successfully!\n");
 	}

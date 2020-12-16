@@ -7,7 +7,7 @@ import java.util.*;
 public class Assert {
 	
 	/**
-	 * If the item has null value, it throws an IllegalArgumentException. Handling and termination will be delegated to the function calling this method.
+	 * If the item has null value, it throws an IllegalArgumentException.
 	 *
 	 * @param item Value to check.
 	 */
@@ -16,7 +16,7 @@ public class Assert {
 	}
  
 	/**
-	 * If the key has null value, it throws an IllegalArgumentException. Handling and termination will be delegated to the function calling this method.
+	 * If the key has null value, it throws an IllegalArgumentException.
 	 *
 	 * @param key Value to check
 	 */
