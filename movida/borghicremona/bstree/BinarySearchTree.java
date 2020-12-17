@@ -230,7 +230,7 @@ public class BinarySearchTree implements Dictionary {
 		 * @param tree Where the key has to be searched and deleted.
 		 */
 		private DeleteReturn __delete(Comparable key, Node tree) {
-			if (null == tree)
+			if (null == tree || null == tree.entry)
 				return null;
 
 			else {

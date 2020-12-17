@@ -52,6 +52,15 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		public Movie getMovie() {
 			return this.movie;
 		}
+
+		public void remove(List<PairPersonMovie> list, Movie m) {
+			Iterator<PairPersonMovie> iter = list.listIterator();
+
+			while (iter.hasNext()) {
+				if (iter.next().getMovie() == m)
+					iter.remove();
+			}
+		}
 	}
 
 	// Association between an Integer and a Movie.
@@ -79,6 +88,15 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 
 		public Movie getMovie() {
 			return this.movie;
+		}
+
+		public void remove(List<PairIntMovie> list, Movie m) {
+			Iterator<PairIntMovie> iter = list.listIterator();
+
+			while (iter.hasNext()) {
+				if (iter.next().getMovie() == m)
+					iter.remove();
+			}
 		}
 	}
 
@@ -322,15 +340,10 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		// Parsing Cast keys because of many Person (people).
 		String[] splitting = tmpCast.split(", ");
 		// Person (people) are one more than comma characters.
-		Person[] cast = new Person[(splitting.length / 2) + 1];
+		Person[] cast = new Person[splitting.length];
 
-		int j = 0;
-		for (int i = 0; splitting.length > i; ++i) {
-			if (", " == splitting[i])
-				continue;
-
-			cast[j++] = new Person(splitting[i]);
-		}
+		for (int i = 0; splitting.length > i; ++i)
+			cast[i] = new Person(splitting[i]);
 
 		return cast;
 	}
@@ -368,18 +381,20 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 
 		// Parsing every line.
 		while (iter.hasNext()) {
-			if (iter.next().contains(": ")) {
-				// Splitting the line into three parts, discarding colon character.
-				String[] keys = iter.next().split(": ");
+			String next = iter.next();
 
-				if (3 != keys.length)
+			if (next.contains(":")) {
+				// Splitting the line into two parts, discarding colon character.
+				String[] keys = next.split(":");
+
+				if (2 != keys.length)
 					throw new MovidaFileException();
 
 				switch (keys[0]) {
 					case "Title":
 						boolmap[0] = true;
 
-						title = keys[2];
+						title = keys[1].trim();
 						break;
 
 					case "Year":
@@ -387,7 +402,7 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 							throw new MovidaFileException();
 						boolmap[1] = true;
 
-						tmpYear = keys[2];
+						tmpYear = keys[1].trim();
 						break;
 
 					case "Director":
@@ -395,7 +410,7 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 							throw new MovidaFileException();
 						boolmap[2] = true;
 
-						tmpDirector = keys[2];
+						tmpDirector = keys[1].trim();
 						break;
 
 					case "Cast":
@@ -403,7 +418,7 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 							throw new MovidaFileException();
 						boolmap[3] = true;
 
-						tmpCast = keys[2];
+						tmpCast = keys[1].trim();
 						break;
 
 					/* Last case (see Movida file format): inserting a new element in the active
@@ -414,27 +429,34 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 						for (int i = 0; boolmap.length > i; ++i)
 							boolmap[i] = false;
 
+						// Decoding data from String to specific data types.
 						Integer year = Integer.decode(tmpYear);
-						Integer votes = Integer.decode(keys[2]);
+						Integer votes = Integer.decode(keys[1].trim());
 						Person[] cast = parseCast(tmpCast);
 						Person director = new Person(tmpDirector);
 						Movie movie = new Movie(title, year, votes, cast, director);
 
+						// Insertion of Person and overwriting of Movie in the active dictionary.
 						Movie tmpMovie = (Movie) doOn(DictionaryOperation.DELETE, KeyType.MOVIE, title, null);
 						doOn(DictionaryOperation.INSERT, KeyType.MOVIE, title, movie);
 						doOn(DictionaryOperation.INSERT, KeyType.PERSON, director.getName(), director);
 						for (int i = 0; cast.length > i; ++i)
 							doOn(DictionaryOperation.INSERT, KeyType.PERSON, cast[i].getName(), cast[i]);
 
+						// Removal of data associated with the movie subscribed from the temporary lists.
 						if (null != tmpMovie) {
-							listYears.remove(new PairIntMovie(tmpMovie.getYear(), tmpMovie));
-							listVotes.remove(new PairIntMovie(tmpMovie.getVotes(), tmpMovie));
-							listDirectors.remove(new PairPersonMovie(tmpMovie.getDirector(), tmpMovie));
-							Person[] deletedCast = tmpMovie.getCast();
-							for (int i = 0; deletedCast.length > i; ++i)
-								listActors.remove(new PairPersonMovie(deletedCast[i], tmpMovie));
+							// Temporary variables to call remove() method, since the latter is not static.
+							PairIntMovie tmp = new PairIntMovie();
+							PairPersonMovie tmp1 = new PairPersonMovie();
+
+							tmp.remove(listYears, tmpMovie);
+							tmp.remove(listVotes, tmpMovie);
+							tmp1.remove(listDirectors, tmpMovie);
+							for (int i = 0; tmpMovie.getCast().length > i; ++i)
+								tmp1.remove(listActors, tmpMovie);
 						}
 
+						// Insertion of data associated with the new inserted movie.
 						PairIntMovie yearMovie = new PairIntMovie(year, movie);
 						listYears.add(yearMovie);
 						PairIntMovie votesMovie = new PairIntMovie(votes, movie);
@@ -453,10 +475,16 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 			}
 		}
 
-		this.arrayData[0] = new Vector<PairIntMovie>((PairIntMovie[]) listYears.toArray());
-		this.arrayData[1] = new Vector<PairIntMovie>((PairIntMovie[]) listVotes.toArray());
-		this.arrayData[2] = new Vector<PairPersonMovie>((PairPersonMovie[]) listDirectors.toArray());
-		this.arrayData[3] = new Vector<PairPersonMovie>((PairPersonMovie[]) listActors.toArray());
+		//TODO: remove dictionary of Person all the people deleted from lists. Use toArray() fun.
+
+		/* These two arrays are temporary used to pass it to toArray(T[]) function, in order
+		   to specify the type of the arrays in which the lists have to be converted */
+		PairIntMovie[] typeArr = new PairIntMovie[1];
+		PairPersonMovie[] typeArr1 = new PairPersonMovie[1];
+		this.arrayData[0] = new Vector<PairIntMovie>(listYears.toArray(typeArr));
+		this.arrayData[1] = new Vector<PairIntMovie>(listVotes.toArray(typeArr));
+		this.arrayData[2] = new Vector<PairPersonMovie>(listDirectors.toArray(typeArr1));
+		this.arrayData[3] = new Vector<PairPersonMovie>(listActors.toArray(typeArr1));
 	}
 
 	private Byte[] movieToBytes(Movie movie) {
