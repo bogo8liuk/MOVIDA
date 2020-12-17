@@ -1,6 +1,7 @@
 package movida.borghicremona;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Files;
 import java.nio.charset.*;
@@ -15,11 +16,8 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 
 	// Key type according to Movida file format.
 	private enum KeyType {
-		TITLE,
-		YEAR,
-		DIRECTOR,
-		CAST,
-		VOTES;
+		MOVIE,	//Identified uniquely by the title.
+		PERSON;	//Identified uniquely by the name.
 	}
 
 	private enum DictionaryOperation {
@@ -28,52 +26,80 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		DELETE;
 	}
 
-	private class wrapPerson implements Comparable {
+	// Association between a Person and a Movie.
+	private class PairPersonMovie implements Comparable<PairPersonMovie> {
 		private Person person;
-
-		public wrapPerson() {
-			this.person = null;
-		}
-
-		public wrapPerson(Person p) {
-			this.person = p;
-		}
-
-		public Integer compareTo(wrapPerson w) {
-			return this.person.getName().compareTo(w.person.getName());
-		}
-	}
-
-	private class wrapMovie implements Comparable {
 		private Movie movie;
 
-		public wrapMovie() {
+		public PairPersonMovie() {
+			this.person = null;
 			this.movie = null;
 		}
 
-		public wrapMovie(Movie m) {
+		public PairPersonMovie(Person p, Movie m) {
+			this.person = p;
 			this.movie = m;
 		}
 
-		public Integer compareTo(wrapMovie w) {
-			return this.movie.getTitle().compareTo(w.movie.getTitle());
+		public int compareTo(PairPersonMovie w) {
+			return this.person.getName().compareTo(w.person.getName());
+		}
+
+		public Person getPerson() {
+			return this.person;
+		}
+
+		public Movie getMovie() {
+			return this.movie;
+		}
+	}
+
+	// Association between an Integer and a Movie.
+	private class PairIntMovie implements Comparable<PairIntMovie> {
+		private Integer index;
+		private Movie movie;
+
+		public PairIntMovie() {
+			this.index = null;
+			this.movie = null;
+		}
+
+		public PairIntMovie(Integer i, Movie m) {
+			this.index = i;
+			this.movie = m;
+		}
+
+		public int compareTo(PairIntMovie w) {
+			return this.index.compareTo(w.index);
+		}
+
+		public Integer getIndex() {
+			return this.index;
+		}
+
+		public Movie getMovie() {
+			return this.movie;
 		}
 	}
 
 	private MapImplementation dictionary;
 	private SortingAlgorithm algorithm;
 	// Arrays of dictionaries to differentiate the types of keys.
-	private HashMap[] table;
-	private BinarySearchTree[] tree;
-	private Vector<wrapPerson> arrayPerson;
-	private Vector<wrapMovie> arrayMovie;
+	private HashMap tableMovie;
+	private HashMap tablePerson;
+	private BinarySearchTree treeMovie;
+	private BinarySearchTree treePerson;
+	private Vector[] arrayData;
+	private HashMap deletedMovies;
 	private NonOrientedGraph graph;
 
 	public MovidaCore() {
-		this.table = null;
-		this.tree = null;
-		this.arrayPerson = null;
-		this.arrayMovie = null;
+		this.tableMovie = null;
+		this.tablePerson = null;
+		this.treeMovie = null;
+		this.treePerson = null;
+		this.arrayData = null;
+		this.deletedMovies = new HashMap();
 		this.graph = null; // TODO: (?)
 		this.dictionary = null;
 		this.algorithm = null;
@@ -113,12 +139,14 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		switch (map) {
 			case ABR:
 				this.dictionary = map;
-				this.tree = new BinarySearchTree[5];
+				this.treeMovie = new BinarySearchTree();
+				this.treePerson = new BinarySearchTree();
 				break;
 
 			case HashIndirizzamentoAperto:
 				this.dictionary = map;
-				this.table = new HashMap[5];
+				this.tableMovie = new HashMap();
+				this.tablePerson = new HashMap();
 				break;
 
 			default:
@@ -137,8 +165,8 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 			System.exit(-1);
 		}
 
-		this.arrayPerson = null;
-		this.arrayMovie = null;
+		this.arrayData = null;
+		this.deletedMovies = new HashMap();
 		this.graph = null; // TODO: (?)
 	}
 
@@ -166,7 +194,8 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 	 * @param key The key to pass as argument to dictionary operation.
 	 * @param data Data to eventually map with key param in case of insert operation.
 	 *
-	 * @return The object returned by search operation, if op is equal to SEARCH, null otherwise.
+	 * @return The object returned by search operation or delete operation, if op is equal to
+	 * SEARCH or DELETE, null otherwise.
 	 */
 	private Object doOn(DictionaryOperation op, KeyType type, Comparable key, Object data) {
 		KeyValueElement element = new KeyValueElement(key, data);
@@ -175,25 +204,15 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 			case ABR:
 				switch (op) {
 					case INSERT:
+						KeyValueElement entry = new KeyValueElement(key, data);
+						
 						switch (type) {
-							case TITLE:
-								this.tree[0].insert(element);
+							case MOVIE:
+								this.treeMovie.insert(entry);
 								break;
 
-							case YEAR:
-								this.tree[1].insert(element);
-								break;
-
-							case DIRECTOR:
-								this.tree[2].insert(element);
-								break;
-
-							case CAST:
-								this.tree[3].insert(element);
-								break;
-
-							case VOTES:
-								this.tree[4].insert(element);
+							case PERSON:
+								this.treePerson.insert(entry);
 								break;
 
 							default:
@@ -205,25 +224,11 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 
 					case SEARCH:
 						switch (type) {
-							case TITLE:
-								return this.tree[0].search(key);
-								break;
+							case MOVIE:
+								return this.treeMovie.search(key);
 
-							case YEAR:
-								return this.tree[1].search(key);
-								break;
-
-							case DIRECTOR:
-								return this.tree[2].search(key);
-								break;
-
-							case CAST:
-								return this.tree[3].search(key);
-								break;
-
-							case VOTES:
-								return this.tree[4].search(key);
-								break;
+							case PERSON:
+								return this.treePerson.search(key);
 
 							default:
 								System.err.println("doOn() default case: aborting");	
@@ -234,25 +239,11 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 
 					case DELETE:
 						switch (type) {
-							case TITLE:
-								this.tree[0].delete(key);
-								break;
+							case MOVIE:
+								return this.treeMovie.delete(key);
 
-							case YEAR:
-								this.tree[1].delete(key);
-								break;
-
-							case DIRECTOR:
-								this.tree[2].delete(key);
-								break;
-
-							case CAST:
-								this.tree[3].delete(key);
-								break;
-
-							case VOTES:
-								this.tree[4].delete(key);
-								break;
+							case PERSON:
+								return this.treePerson.delete(key);
 
 							default:
 								System.err.println("doOn() default case: aborting");	
@@ -267,25 +258,15 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 			case HashIndirizzamentoAperto: 
 				switch (op) {
 					case INSERT:
+						KeyValueElement entry = new KeyValueElement(key, data);
+
 						switch (type) {
-							case TITLE:
-								this.table[0].insert(element);
+							case MOVIE:
+								this.tableMovie.insert(entry);
 								break;
 
-							case YEAR:
-								this.table[1].insert(element);
-								break;
-
-							case DIRECTOR:
-								this.table[2].insert(element);
-								break;
-
-							case CAST:
-								this.table[3].insert(element);
-								break;
-
-							case VOTES:
-								this.table[4].insert(element);
+							case PERSON:
+								this.tablePerson.insert(entry);
 								break;
 
 							default:
@@ -297,25 +278,11 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 
 					case SEARCH:
 						switch (type) {
-							case TITLE:
-								return this.table[0].search(key);
-								break;
+							case MOVIE:
+								return this.tableMovie.search(key);
 
-							case YEAR:
-								return this.table[1].search(key);
-								break;
-
-							case DIRECTOR:
-								return this.table[2].search(key);
-								break;
-
-							case CAST:
-								return this.table[3].search(key);
-								break;
-
-							case VOTES:
-								return this.table[4].search(key);
-								break;
+							case PERSON:
+								return this.tablePerson.search(key);
 
 							default:
 								System.err.println("doOn() default case: aborting");	
@@ -326,25 +293,11 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 
 					case DELETE:
 						switch (type) {
-							case TITLE:
-								this.table[0].delete(key);
-								break;
+							case MOVIE:
+								return this.tableMovie.delete(key);
 
-							case YEAR:
-								this.table[1].delete(key);
-								break;
-
-							case DIRECTOR:
-								this.table[2].delete(key);
-								break;
-
-							case CAST:
-								this.table[3].delete(key);
-								break;
-
-							case VOTES:
-								this.table[4].delete(key);
-								break;
+							case PERSON:
+								return this.tablePerson.delete(key);
 
 							default:
 								System.err.println("doOn() default case: aborting");	
@@ -365,7 +318,7 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		return null;
 	}
 
-	private Person[] parseCast(String tmpCast) {
+	private static Person[] parseCast(String tmpCast) {
 		// Parsing Cast keys because of many Person (people).
 		String[] splitting = tmpCast.split(", ");
 		// Person (people) are one more than comma characters.
@@ -382,22 +335,36 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		return cast;
 	}
 
-	// TODO: keys have to exist only for Movie(title) and Person(name)? Look at IMovidaDB.
 	public void loadFromFile(File f) throws MovidaFileException {
 		if (null == f)
-			throw new MovidaFileException("Invalid object file");
+			throw new MovidaFileException();
 
+		this.arrayData = new Vector[4];
+
+		List<String> lines;
 		Path path = f.toPath();
-		List<String> lines = Files.readAllLines(path, StandardCharsets.UTF_8);
+		try {
+			lines = Files.readAllLines(path, StandardCharsets.UTF_8);
+		} catch (IOException exception) {
+			throw new MovidaFileException();
+		}
 		Iterator<String> iter = lines.iterator();
 
-		List<Person> people = new LinkedList<Person>();
-		List<Movie> movies = new LinkedList<Movie>();
+		/* Temporary variables to save the strings representing data in the file, while
+		   parsing it. */
+		String title = "";
+		String tmpYear = "";
+		String tmpCast = "";
+		String tmpDirector = "";
 
-		String tmpTitle;
-		String tmpYear;
-		String tmpCast;
-		String tmpDirector;
+		// Map to check the right format of every line.
+		boolean[] boolmap = { false, false, false, false };
+
+		// List to populate arrays of arrayData, in order to keep track of data about movies.
+		LinkedList<PairIntMovie> listYears = new LinkedList<PairIntMovie>();
+		LinkedList<PairIntMovie> listVotes = new LinkedList<PairIntMovie>();
+		LinkedList<PairPersonMovie> listDirectors = new LinkedList<PairPersonMovie>();
+		LinkedList<PairPersonMovie> listActors = new LinkedList<PairPersonMovie>();
 
 		// Parsing every line.
 		while (iter.hasNext()) {
@@ -406,84 +373,120 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 				String[] keys = iter.next().split(": ");
 
 				if (3 != keys.length)
-					throw new MovidaFileException("Invalid file format");
+					throw new MovidaFileException();
 
 				switch (keys[0]) {
 					case "Title":
-						tmpTitle = keys[2];
+						boolmap[0] = true;
+
+						title = keys[2];
 						break;
 
 					case "Year":
+						if (!boolmap[0])
+							throw new MovidaFileException();
+						boolmap[1] = true;
+
 						tmpYear = keys[2];
 						break;
 
 					case "Director":
+						if (!boolmap[1])
+							throw new MovidaFileException();
+						boolmap[2] = true;
+
 						tmpDirector = keys[2];
 						break;
 
 					case "Cast":
+						if (!boolmap[2])
+							throw new MovidaFileException();
+						boolmap[3] = true;
+
 						tmpCast = keys[2];
 						break;
 
 					/* Last case (see Movida file format): inserting a new element in the active
 					   dictionary. */
 					case "Votes":
-						// Decoding strings (keys) into different types for Movie constructor.
-						Integer votes = decode(keys[2]);
-						Integer year = decode(tmpYear);
+						if (!boolmap[3])
+							throw new MovidaFileException();
+						for (int i = 0; boolmap.length > i; ++i)
+							boolmap[i] = false;
+
+						Integer year = Integer.decode(tmpYear);
+						Integer votes = Integer.decode(keys[2]);
+						Person[] cast = parseCast(tmpCast);
 						Person director = new Person(tmpDirector);
-						Person[] cast = this.parseCast(tmpCast);
+						Movie movie = new Movie(title, year, votes, cast, director);
 
-						people.add(director);
-						for (Person p: cast)
-							people.add(p);
+						Movie tmpMovie = (Movie) doOn(DictionaryOperation.DELETE, KeyType.MOVIE, title, null);
+						doOn(DictionaryOperation.INSERT, KeyType.MOVIE, title, movie);
+						doOn(DictionaryOperation.INSERT, KeyType.PERSON, director.getName(), director);
+						for (int i = 0; cast.length > i; ++i)
+							doOn(DictionaryOperation.INSERT, KeyType.PERSON, cast[i].getName(), cast[i]);
 
-						// Movie object inserting.
-						Movie movie = new Movie(tmpTitle, year, votes, cast, director);
-						String[] tmpKey = {tmpTitle, tmpYear, tmpDirector, tmpCast, keys[2]};
-						movies.add(movie);
+						if (null != tmpMovie) {
+							listYears.remove(new PairIntMovie(tmpMovie.getYear(), tmpMovie));
+							listVotes.remove(new PairIntMovie(tmpMovie.getVotes(), tmpMovie));
+							listDirectors.remove(new PairPersonMovie(tmpMovie.getDirector(), tmpMovie));
+							Person[] deletedCast = tmpMovie.getCast();
+							for (int i = 0; deletedCast.length > i; ++i)
+								listActors.remove(new PairPersonMovie(deletedCast[i], tmpMovie));
+						}
 
-						int i = 0;
-						for (KeyType t: KeyType.values()) {
-							// To avoid movies with the same title.
-							if (TITLE == t)
-								this.doOn(DELETE, t, tmpKey[i], null);
-
-							this.doOn(INSERT, t, tmpKey[i++], movie);
+						PairIntMovie yearMovie = new PairIntMovie(year, movie);
+						listYears.add(yearMovie);
+						PairIntMovie votesMovie = new PairIntMovie(votes, movie);
+						listVotes.add(votesMovie);
+						PairPersonMovie directorMovie = new PairPersonMovie(director, movie);
+						listDirectors.add(directorMovie);
+						for (int i = 0; cast.length > i; ++i) {
+							PairPersonMovie actorMovie = new PairPersonMovie(cast[i], movie);
+							listActors.add(actorMovie);
 						}
 						break;
 
 					default:
-						throw new MovidaFileException("Unable to find keys");
-						break;
+						throw new MovidaFileException();
 				}
 			}
 		}
 
-		Person[] arrayP = people.toArray();
-		Movie[] arrayM = movies.toArray();
-		this.arrayPerson = new Vector(arrayP);
-		this.arrayMovie = new Vector(arrayM);
+		this.arrayData[0] = new Vector<PairIntMovie>((PairIntMovie[]) listYears.toArray());
+		this.arrayData[1] = new Vector<PairIntMovie>((PairIntMovie[]) listVotes.toArray());
+		this.arrayData[2] = new Vector<PairPersonMovie>((PairPersonMovie[]) listDirectors.toArray());
+		this.arrayData[3] = new Vector<PairPersonMovie>((PairPersonMovie[]) listActors.toArray());
 	}
 
-	private Bytes[] movieToBytes(Movie movie) {
+	private Byte[] movieToBytes(Movie movie) {
 		String data = "Title: " + movie.getTitle() + "\n";
 		data += "Year: " + movie.getYear().toString() + "\n";
 		data += "Director: " + movie.getDirector().getName() + "\n";
 		//TODO: finish
+		return null;
 	}
 
 	public void saveToFile(File f) {
-		if (null == this.arrayMovie)
-			throw new MovidaFileException("No already uploaded data");
+		switch (this.dictionary) {
+			case ABR:
+				if (null == this.tableMovie)
+					throw new MovidaFileException();
+				break;
+
+			case HashIndirizzamentoAperto:
+				if (null == this.treeMovie)
+					throw new MovidaFileException();
+				break;
+		}
 
 		if (null == f)
-			throw new MovidaFileException("null File object");
+			throw new MovidaFileException();
 
 		Path file = f.toPath();
 
 		if (!Files.isReadable(file) || !Files.isWritable(file))
-			throw new MovidaFileException("Do not have permissions");
+			throw new MovidaFileException();
 	}
 
 	public void clear() {

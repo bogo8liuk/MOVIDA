@@ -28,7 +28,7 @@ public class Vector<T extends Comparable<T>> {
 		for (int i = 0; length > i; ++i) {
 			Random rand = new Random();
 			int j = rand.nextInt(length);
-			swap(this, i, j);
+			swap(this.vector, i, j);
 		}
 	}
 

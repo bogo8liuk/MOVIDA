@@ -12,6 +12,16 @@ public class BinarySearchTree implements Dictionary {
 		private Node leftChild;
 		private Node rightChild;
 
+		private class DeleteReturn {
+			public Node newRoot;
+			public Object returnValue;
+
+			public DeleteReturn(Node root, Object res) {
+				this.newRoot = root;
+				this.returnValue = res;
+			}
+		}
+
 		public Node(KeyValueElement item) {
 			this.entry = item;
 			this.parent = null;
@@ -46,7 +56,11 @@ public class BinarySearchTree implements Dictionary {
 	    private void __insert(KeyValueElement item, Node tree) {
 			Integer diff = item.getKey().compareTo(tree.entry.getKey());
 
-			if (0 >= diff) {
+			// Duplicates not allowed.
+			if (0 == diff)
+				return;
+
+			else if (0 > diff) {
 				if (null == tree.leftChild) {
 					tree.leftChild = new Node(item, tree);
 					return;
@@ -209,12 +223,13 @@ public class BinarySearchTree implements Dictionary {
 		 * if the key exists.
 		 *
 		 * @return The node that took the place of the removed node, if the removed
-		 * node is the root, null otherwise.
+		 * node is the root, null otherwise and the data associated with the deleted
+		 * key, if the latter existed, null otherwise.
 		 *
 		 * @param key The key to delete.
 		 * @param tree Where the key has to be searched and deleted.
 		 */
-		private Node __delete(Comparable key, Node tree) {
+		private DeleteReturn __delete(Comparable key, Node tree) {
 			if (null == tree)
 				return null;
 
@@ -223,8 +238,9 @@ public class BinarySearchTree implements Dictionary {
 
 				if (0 == diff) {
 					Node res = removeLinks(tree);
+					Object value = tree.entry.getValue();
 					tree.entry = null;
-					return (this == tree) ? res : null;
+					return (this == tree) ? new DeleteReturn(res, value) : new DeleteReturn(null, value);
 				}
 
 				else if (0 > diff)
@@ -238,7 +254,7 @@ public class BinarySearchTree implements Dictionary {
 		/**
 		 * See __delete().
 		 */
-		public Node delete(Comparable key) {
+		public DeleteReturn delete(Comparable key) {
 			return __delete(key, this);
 		}
 
@@ -305,7 +321,7 @@ public class BinarySearchTree implements Dictionary {
 		this.root.insert(item);
 	}
 
-	public void delete(Comparable key) {
+	public Object delete(Comparable key) {
 		try {
 			Assert.notNullKey(key);
 		} catch (IllegalArgumentException exception) {
@@ -313,9 +329,17 @@ public class BinarySearchTree implements Dictionary {
 			System.exit(-1);
 		}
 
-		Node newRoot = this.root.delete(key);
-		if (null != newRoot)
-			this.root = newRoot;
+		Node.DeleteReturn res = this.root.delete(key);
+
+		if (null != res) {
+			Node newRoot = res.newRoot;
+			if (null != newRoot)
+				this.root = newRoot;
+
+			return res.returnValue;
+		}
+
+		return null;
 	}
 
 	public void inOrderVisitPrint() {

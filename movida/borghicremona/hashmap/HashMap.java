@@ -127,6 +127,12 @@ public class HashMap implements Dictionary {
                 inserted = true;
                 break;
             }
+
+			// Duplicates not allowed
+			else if (0 == this.table[i].getKey().compareTo(item.getKey())) {
+				inserted = true;
+				break;
+			}
         }
 
         return inserted;
@@ -190,7 +196,7 @@ public class HashMap implements Dictionary {
         }
     }
 
-    public void delete(Comparable key) {
+    public Object delete(Comparable key) {
 		try {
 			Assert.notNullKey(key);
 		} catch (IllegalArgumentException exception) {
@@ -201,17 +207,20 @@ public class HashMap implements Dictionary {
 
         int index = hash((String) key) % this.table.length;
 
-        if (null == this.table[index]) return;
+        if (null == this.table[index]) return null;
 
 		// Linear inspection: every time the inspection gets a collision, the index is incremented by 1
         for (int attempt = 0; this.table.length > attempt; ++attempt) {
             int i = (index + attempt) % this.table.length;
 
             if ((String) this.table[i].getKey() == (String) key) {
+				Object value = this.table[i].getValue();
                 this.table[i] = _DELETED_;
-                break;
+                return value;
             }
         }
+
+		return null;
     }
 
     public void printTable() {
