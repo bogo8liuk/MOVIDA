@@ -4,6 +4,7 @@ import movida.borghicremona.Dictionary;
 import movida.borghicremona.KeyValueElement;
 import movida.borghicremona.Assert;
 import java.lang.Exception;
+import java.util.*;
 
 /**
  * Open addressing hashmap.
@@ -231,4 +232,18 @@ public class HashMap implements Dictionary {
                 System.out.println(i + ": " + this.table[i].getKey());
         }
     }
+	/**
+	*It returns an Array containing only the Values of all the elements in the Hashmap.
+	**/
+	public Object[] toArray() {
+		List<Object> l = new LinkedList<>();
+
+		for (int i = 0; this.table.length > i; ++i) {
+			if (null == this.table[i]) continue;
+		
+			l.add(table[i].getValue());
+		}
+			
+		return l.toArray();
+	}
 }
