@@ -232,18 +232,24 @@ public class HashMap implements Dictionary {
                 System.out.println(i + ": " + this.table[i].getKey());
         }
     }
+
 	/**
-	*It returns an Array containing only the Values of all the elements in the Hashmap.
-	**/
+	 * It gathers all the values in the hashmap in an array.
+	 *
+	 * @return An Object array.
+	 */
 	public Object[] toArray() {
-		List<Object> l = new LinkedList<>();
+		List<Object> l = new LinkedList<Object>();
 
 		for (int i = 0; this.table.length > i; ++i) {
 			if (null == this.table[i]) continue;
 		
 			l.add(table[i].getValue());
 		}
-			
-		return l.toArray();
+
+		if (0 != l.size())
+			return l.toArray();
+		else
+			return null;
 	}
 }
