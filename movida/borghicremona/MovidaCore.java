@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Files;
 import java.nio.charset.*;
+import java.nio.file.StandardOpenOption;
 import java.util.*;
 import movida.commons.*;
 import movida.borghicremona.hashmap.HashMap;
@@ -102,13 +103,21 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 
 	private MapImplementation dictionary;
 	private SortingAlgorithm algorithm;
-	// Arrays of dictionaries to differentiate the types of keys.
+
+	/* Dictionaries for Movie and Person, only one for type (Movie and Person)
+	   has to be active */
 	private HashMap tableMovie;
 	private HashMap tablePerson;
 	private BinarySearchTree treeMovie;
 	private BinarySearchTree treePerson;
+
+	// Arrays to keep track of data about movies
 	private Vector[] arrayData;
+
+	/* Hashmap used to keep track of deleted movies, in order not to consider
+	   data about already deleted movies. */
 	private HashMap deletedMovies;
+
 	private NonOrientedGraph graph;
 
 	public MovidaCore() {
@@ -373,12 +382,6 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		// Map to check the right format of every line.
 		boolean[] boolmap = { false, false, false, false };
 
-		// List to populate arrays of arrayData, in order to keep track of data about movies.
-		LinkedList<PairIntMovie> listYears = new LinkedList<PairIntMovie>();
-		LinkedList<PairIntMovie> listVotes = new LinkedList<PairIntMovie>();
-		LinkedList<PairPersonMovie> listDirectors = new LinkedList<PairPersonMovie>();
-		LinkedList<PairPersonMovie> listActors = new LinkedList<PairPersonMovie>();
-
 		// Parsing every line.
 		while (iter.hasNext()) {
 			String next = iter.next();
@@ -436,37 +439,9 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 						Person director = new Person(tmpDirector);
 						Movie movie = new Movie(title, year, votes, cast, director);
 
-						// Insertion of Person and overwriting of Movie in the active dictionary.
-						Movie tmpMovie = (Movie) doOn(DictionaryOperation.DELETE, KeyType.MOVIE, title, null);
+						// Overwriting of Movie in the active dictionary.
+						doOn(DictionaryOperation.DELETE, KeyType.MOVIE, title, null);
 						doOn(DictionaryOperation.INSERT, KeyType.MOVIE, title, movie);
-						doOn(DictionaryOperation.INSERT, KeyType.PERSON, director.getName(), director);
-						for (int i = 0; cast.length > i; ++i)
-							doOn(DictionaryOperation.INSERT, KeyType.PERSON, cast[i].getName(), cast[i]);
-
-						// Removal of data associated with the movie subscribed from the temporary lists.
-						if (null != tmpMovie) {
-							// Temporary variables to call remove() method, since the latter is not static.
-							PairIntMovie tmp = new PairIntMovie();
-							PairPersonMovie tmp1 = new PairPersonMovie();
-
-							tmp.remove(listYears, tmpMovie);
-							tmp.remove(listVotes, tmpMovie);
-							tmp1.remove(listDirectors, tmpMovie);
-							for (int i = 0; tmpMovie.getCast().length > i; ++i)
-								tmp1.remove(listActors, tmpMovie);
-						}
-
-						// Insertion of data associated with the new inserted movie.
-						PairIntMovie yearMovie = new PairIntMovie(year, movie);
-						listYears.add(yearMovie);
-						PairIntMovie votesMovie = new PairIntMovie(votes, movie);
-						listVotes.add(votesMovie);
-						PairPersonMovie directorMovie = new PairPersonMovie(director, movie);
-						listDirectors.add(directorMovie);
-						for (int i = 0; cast.length > i; ++i) {
-							PairPersonMovie actorMovie = new PairPersonMovie(cast[i], movie);
-							listActors.add(actorMovie);
-						}
 						break;
 
 					default:
@@ -475,7 +450,56 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 			}
 		}
 
-		//TODO: remove dictionary of Person all the people deleted from lists. Use toArray() fun.
+		Movie[] movies;
+
+		switch (this.dictionary) {
+			case HashIndirizzamentoAperto:
+				movies = (Movie[]) this.tableMovie.toArray();
+				break;
+
+			case ABR:
+				movies = (Movie[]) this.treeMovie.toArray();
+				break;
+
+			default:
+				throw new MovidaFileException();
+		}
+
+		if (null == movies)
+			return;
+
+		// List to populate arrays of arrayData, in order to keep track of data about movies.
+		LinkedList<PairIntMovie> listYears = new LinkedList<PairIntMovie>();
+		LinkedList<PairIntMovie> listVotes = new LinkedList<PairIntMovie>();
+		LinkedList<PairPersonMovie> listDirectors = new LinkedList<PairPersonMovie>();
+		LinkedList<PairPersonMovie> listActors = new LinkedList<PairPersonMovie>();
+
+		/* Inside this 'for' loop, the dictionary for Person is populated and the arrayData
+		   arrays are filled with data about every Movie in the dictionary as well. */
+		for (int i = 0; movies.length > i; ++i) {
+			Person[] people = movies[i].getCast();
+
+			for (int j = 0; people.length > j; ++j) {
+				String actorName = people[j].getName();
+
+				if (null == doOn(DictionaryOperation.SEARCH, KeyType.PERSON, actorName, null))
+					doOn(DictionaryOperation.INSERT, KeyType.PERSON, actorName, null);
+
+				PairPersonMovie actorMovie = new PairPersonMovie(people[j], movies[i]);
+				listActors.add(actorMovie);
+			}
+
+			String directorName = movies[i].getDirector().getName();
+			if (null == doOn(DictionaryOperation.SEARCH, KeyType.PERSON, directorName, null))
+				doOn(DictionaryOperation.INSERT, KeyType.PERSON, directorName, null);
+
+			PairPersonMovie directorMovie = new PairPersonMovie(movies[i].getDirector(), movies[i]);
+			PairIntMovie yearMovie = new PairIntMovie(movies[i].getYear(), movies[i]);
+			PairIntMovie votesMovie = new PairIntMovie(movies[i].getVotes(), movies[i]);
+			listDirectors.add(directorMovie);
+			listYears.add(yearMovie);
+			listVotes.add(votesMovie);
+		}
 
 		/* These two arrays are temporary used to pass it to toArray(T[]) function, in order
 		   to specify the type of the arrays in which the lists have to be converted */
@@ -487,25 +511,45 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		this.arrayData[3] = new Vector<PairPersonMovie>(listActors.toArray(typeArr1));
 	}
 
-	private Byte[] movieToBytes(Movie movie) {
+	private byte[] movieToBytes(Movie movie) {
+		Person[] cast = movie.getCast();
+
 		String data = "Title: " + movie.getTitle() + "\n";
 		data += "Year: " + movie.getYear().toString() + "\n";
 		data += "Director: " + movie.getDirector().getName() + "\n";
-		//TODO: finish
-		return null;
+		for (int i = 0; cast.length > 0; ++i) {
+			if (0 != i)
+				data += ", ";
+
+			data += cast[i].getName();
+		}
+		data += "\n";
+		data += "Votes: " + movie.getVotes().toString() + "\n";
+		data += "\n";
+
+		return data.getBytes();
 	}
 
 	public void saveToFile(File f) {
+		Movie[] movies;
+
 		switch (this.dictionary) {
 			case ABR:
 				if (null == this.tableMovie)
 					throw new MovidaFileException();
+				else
+					movies = (Movie[]) this.tableMovie.toArray();
 				break;
 
 			case HashIndirizzamentoAperto:
 				if (null == this.treeMovie)
 					throw new MovidaFileException();
+				else
+					movies = (Movie[]) this.treeMovie.toArray();
 				break;
+
+			default:
+				throw new MovidaFileException();
 		}
 
 		if (null == f)
@@ -515,6 +559,16 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 
 		if (!Files.isReadable(file) || !Files.isWritable(file))
 			throw new MovidaFileException();
+
+		if (null == movies)
+			return;
+
+		try {
+			for (int i = 0; movies.length < i; ++i) 
+				Files.write(file, movieToBytes(movies[i]), StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException | UnsupportedOperationException exception) {
+			throw new MovidaFileException();
+		}
 	}
 
 	public void clear() {
