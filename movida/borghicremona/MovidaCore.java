@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.charset.*;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
+import java.lang.RuntimeException;
 import movida.commons.*;
 import movida.borghicremona.hashmap.HashMap;
 import movida.borghicremona.bstree.BinarySearchTree;
@@ -26,6 +27,11 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		SEARCH,
 		DELETE;
 	}
+
+	private final static int YEARS = 0;
+	private final static int VOTES = 1;
+	private final static int DIRECTORS = 2;
+	private final static int ACTORS = 3;
 
 	// Association between a Person and a Movie.
 	private class PairPersonMovie implements Comparable<PairPersonMovie> {
@@ -52,15 +58,6 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 
 		public Movie getMovie() {
 			return this.movie;
-		}
-
-		public void remove(List<PairPersonMovie> list, Movie m) {
-			Iterator<PairPersonMovie> iter = list.listIterator();
-
-			while (iter.hasNext()) {
-				if (iter.next().getMovie() == m)
-					iter.remove();
-			}
 		}
 	}
 
@@ -89,15 +86,6 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 
 		public Movie getMovie() {
 			return this.movie;
-		}
-
-		public void remove(List<PairIntMovie> list, Movie m) {
-			Iterator<PairIntMovie> iter = list.listIterator();
-
-			while (iter.hasNext()) {
-				if (iter.next().getMovie() == m)
-					iter.remove();
-			}
 		}
 	}
 
@@ -345,6 +333,48 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		return null;
 	}
 
+	/**
+	 * It performs toArray() function of the active dictionary implementation, according
+	 * to the requested type of the key (Movie or Person).
+	 *
+	 * @param type The KeyType that characterizes the type of the array to return.
+	 *
+	 * @return The array returned by toArray() function.
+	 *
+	 * @throws RuntimeException In case of there's no active dictionaries or the type of
+	 * the key is invalid.
+	 */
+	private Object[] getArray(KeyType type) throws RuntimeException {
+		switch (this.dictionary) {
+			case HashIndirizzamentoAperto:
+				switch (type) {
+					case MOVIE:
+						return this.tableMovie.toArray();
+
+					case PERSON:
+						return this.tablePerson.toArray();
+
+					default:
+						throw new RuntimeException();
+				}
+
+			case ABR:
+				switch (type) {
+					case MOVIE:
+						return this.treeMovie.toArray();
+
+					case PERSON:
+						return this.treePerson.toArray();
+
+					default:
+						throw new RuntimeException();
+				}
+
+			default:
+				throw new RuntimeException();
+		}
+	}
+
 	private static Person[] parseCast(String tmpCast) {
 		// Parsing Cast keys because of many Person (people).
 		String[] splitting = tmpCast.split(", ");
@@ -440,8 +470,8 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 						Movie movie = new Movie(title, year, votes, cast, director);
 
 						// Overwriting of Movie in the active dictionary.
-						doOn(DictionaryOperation.DELETE, KeyType.MOVIE, title, null);
-						doOn(DictionaryOperation.INSERT, KeyType.MOVIE, title, movie);
+						this.doOn(DictionaryOperation.DELETE, KeyType.MOVIE, title, null);
+						this.doOn(DictionaryOperation.INSERT, KeyType.MOVIE, title, movie);
 						break;
 
 					default:
@@ -452,17 +482,10 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 
 		Movie[] movies;
 
-		switch (this.dictionary) {
-			case HashIndirizzamentoAperto:
-				movies = (Movie[]) this.tableMovie.toArray();
-				break;
-
-			case ABR:
-				movies = (Movie[]) this.treeMovie.toArray();
-				break;
-
-			default:
-				throw new MovidaFileException();
+		try {
+			movies = (Movie[]) this.getArray(KeyType.MOVIE);
+		} catch (RuntimeException exception) {
+			throw new MovidaFileException();
 		}
 
 		if (null == movies)
@@ -482,16 +505,16 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 			for (int j = 0; people.length > j; ++j) {
 				String actorName = people[j].getName();
 
-				if (null == doOn(DictionaryOperation.SEARCH, KeyType.PERSON, actorName, null))
-					doOn(DictionaryOperation.INSERT, KeyType.PERSON, actorName, null);
+				if (null == this.doOn(DictionaryOperation.SEARCH, KeyType.PERSON, actorName, null))
+					this.doOn(DictionaryOperation.INSERT, KeyType.PERSON, actorName, null);
 
 				PairPersonMovie actorMovie = new PairPersonMovie(people[j], movies[i]);
 				listActors.add(actorMovie);
 			}
 
 			String directorName = movies[i].getDirector().getName();
-			if (null == doOn(DictionaryOperation.SEARCH, KeyType.PERSON, directorName, null))
-				doOn(DictionaryOperation.INSERT, KeyType.PERSON, directorName, null);
+			if (null == this.doOn(DictionaryOperation.SEARCH, KeyType.PERSON, directorName, null))
+				this.doOn(DictionaryOperation.INSERT, KeyType.PERSON, directorName, null);
 
 			PairPersonMovie directorMovie = new PairPersonMovie(movies[i].getDirector(), movies[i]);
 			PairIntMovie yearMovie = new PairIntMovie(movies[i].getYear(), movies[i]);
@@ -505,10 +528,10 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		   to specify the type of the arrays in which the lists have to be converted */
 		PairIntMovie[] typeArr = new PairIntMovie[1];
 		PairPersonMovie[] typeArr1 = new PairPersonMovie[1];
-		this.arrayData[0] = new Vector<PairIntMovie>(listYears.toArray(typeArr));
-		this.arrayData[1] = new Vector<PairIntMovie>(listVotes.toArray(typeArr));
-		this.arrayData[2] = new Vector<PairPersonMovie>(listDirectors.toArray(typeArr1));
-		this.arrayData[3] = new Vector<PairPersonMovie>(listActors.toArray(typeArr1));
+		this.arrayData[YEARS] = new Vector<PairIntMovie>(listYears.toArray(typeArr));
+		this.arrayData[VOTES] = new Vector<PairIntMovie>(listVotes.toArray(typeArr));
+		this.arrayData[DIRECTORS] = new Vector<PairPersonMovie>(listDirectors.toArray(typeArr1));
+		this.arrayData[ACTORS] = new Vector<PairPersonMovie>(listActors.toArray(typeArr1));
 	}
 
 	private byte[] movieToBytes(Movie movie) {
@@ -530,26 +553,13 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		return data.getBytes();
 	}
 
-	public void saveToFile(File f) {
+	public void saveToFile(File f) throws MovidaFileException {
 		Movie[] movies;
 
-		switch (this.dictionary) {
-			case ABR:
-				if (null == this.tableMovie)
-					throw new MovidaFileException();
-				else
-					movies = (Movie[]) this.tableMovie.toArray();
-				break;
-
-			case HashIndirizzamentoAperto:
-				if (null == this.treeMovie)
-					throw new MovidaFileException();
-				else
-					movies = (Movie[]) this.treeMovie.toArray();
-				break;
-
-			default:
-				throw new MovidaFileException();
+		try {
+			movies = (Movie[]) getArray(KeyType.MOVIE);
+		} catch(RuntimeException exception) {
+			throw new MovidaFileException();
 		}
 
 		if (null == f)
@@ -557,11 +567,17 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 
 		Path file = f.toPath();
 
-		if (!Files.isReadable(file) || !Files.isWritable(file))
+		if (!Files.isWritable(file))
 			throw new MovidaFileException();
 
-		if (null == movies)
-			return;
+		if (null == movies) {
+			try {
+				Files.write(file, "\n".getBytes(), StandardOpenOption.TRUNCATE_EXISTING);
+				return;
+			} catch (IOException | UnsupportedOperationException exception) {
+				throw new MovidaFileException();
+			}
+		}
 
 		try {
 			for (int i = 0; movies.length < i; ++i) 
@@ -572,61 +588,247 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 	}
 
 	public void clear() {
+		//TODO: verify if dictionary and algorithm can be interchangeable, namely setMap() and setSort() can be called more than once.
+		switch (this.dictionary) {
+			case HashIndirizzamentoAperto:
+				this.tableMovie = new HashMap();
+				this.tablePerson = new HashMap();
+				break;
 
+			case ABR:
+				this.treeMovie = new BinarySearchTree();
+				this.treePerson = new BinarySearchTree();
+				break;
+
+			default:
+				System.err.println("Default clear() case: aborting");
+				System.exit(-1);
+		}
+
+		this.arrayData = null;
+		this.deletedMovies = new HashMap();
+		this.graph = null; // TODO: (?)
 	}
 
 	public int countMovies() {
-		return 1;
+		try {
+			return this.getArray(KeyType.MOVIE).length;
+		} catch (RuntimeException exception) {
+			System.err.println("Invalid set dictionary: aborting");
+			System.exit(-1);
+		}
+
+		// Unreachable.
+		return -1;
 	}
 
 	public int countPeople() {
-		return 1;
+		try {
+			return this.getArray(KeyType.PERSON).length;
+		} catch (RuntimeException exception) {
+			System.err.println("Invalid set dictionary: aborting");
+			System.exit(-1);
+		}
 
+		// Unreachable.
+		return -1;
 	}
 
 	public boolean deleteMovieByTitle(String title) {
-		return true;
+		if (null == title)
+			return false;
 
+		Movie movie = (Movie) this.doOn(DictionaryOperation.DELETE, KeyType.MOVIE, title, null);
+
+		if (null == movie)
+			return false;
+		else {
+			KeyValueElement item = new KeyValueElement(title, null);
+
+			// TODO: remove Person, looking at their collaborations, if they don't attend to other movies, they have to be deleted.
+			this.deletedMovies.insert(item);
+			return true;
+		}
 	}
 
 	public Movie getMovieByTitle(String title) {
-		return null;
+		if (null == title)
+			return null;
 
+		return (Movie) this.doOn(DictionaryOperation.SEARCH, KeyType.MOVIE, title, null);
 	}
 
 	public Person getPersonByName(String name) {
+		if (null == name)
+			return null;
 
-		return null;
+		return (Person) this.doOn(DictionaryOperation.SEARCH, KeyType.PERSON, name, null);
 	}
 
 	public Movie[] getAllMovies() {
+		try {
+			return (Movie[]) this.getArray(KeyType.MOVIE);
+		} catch (RuntimeException exception) {
+			System.err.println("Invalid set dictionary: aborting");
+			System.exit(-1);
+		}
 
+		// Unreachable.
 		return null;
 	}
 
 	public Person[] getAllPeople() {
+		try {
+			return (Person[]) this.getArray(KeyType.PERSON);
+		} catch (RuntimeException exception) {
+			System.err.println("Invalid set dictionary: aborting");
+			System.exit(-1);
+		}
 
+		// Unreachable.
 		return null;
 	}
 
 	public Movie[] searchMoviesByTitle(String title) {
+		if (null == title)
+			return null;
 
-		return null;
+		// No duplicate is allowed, so the array length is 1.
+		Movie[] movies = new Movie[1];
+
+		movies[0] = getMovieByTitle(title);
+		return movies;
+	}
+
+	/**
+	 * It sorts one of the arrays in arrayData, according to a given type of attribute
+	 * of a Movie (year, votes, director, cast).
+	 *
+	 * @param arrayIndex It tells the array to sort.
+	 */
+	private void sort(Integer arrayIndex) {
+		switch (arrayIndex) {
+			case YEARS:
+				switch (this.algorithm) {
+					case SelectionSort:
+						this.arrayData[YEARS].selectionSort();
+						break;
+
+					case QuickSort:
+						this.arrayData[YEARS].quickSort();
+						break;
+
+					default:
+						System.err.println("Sorting doOn() default case: aborting");
+						System.exit(-1);
+				}
+				break;
+
+			case VOTES:
+				switch (this.algorithm) {
+					case SelectionSort:
+						this.arrayData[VOTES].selectionSort();
+						break;
+
+					case QuickSort:
+						this.arrayData[VOTES].quickSort();
+						break;
+						
+					default:
+						System.err.println("Sorting doOn() default case: aborting");
+						System.exit(-1);
+				}
+				break;
+
+			case DIRECTORS:
+				switch (this.algorithm) {
+					case SelectionSort:
+						this.arrayData[DIRECTORS].selectionSort();
+						break;
+
+					case QuickSort:
+						this.arrayData[DIRECTORS].quickSort();
+						break;
+
+					default:
+						System.err.println("Sorting doOn() default case: aborting");
+						System.exit(-1);
+				}
+				break;
+
+			case ACTORS:
+				switch (this.algorithm) {
+					case SelectionSort:
+						this.arrayData[ACTORS].selectionSort();
+						break;
+
+					case QuickSort:
+						this.arrayData[ACTORS].quickSort();
+						
+					default:
+						System.err.println("Sorting doOn() default case: aborting");
+						System.exit(-1);
+				}
+				break;
+
+			default:
+				System.err.println("Sorting doOn() default case: aborting");
+				System.exit(-1);
+		}
 	}
 
 	public Movie[] searchMoviesInYear(Integer year) {
+		if (null == year)
+			return null;
 
-		return null;
+		LinkedList<Movie> list = new LinkedList<Movie>();
+		PairIntMovie[] years = (PairIntMovie[]) this.arrayData[YEARS].getArray();
+
+		for (int i = 0; years.length < i; ++i) {
+			if (year == years[i].getIndex())
+				list.add(years[i].getMovie());
+		}
+
+		if (0 != list.size())
+			return (Movie[]) list.toArray();
+		else
+			return null;
 	}
 
 	public Movie[] searchMoviesDirectedBy(String name) {
+		if (null == name)
+			return null;
 
-		return null;
+		LinkedList<Movie> list = new LinkedList<Movie>();
+		PairPersonMovie[] directors = (PairPersonMovie[]) this.arrayData[DIRECTORS].getArray();
+
+		for (int i = 0; directors.length < i; ++i) {
+			if (name == directors[i].getPerson().getName())
+				list.add(directors[i].getMovie());
+		}
+
+		if (0 != list.size())
+			return (Movie[]) list.toArray();
+		else
+			return null;
 	}
 
 	public Movie[] searchMoviesStarredBy(String name) {
+		if (null == name)
+			return null;
 
-		return null;
+		LinkedList<Movie> list = new LinkedList<Movie>();
+		PairPersonMovie[] actors = (PairPersonMovie[]) this.arrayData[ACTORS].getArray();
+
+		for (int i = 0; actors.length < i; ++i) {
+			if (name == actors[i].getPerson().getName())
+				list.add(actors[i].getMovie());
+		}
+
+		if (0 != list.size())
+			return (Movie[]) list.toArray();
+		else
+			return null;
 	}
 
 	public Movie[] searchMostVotedMovies(Integer N) {
