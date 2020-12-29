@@ -341,7 +341,9 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 	 *
 	 * @return The array returned by toArray() function.
 	 *
-	 * @throws RuntimeException In case of there's no active dictionaries or the type of
+	 * @attention The existence of an active dictionary istance is unchecked runtime error.
+	 *
+	 * @throws RuntimeException In case of there's no active dictionary or the type of
 	 * the key is invalid.
 	 */
 	private Object[] getArray(KeyType type) throws RuntimeException {
@@ -375,6 +377,14 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		}
 	}
 
+	/**
+	 * It turns a string representing the set of movie cast according to Movida file
+	 * format into an array of Person.
+	 *
+	 * @param tmpCast The string representing the cast.
+	 *
+	 * @return An array of Person containing all the people inside tmpCast parameter.
+	 */
 	private static Person[] parseCast(String tmpCast) {
 		// Parsing Cast keys because of many Person (people).
 		String[] splitting = tmpCast.split(", ");
@@ -391,7 +401,7 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		if (null == f)
 			throw new MovidaFileException();
 
-		this.arrayData = new Vector[4];
+		this.arrayData = { null, null, null, null };
 
 		List<String> lines;
 		Path path = f.toPath();
@@ -534,7 +544,62 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		this.arrayData[ACTORS] = new Vector<PairPersonMovie>(listActors.toArray(typeArr1));
 	}
 
-	private byte[] movieToBytes(Movie movie) {
+	/**
+	 * It checks the existence of a dictionary istance for Movie or for Person.
+	 *
+	 * @param type The key type of the dictionary to check (Movie or Person).
+	 *
+	 * @return true If there is an active dictionary istance, false otherwise.
+	 *
+	 * @attention The type of the active dictionary is a checked runtime error.
+	 */
+	private boolean movieDictIstanceExist(KeyType type) {
+		if (null == this.dictionary)
+			return false;
+		else {
+			switch (type) {
+				case MOVIE:
+					switch (this.dictionary) {
+						case HashIndirizzamentoAperto:
+							return (null == this.tableMovie) ? false : true;
+
+						case ABR:
+							return (null == this.treeMovie) ? false : true;
+
+						default:
+							System.err.println("Unavailable or invalid type of dictionary: aborting");
+							System.exit(-1);
+					}
+					break;
+
+				case PERSON:
+					switch (this.dictionary) {
+						case HashIndirizzamentoAperto:
+							return (null == this.tablePerson) ? false : true;
+
+						case ABR:
+							return (null == this.treePerson) ? false : true;
+
+						default:
+							System.err.println("Unavailable or invalid type of dictionary: aborting");
+							System.exit(-1);
+					}
+					break;
+			}
+		}
+
+		// Unreachable: to quiet the compiler.
+		return false;
+	}
+
+	/**
+	 * It turns the data of a Movie into an array of bytes according to Movida file format.
+	 *
+	 * @param movie The Movie object to convert.
+	 *
+	 * @return An array of bytes containing all the data about the movie parameter.
+	 */
+	private static byte[] movieToBytes(Movie movie) {
 		Person[] cast = movie.getCast();
 
 		String data = "Title: " + movie.getTitle() + "\n";
@@ -555,6 +620,9 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 
 	public void saveToFile(File f) throws MovidaFileException {
 		Movie[] movies;
+
+		if (!this.movieDictIstanceExist(KeyType.MOVIE))
+			throw new MovidaFileException();
 
 		try {
 			movies = (Movie[]) getArray(KeyType.MOVIE);
@@ -611,6 +679,11 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 	}
 
 	public int countMovies() {
+		if (!this.movieDictIstanceExist(KeyType.MOVIE)) {
+			System.err.println("Dictionary not set: aborting");
+			System.exit(-1);
+		}
+
 		try {
 			return this.getArray(KeyType.MOVIE).length;
 		} catch (RuntimeException exception) {
@@ -623,6 +696,11 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 	}
 
 	public int countPeople() {
+		if (!this.movieDictIstanceExist(KeyType.PERSON)) {
+			System.err.println("Dictionary not set: aborting");
+			System.exit(-1);
+		}
+
 		try {
 			return this.getArray(KeyType.PERSON).length;
 		} catch (RuntimeException exception) {
@@ -635,6 +713,11 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 	}
 
 	public boolean deleteMovieByTitle(String title) {
+		if (!this.movieDictIstanceExist(KeyType.MOVIE)) {
+			System.err.println("Dictionary not set: aborting");
+			System.exit(-1);
+		}
+
 		if (null == title)
 			return false;
 
@@ -652,6 +735,11 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 	}
 
 	public Movie getMovieByTitle(String title) {
+		if (!this.movieDictIstanceExist(KeyType.MOVIE)) {
+			System.err.println("Dictionary not set: aborting");
+			System.exit(-1);
+		}
+
 		if (null == title)
 			return null;
 
@@ -659,6 +747,11 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 	}
 
 	public Person getPersonByName(String name) {
+		if (!this.movieDictIstanceExist(KeyType.PERSON)) {
+			System.err.println("Dictionary not set: aborting");
+			System.exit(-1);
+		}
+
 		if (null == name)
 			return null;
 
@@ -666,6 +759,11 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 	}
 
 	public Movie[] getAllMovies() {
+		if (!this.movieDictIstanceExist(KeyType.MOVIE)) {
+			System.err.println("Dictionary not set: aborting");
+			System.exit(-1);
+		}
+
 		try {
 			return (Movie[]) this.getArray(KeyType.MOVIE);
 		} catch (RuntimeException exception) {
@@ -678,6 +776,11 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 	}
 
 	public Person[] getAllPeople() {
+		if (!this.movieDictIstanceExist(KeyType.PERSON)) {
+			System.err.println("Dictionary not set: aborting");
+			System.exit(-1);
+		}
+
 		try {
 			return (Person[]) this.getArray(KeyType.PERSON);
 		} catch (RuntimeException exception) {
@@ -696,7 +799,7 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		// No duplicate is allowed, so the array length is 1.
 		Movie[] movies = new Movie[1];
 
-		movies[0] = getMovieByTitle(title);
+		movies[0] = this.getMovieByTitle(title);
 		return movies;
 	}
 
@@ -719,7 +822,7 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 						break;
 
 					default:
-						System.err.println("Sorting doOn() default case: aborting");
+						System.err.println("sort() default case: aborting");
 						System.exit(-1);
 				}
 				break;
@@ -735,7 +838,7 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 						break;
 						
 					default:
-						System.err.println("Sorting doOn() default case: aborting");
+						System.err.println("sort() default case: aborting");
 						System.exit(-1);
 				}
 				break;
@@ -751,7 +854,7 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 						break;
 
 					default:
-						System.err.println("Sorting doOn() default case: aborting");
+						System.err.println("sort() default case: aborting");
 						System.exit(-1);
 				}
 				break;
@@ -766,19 +869,19 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 						this.arrayData[ACTORS].quickSort();
 						
 					default:
-						System.err.println("Sorting doOn() default case: aborting");
+						System.err.println("sort() default case: aborting");
 						System.exit(-1);
 				}
 				break;
 
 			default:
-				System.err.println("Sorting doOn() default case: aborting");
+				System.err.println("sort() default case: aborting");
 				System.exit(-1);
 		}
 	}
 
 	public Movie[] searchMoviesInYear(Integer year) {
-		if (null == year)
+		if (null == year || null == this.arrayData || null == this.arrayData[YEARS])
 			return null;
 
 		LinkedList<Movie> list = new LinkedList<Movie>();
@@ -796,7 +899,7 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 	}
 
 	public Movie[] searchMoviesDirectedBy(String name) {
-		if (null == name)
+		if (null == name || null == this.arrayData || null == this.arrayData[DIRECTORS])
 			return null;
 
 		LinkedList<Movie> list = new LinkedList<Movie>();
@@ -832,8 +935,18 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 	}
 
 	public Movie[] searchMostVotedMovies(Integer N) {
+		if (null == N || 0 >= N)
+			return null;
 
-		return null;
+		this.sort(VOTES);
+
+		PairIntMovie[] votes = (PairIntMovie[]) this.arrayData[VOTES].getArray();
+		Movie[] mostVotedMovies = new Movie[N];
+
+		for (Integer i = 0; N > i; ++i)
+			mostVotedMovies[i] = votes[i].getMovie();
+
+		return mostVotedMovies;
 	}
 
 	public Movie[] searchMostRecentMovies(Integer N) {
