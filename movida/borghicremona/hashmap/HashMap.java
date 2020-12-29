@@ -2,7 +2,9 @@ package movida.borghicremona.hashmap;
 
 import movida.borghicremona.Dictionary;
 import movida.borghicremona.KeyValueElement;
+import movida.borghicremona.Assert;
 import java.lang.Exception;
+import java.util.*;
 
 /**
  * Open addressing hashmap.
@@ -20,20 +22,6 @@ public class HashMap implements Dictionary {
     private final static KeyValueElement _DELETED_ = new KeyValueElement("_DELETED_", null);
 
 	/**
-	 * If the key has null value, it throws an IllegalArgumentException and it handles it, terminating the process.
-	 *
-	 * @param key Value to check
-	 */
-	private static void __assertNotNullKey(Comparable key) {
-        try {
-            if (null == key) throw new IllegalArgumentException("Cannot have an empty key");
-        } catch (IllegalArgumentException exception) {
-            System.err.println(exception.getMessage());
-			System.exit(-1);
-        }
-	}
-
-	/**
 	 * If the key has a value equal to _DELETED_ label, it throws an IllegalArgumentException and it handles it,
 	 * terminating the process.
 	 *
@@ -44,16 +32,23 @@ public class HashMap implements Dictionary {
 	 */
 	private static void __assertNotDeletedKey(Comparable key) {
         try {
-            if ("_DELETED_" == (String) key) throw new IllegalArgumentException("Illegal key");
+            if ("_DELETED_" == (String) key) throw new IllegalArgumentException("Illegal key: aborting");
         } catch (IllegalArgumentException exception) {
             System.err.println(exception.getMessage());
 			System.exit(-1);
         }
 	}
 
+	/**
+	 * It initializes the table with a default size of 20 elements.
+	 */
+	public HashMap() {
+		this.table = new KeyValueElement[20];
+	}
+
     public HashMap(int length) {
         try {
-            if (0 >= length) throw new IllegalArgumentException("Cannot have a negative length");
+            if (0 >= length) throw new IllegalArgumentException("Cannot have a negative length: aborting");
         } catch (IllegalArgumentException exception) {
             System.err.println(exception.getMessage());
 			System.exit(-1);
@@ -68,7 +63,12 @@ public class HashMap implements Dictionary {
     }
 
     public static int hash(String key) {
-		__assertNotNullKey(key);
+		try {
+			Assert.notNullKey(key);
+		} catch (IllegalArgumentException exception) {
+			System.err.println(exception.getMessage() + ": aborting");
+			System.exit(-1);
+		}
 
         int h = HASH;
 
@@ -81,27 +81,29 @@ public class HashMap implements Dictionary {
         return h;
     }
 
-    public boolean search(Comparable key) {
-		__assertNotNullKey(key);
+    public Object search(Comparable key) {
+		try {
+			Assert.notNullKey(key);
+		} catch (IllegalArgumentException exception) {
+			System.err.println(exception.getMessage() + ": aborting");
+			System.exit(-1);
+		}
 		__assertNotDeletedKey(key);
 
         int index = hash((String) key) % this.table.length;
-        boolean found = false;
 
 		// Linear inspection: every time the inspection gets a collision, the index is incremented by 1.
         for (int attempt = 0; this.table.length > attempt; ++attempt) {
             int i = (index + attempt) % this.table.length;
 
-            if (null == this.table[i]) {
-                break;
-            }
-            else if ((String) this.table[i].getKey() == (String) key) {
-                found = true;
-                break;
-            }
+            if (null == this.table[i])
+				return null;
+
+            else if ((String) this.table[i].getKey() == (String) key)
+				return this.table[i].getValue();
         }
 
-        return found;
+        return null;
     }
 
 	/**
@@ -126,11 +128,17 @@ public class HashMap implements Dictionary {
                 inserted = true;
                 break;
             }
+
+			// Duplicates not allowed
+			else if (0 == this.table[i].getKey().compareTo(item.getKey())) {
+				inserted = true;
+				break;
+			}
         }
 
         return inserted;
     }
-  
+
 	/**
 	 * It moves the items of an old hashmap in a new bigger (in size) one.
 	 *
@@ -165,7 +173,18 @@ public class HashMap implements Dictionary {
     }
 
     public void insert(KeyValueElement item) {
-		__assertNotNullKey(item.getKey());
+		try {
+			Assert.notNullData(item);
+		} catch (IllegalArgumentException exception) {
+			System.err.println(exception.getMessage() + ": aborting");
+			System.exit(-1);
+		}
+		try {
+			Assert.notNullKey(item.getKey());
+		} catch (IllegalArgumentException exception) {
+			System.err.println(exception.getMessage() + ": aborting");
+			System.exit(-1);
+		}
 		__assertNotDeletedKey(item.getKey());
 
         int index = hash((String) item.getKey()) % this.table.length;
@@ -178,23 +197,31 @@ public class HashMap implements Dictionary {
         }
     }
 
-    public void delete(Comparable key) {
-		__assertNotNullKey(key);
+    public Object delete(Comparable key) {
+		try {
+			Assert.notNullKey(key);
+		} catch (IllegalArgumentException exception) {
+			System.err.println(exception.getMessage() + ": aborting");
+			System.exit(-1);
+		}
 		__assertNotDeletedKey(key);
 
         int index = hash((String) key) % this.table.length;
 
-        if (null == this.table[index]) return;
+        if (null == this.table[index]) return null;
 
 		// Linear inspection: every time the inspection gets a collision, the index is incremented by 1
         for (int attempt = 0; this.table.length > attempt; ++attempt) {
             int i = (index + attempt) % this.table.length;
 
             if ((String) this.table[i].getKey() == (String) key) {
+				Object value = this.table[i].getValue();
                 this.table[i] = _DELETED_;
-                break;
+                return value;
             }
         }
+
+		return null;
     }
 
     public void printTable() {
@@ -205,4 +232,24 @@ public class HashMap implements Dictionary {
                 System.out.println(i + ": " + this.table[i].getKey());
         }
     }
+
+	/**
+	 * It gathers all the values in the hashmap in an array.
+	 *
+	 * @return An Object array.
+	 */
+	public Object[] toArray() {
+		List<Object> l = new LinkedList<Object>();
+
+		for (int i = 0; this.table.length > i; ++i) {
+			if (null == this.table[i]) continue;
+		
+			l.add(table[i].getValue());
+		}
+
+		if (0 != l.size())
+			return l.toArray();
+		else
+			return null;
+	}
 }

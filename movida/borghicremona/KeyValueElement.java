@@ -17,4 +17,8 @@ public class KeyValueElement {
     public Comparable getKey() {
         return this.key;
     }
+
+	public Object getValue() {
+		return this.data;
+	}
 }
