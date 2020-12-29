@@ -13,6 +13,9 @@ public class BinarySearchTree implements Dictionary {
 		private Node leftChild;
 		private Node rightChild;
 
+		/* Instances of this class are needed to change the root of a tree
+		   in particular cases of deletion (for instance when, after a delete
+		   operation, the deleted node is the root). */
 		private class DeleteReturn {
 			public Node newRoot;
 			public Object returnValue;
@@ -162,7 +165,8 @@ public class BinarySearchTree implements Dictionary {
 		}
 
 		/**
-		 * It removes all the links of a node within a Node.
+		 * It removes all the links of a node, updating the state of tree in order to
+		 * the latter continues to be a binary search tree.
 		 *
 		 * @param node The node from which every links have to be removed.
 		 *
@@ -175,35 +179,46 @@ public class BinarySearchTree implements Dictionary {
 		private Node removeLinks(Node node) {
 			Node parent = node.parent;
 
+			// case no child.
 			if (null == node.leftChild && null == node.rightChild) {
 				updateChild(parent, node, null);
 				return node;
 			}
 
+			// case one child: the right one.
 			else if (null == node.leftChild) {
 				moveParentLink(parent, node, node.rightChild);
 				return node.rightChild;
 			}
 
+			// case one child: the left one.
 			else if (null == node.rightChild) {
 				moveParentLink(parent, node, node.leftChild);
 				return node.leftChild;
 			}
 
+			// case two children.
 			else {
 				Node predecessor = predecessor(node);
 
-				//TODO: docs of this part
+				/* The eventual father of the deleted root takes the predecessor as
+				   a new child in place of the deleted root. The predecessor must
+				   exist because the deleted root have two children for hypothesis. */
 				updateChild(parent, node, predecessor);
 				if (node != predecessor.parent)
 					predecessor.parent.rightChild = predecessor.leftChild;
 				predecessor.parent = parent;
 
+				/* The predecessor has to take the left child of the deleted root as
+				   his new left child, if the predecessor is not the left child of the
+				   deleted root. */
 				if (predecessor != node.leftChild) {
 					predecessor.leftChild = node.leftChild;
 					node.leftChild.parent = predecessor;
 				}
 
+				/* The predecessor has to take the right child of the deleted root as
+				   his new right child. */
 				predecessor.rightChild = node.rightChild;
 				node.rightChild.parent = predecessor;
 
@@ -230,6 +245,9 @@ public class BinarySearchTree implements Dictionary {
 				Integer diff = key.compareTo(tree.entry.getKey());
 
 				if (0 == diff) {
+					/* If the deleted node is the root, then it will be returned in order to
+					   notify the client that uses this function that the root has been deleted
+					   and it must be updated, else null is returned. */
 					Node res = removeLinks(tree);
 					Object value = tree.entry.getValue();
 					tree.entry = null;
@@ -327,6 +345,7 @@ public class BinarySearchTree implements Dictionary {
 
 		if (null != res) {
 			Node newRoot = res.newRoot;
+			// If the deleted node is root of the tree, then the root must be updated.
 			if (null != newRoot)
 				this.root = newRoot;
 
@@ -340,6 +359,11 @@ public class BinarySearchTree implements Dictionary {
 		this.root.__inOrderVisitPrint(this.root);
 	}
 
+	/**
+	 * It returns an array populated with the objects in the tree.
+	 *
+	 * @return An array of Object.
+	 */
 	public Object[] toArray() {
 		List<Object> l = new LinkedList<Object>();
 
