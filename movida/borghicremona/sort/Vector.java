@@ -2,6 +2,8 @@ package movida.borghicremona.sort;
 
 import java.util.Random;
 
+/* Class that encapsulates an array of Comparable and it offers methods to perform sorting
+   and shuffling on the array. */
 public class Vector<T extends Comparable<T>> {
 	private T[] vector;
 
@@ -16,12 +18,24 @@ public class Vector<T extends Comparable<T>> {
 		this.vector = array;
 	}
 
+	/**
+	 * It swaps two elements in an array.
+	 *
+	 * @param array Array where the swapping has to be performed.
+	 * @param index1 Index of the first element to swap.
+	 * @param index2 Index of the second element to swap.
+	 *
+	 * @attention The validity of the two indexes is an unchecked runtime error.
+	 */
 	private void swap(T[] array, Integer index1, Integer index2) {
 		T tmp = array[index1];
 		array[index1] = array[index2];
 		array[index2] = tmp;
 	}
 
+	/**
+	 * It performs a pseudo-casual shuffling.
+	 */
 	public void shuffle() {
 		Integer length = this.vector.length;
 
@@ -32,17 +46,37 @@ public class Vector<T extends Comparable<T>> {
 		}
 	}
 
+	/**
+	 * It performs the selection sort algorithm.
+	 */
 	public void selectionSort() {
 		for (int i = 0; this.vector.length - 1 > i; ++i) {
 			int minIndex = i;
+
 			for (int j = i + 1; this.vector.length > j; ++j) {
 				if (this.vector[minIndex].compareTo(this.vector[j]) > 0)
 					minIndex = j;
 			}
+
 			swap(this.vector, minIndex, i);
 		}
 	}
 
+	/**
+	 * It increments an index within an array until the indexed element is less than a
+	 * specific element in an array.
+	 *
+	 * @param array The array of reference.
+	 * @param toShift The index to increment.
+	 * @param rightExtreme The index that toShift has not to come over.
+	 * @param pivot The element to compare every time with the toShift-th element.
+	 *
+	 * @return The new value of the incremented index.
+	 *
+	 * @attention The validity of the indexes in an unchecked runtime error.
+	 * @attention The validity and the existence of the pivot in the array is an
+	 * unchecked runtime error.
+	 */
 	private Integer rightShift(T[] array, Integer toShift, Integer rightExtreme, T pivot) {
 		do {
 			++toShift;
@@ -51,6 +85,20 @@ public class Vector<T extends Comparable<T>> {
 		return toShift;
 	}
 
+	/**
+	 * It decrements an index within an array until the indexed element is greater than a
+	 * specific element in an array.
+	 *
+	 * @param array The array of reference.
+	 * @param toShift The index to decrement.
+	 * @param pivot The element to compare every time with the toShift-th element.
+	 *
+	 * @return The new value of the decremented index.
+	 *
+	 * @attention The validity of the index in an unchecked runtime error.
+	 * @attention The validity and the existence of the pivot in the array is an
+	 * unchecked runtime error.
+	 */
 	private Integer leftShift(T[] array, Integer toShift, T pivot) {
 		do {
 			--toShift;
@@ -59,11 +107,25 @@ public class Vector<T extends Comparable<T>> {
 		return toShift;
 	}
 
+	/**
+	 * It moves the elements within the two indexes of an array in order to have all the
+	 * elements less than a specific element to its "left" and the greater elements to its
+	 * "right".
+	 *
+	 * @param array The array where the moving has to be performed.
+	 * @param leftExtreme The first index.
+	 * @param rightExtreme The second index.
+	 *
+	 * @return The index of the element around which the moving has been performed.
+	 *
+	 * @attention The validity of the two indexes is an unchecked runtime error.
+	 */
 	private Integer partition(T[] array, Integer leftExtreme, Integer rightExtreme) {
 		Integer inf = leftExtreme;
 		Integer sup = rightExtreme + 1;
 
 		while (inf < sup) {
+			// Pivot chosed at the first position.
 			inf = rightShift(array, inf, rightExtreme, array[leftExtreme]);
 			sup = leftShift(array, sup, array[leftExtreme]);
 			if (inf < sup)
@@ -81,6 +143,9 @@ public class Vector<T extends Comparable<T>> {
 		__quickSort(array, edge + 1, rightExtreme);
 	}
 
+	/**
+	 * It performs the quick sort algorithm.
+	 */
 	public void quickSort() {
 		__quickSort(this.vector, 0, this.vector.length - 1);
 	}

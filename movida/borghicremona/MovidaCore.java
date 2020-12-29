@@ -387,12 +387,12 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 	 */
 	private static Person[] parseCast(String tmpCast) {
 		// Parsing Cast keys because of many Person (people).
-		String[] splitting = tmpCast.split(", ");
+		String[] splitting = tmpCast.split(",");
 		// Person (people) are one more than comma characters.
 		Person[] cast = new Person[splitting.length];
 
 		for (int i = 0; splitting.length > i; ++i)
-			cast[i] = new Person(splitting[i]);
+			cast[i] = new Person(splitting[i].trim());
 
 		return cast;
 	}
@@ -401,6 +401,7 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		if (null == f)
 			throw new MovidaFileException();
 
+		// Instantiation of arrayData, namely the arrays containing data about movies.
 		for (int i = 0; this.arrayData.length > i; ++i)
 			this.arrayData[i] = null;
 
@@ -513,6 +514,7 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		for (int i = 0; movies.length > i; ++i) {
 			Person[] people = movies[i].getCast();
 
+			// Cast arranging.
 			for (int j = 0; people.length > j; ++j) {
 				String actorName = people[j].getName();
 
@@ -523,6 +525,7 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 				listActors.add(actorMovie);
 			}
 
+			// Director arranging.
 			String directorName = movies[i].getDirector().getName();
 			if (null == this.doOn(DictionaryOperation.SEARCH, KeyType.PERSON, directorName, null))
 				this.doOn(DictionaryOperation.INSERT, KeyType.PERSON, directorName, null);
@@ -636,9 +639,11 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 
 		Path file = f.toPath();
 
+		// I need to write to the file.
 		if (!Files.isWritable(file))
 			throw new MovidaFileException();
 
+		// If there's no Movie, then write simply a newline, cancelling all the previous lines.
 		if (null == movies) {
 			try {
 				Files.write(file, "\n".getBytes(), StandardOpenOption.TRUNCATE_EXISTING);
@@ -648,11 +653,14 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 			}
 		}
 
-		try {
-			for (int i = 0; movies.length < i; ++i) 
-				Files.write(file, movieToBytes(movies[i]), StandardOpenOption.TRUNCATE_EXISTING);
-		} catch (IOException | UnsupportedOperationException exception) {
-			throw new MovidaFileException();
+		// Lines are overwrited.
+		else {
+			try {
+				for (int i = 0; movies.length < i; ++i) 
+					Files.write(file, movieToBytes(movies[i]), StandardOpenOption.TRUNCATE_EXISTING);
+			} catch (IOException | UnsupportedOperationException exception) {
+				throw new MovidaFileException();
+			}
 		}
 	}
 
@@ -692,7 +700,7 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 			System.exit(-1);
 		}
 
-		// Unreachable.
+		// Unreachable: to quiet the compiler.
 		return -1;
 	}
 
@@ -730,6 +738,7 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 			KeyValueElement item = new KeyValueElement(title, null);
 
 			// TODO: remove Person, looking at their collaborations, if they don't attend to other movies, they have to be deleted.
+			// Insertion of the deleted key in the hashmap in order to keep track of it.
 			this.deletedMovies.insert(item);
 			return true;
 		}
@@ -772,7 +781,7 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 			System.exit(-1);
 		}
 
-		// Unreachable.
+		// Unreachable: to quiet the compiler.
 		return null;
 	}
 
@@ -789,7 +798,7 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 			System.exit(-1);
 		}
 
-		// Unreachable.
+		// Unreachable: to quiet the compiler.
 		return null;
 	}
 
@@ -809,6 +818,8 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 	 * of a Movie (year, votes, director, cast).
 	 *
 	 * @param arrayIndex It tells the array to sort.
+	 *
+	 * @attention The correctness of arrayIndex is a checked runtime error.
 	 */
 	private void sort(Integer arrayIndex) {
 		switch (arrayIndex) {
@@ -875,6 +886,7 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 				}
 				break;
 
+			// Any other integer value is not a valid index for arrayData.
 			default:
 				System.err.println("sort() default case: aborting");
 				System.exit(-1);
@@ -893,11 +905,14 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		LinkedList<Movie> list = new LinkedList<Movie>();
 		PairIntMovie[] years = (PairIntMovie[]) this.arrayData[YEARS].getArray();
 
+		/* Insertion of elements with the year equal to the parameter from the array of
+		   arrayData to the list. */
 		for (int i = 0; years.length < i; ++i) {
 			if (year == years[i].getIndex())
 				list.add(years[i].getMovie());
 		}
 
+		// Conversion of the list in an array.
 		if (0 != list.size())
 			return (Movie[]) list.toArray();
 		else
@@ -916,11 +931,14 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		LinkedList<Movie> list = new LinkedList<Movie>();
 		PairPersonMovie[] directors = (PairPersonMovie[]) this.arrayData[DIRECTORS].getArray();
 
+		/* Insertion of elements with the name equal to the parameter from the array of
+		   arrayData to the list. */
 		for (int i = 0; directors.length < i; ++i) {
 			if (name == directors[i].getPerson().getName())
 				list.add(directors[i].getMovie());
 		}
 
+		// Conversion of the list in an array.
 		if (0 != list.size())
 			return (Movie[]) list.toArray();
 		else
@@ -939,11 +957,14 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		LinkedList<Movie> list = new LinkedList<Movie>();
 		PairPersonMovie[] actors = (PairPersonMovie[]) this.arrayData[ACTORS].getArray();
 
+		/* Insertion of elements with the name equal to the parameter from the array of
+		   arrayData to the list. */
 		for (int i = 0; actors.length < i; ++i) {
 			if (name == actors[i].getPerson().getName())
 				list.add(actors[i].getMovie());
 		}
 
+		// Conversion of the list in an array.
 		if (0 != list.size())
 			return (Movie[]) list.toArray();
 		else
@@ -959,13 +980,17 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		if (null == N || 0 >= N || null == this.arrayData[VOTES])
 			return null;
 
+		// Sorting the array containing data about votes of the movies.
 		this.sort(VOTES);
 
+		/* If N is greater than the number of movies, then length of the returned array must be
+		   equal to the number of movies. */
 		PairIntMovie[] votes = (PairIntMovie[]) this.arrayData[VOTES].getArray();
 		Integer length = (N <= votes.length) ? N : votes.length;
 		Movie[] mostVotedMovies = new Movie[length];
 
-		for (Integer i = 0; length > i; ++i)
+		// Taking the last N movies, because of the hypothesis of the sorted array.
+		for (Integer i = length - 1; 0 < i; ++i)
 			mostVotedMovies[i] = votes[i].getMovie();
 
 		return mostVotedMovies;
@@ -980,12 +1005,16 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		if (null == N || 0 >= N || null == this.arrayData[YEARS])
 			return null;
 
+		// Sorting the array containing data about years of the movies.
 		this.sort(YEARS);
 
+		/* If N is greater than the number of movies, then length of the returned array must be
+		   equal to the number of movies. */
 		PairIntMovie[] years = (PairIntMovie[]) this.arrayData[YEARS].getArray();
 		Integer length = (N <= years.length) ? N : years.length;
 		Movie[] mostRecentMovies = new Movie[length];
 
+		// Taking the first N movies, because of the hypothesis of the sorted array.
 		for (Integer i = 0; length > i; ++i)
 			mostRecentMovies[i] = years[i].getMovie();
 
@@ -1034,6 +1063,8 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		PairPersonMovie[] actors = (PairPersonMovie[]) this.arrayData[ACTORS].getArray();
 		LinkedList<PairIntPerson> list = new LinkedList<PairIntPerson>();
 
+		/* Insertion of people in a list in order to avoid duplicates and keeping track of
+		   all the appearances of every person. */
 		for (int i = 0; actors.length > i; ++i) {
 			Person actor = actors[i].getPerson();
 
@@ -1047,6 +1078,7 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 			list.add(entry);
 		}
 
+		// Construction and sorting of vector with every person and all its occurrences (of the given person).
 		PairIntPerson[] occurrences = (PairIntPerson []) list.toArray();
 		Vector<PairIntPerson> v = new Vector(occurrences);
 
@@ -1064,9 +1096,12 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 				System.exit(-1);
 		}
 
+		/* If N is greater than the number of people, then length of the returned array must be
+		   equal to the number of people. */
 		int length = (N <= occurrences.length) ? N : occurrences.length;
 		Person[] mostActiveActors = new Person[length];
 
+		// Taking the last N elements, because of the hypothesis of the sorted array.
 		for (int i = 0; length > i; ++i)
 			mostActiveActors[i] = occurrences[i].getPerson();
 
