@@ -401,7 +401,8 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		if (null == f)
 			throw new MovidaFileException();
 
-		this.arrayData = { null, null, null, null };
+		for (int i = 0; this.arrayData.length > i; ++i)
+			this.arrayData[i] = null;
 
 		List<String> lines;
 		Path path = f.toPath();
@@ -881,7 +882,12 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 	}
 
 	public Movie[] searchMoviesInYear(Integer year) {
-		if (null == year || null == this.arrayData || null == this.arrayData[YEARS])
+		if (null == this.arrayData) {
+			System.err.println("Dictionary not set: aborting");
+			System.exit(-1);
+		}
+
+		if (null == year || null == this.arrayData[YEARS])
 			return null;
 
 		LinkedList<Movie> list = new LinkedList<Movie>();
@@ -899,7 +905,12 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 	}
 
 	public Movie[] searchMoviesDirectedBy(String name) {
-		if (null == name || null == this.arrayData || null == this.arrayData[DIRECTORS])
+		if (null == this.arrayData) {
+			System.err.println("Dictionary not set: aborting");
+			System.exit(-1);
+		}
+
+		if (null == name || null == this.arrayData[DIRECTORS])
 			return null;
 
 		LinkedList<Movie> list = new LinkedList<Movie>();
@@ -917,7 +928,12 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 	}
 
 	public Movie[] searchMoviesStarredBy(String name) {
-		if (null == name)
+		if (null == this.arrayData) {
+			System.err.println("Dictionary not set: aborting");
+			System.exit(-1);
+		}
+
+		if (null == name || null == this.arrayData[ACTORS])
 			return null;
 
 		LinkedList<Movie> list = new LinkedList<Movie>();
@@ -935,28 +951,126 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 	}
 
 	public Movie[] searchMostVotedMovies(Integer N) {
-		if (null == N || 0 >= N)
+		if (null == this.arrayData) {
+			System.err.println("Dictionary not set: aborting");
+			System.exit(-1);
+		}
+
+		if (null == N || 0 >= N || null == this.arrayData[VOTES])
 			return null;
 
 		this.sort(VOTES);
 
 		PairIntMovie[] votes = (PairIntMovie[]) this.arrayData[VOTES].getArray();
-		Movie[] mostVotedMovies = new Movie[N];
+		Integer length = (N <= votes.length) ? N : votes.length;
+		Movie[] mostVotedMovies = new Movie[length];
 
-		for (Integer i = 0; N > i; ++i)
+		for (Integer i = 0; length > i; ++i)
 			mostVotedMovies[i] = votes[i].getMovie();
 
 		return mostVotedMovies;
 	}
 
 	public Movie[] searchMostRecentMovies(Integer N) {
+		if (null == this.arrayData) {
+			System.err.println("Dictionary not set: aborting");
+			System.exit(-1);
+		}
 
-		return null;
+		if (null == N || 0 >= N || null == this.arrayData[YEARS])
+			return null;
+
+		this.sort(YEARS);
+
+		PairIntMovie[] years = (PairIntMovie[]) this.arrayData[YEARS].getArray();
+		Integer length = (N <= years.length) ? N : years.length;
+		Movie[] mostRecentMovies = new Movie[length];
+
+		for (Integer i = 0; length > i; ++i)
+			mostRecentMovies[i] = years[i].getMovie();
+
+		return mostRecentMovies;
+	}
+
+	// To keep track the number of occurences of a Person in a particular context.
+	private class PairIntPerson implements Comparable<PairIntPerson> {
+		private Integer index;
+		private Person person;
+
+		public PairIntPerson() {
+			this.index = null;
+			this.person = null;
+		}
+
+		public PairIntPerson(Integer i, Person p) {
+			this.index = i;
+			this.person = p;
+		}
+
+		public int compareTo(PairIntPerson w) {
+			return this.index.compareTo(w.index);
+		}
+
+		public Integer getIndex() {
+			return this.index;
+		}
+
+		public Person getPerson() {
+			return this.person;
+		}
 	}
 
 	public Person[] searchMostActiveActors(Integer N) {
+		if (null == this.arrayData) {
+			System.err.println("Dictionary not set: aborting");
+			System.exit(-1);
+		}
 
-		return null;
+		if (null == N || 0 >= N || null == this.arrayData[ACTORS])
+			return null;
+
+		this.sort(ACTORS);
+
+		PairPersonMovie[] actors = (PairPersonMovie[]) this.arrayData[ACTORS].getArray();
+		LinkedList<PairIntPerson> list = new LinkedList<PairIntPerson>();
+
+		for (int i = 0; actors.length > i; ++i) {
+			Person actor = actors[i].getPerson();
+
+			int j = 0;
+			while (actors.length > i && actor == actors[i].getPerson()) {
+				++j;
+				++i;
+			}
+
+			PairIntPerson entry = new PairIntPerson(j, actor);
+			list.add(entry);
+		}
+
+		PairIntPerson[] occurrences = (PairIntPerson []) list.toArray();
+		Vector<PairIntPerson> v = new Vector(occurrences);
+
+		switch (this.algorithm) {
+			case SelectionSort:
+				v.selectionSort();
+				break;
+
+			case QuickSort:
+				v.quickSort();
+				break;
+
+			default:
+				System.err.println("Unavailable or invalid algorithm: aborting");
+				System.exit(-1);
+		}
+
+		int length = (N <= occurrences.length) ? N : occurrences.length;
+		Person[] mostActiveActors = new Person[length];
+
+		for (int i = 0; length > i; ++i)
+			mostActiveActors[i] = occurrences[i].getPerson();
+
+		return mostActiveActors;
 	}
 
 	public Person[] getDirectCollaboratorsOf(Person actor) {
