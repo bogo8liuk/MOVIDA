@@ -1,19 +1,19 @@
 package movida.borghicremona.graph;
 
 public class Arch {
-    private int nodeA;
-    private int nodeB;
+	private Comparable nodeKeyA;
+	private Comparable nodeB;
 
-    public Arch(int nodeA, int nodeB) {
-        this.nodeA = nodeA;
-        this.nodeB = nodeB;
-    }
+	public Arch(Comparable nodeKeyA, Comparable nodeKeyB) {
+		this.nodeA = nodeA;
+		this.nodeB = nodeB;
+	}
 
-    public int[] getArchNodes() {
-        int[] couple = new int[2];
-        couple[0] = this.nodeA;
-        couple[1] = this.nodeB;
-        return couple;    
-    }
+	public Comparable[] getArchNodes() {
+		Comparable[] pair = new Comparable[2];
+		pair[0] = this.nodeA;
+		pair[1] = this.nodeB;
+		return pair;    
+	}
 }
 

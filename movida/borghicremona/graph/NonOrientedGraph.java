@@ -9,7 +9,7 @@ import java.util.*;
 // TODO: We grant that if a node exists(it concerns also the case the node is not empty), his "list" member is instantiated
 
 public class NonOrientedGraph implements Graph {
-    static private class __couple_list {
+    /*static private class __couple_list {
 		public boolean emptyNode;
         public Object value;
         public List<Integer> list;
@@ -23,7 +23,26 @@ public class NonOrientedGraph implements Graph {
 		}
     }
 
-    private __couple_list[] adjacencyList;
+    private __couple_list[] adjacencyList;*/
+
+	static private class PairNodeList {
+		public String nodeKey;
+		public List<String> adjacentNodes;
+
+		public PairNodeList() {
+			this.nodeKey = null;
+			this.adjacentNodes = null;
+		}
+
+		public PairNodeList(String nodeKey, List<String> adjacentNodes) {
+			this.nodeKey = nodeKey;
+			this.adjacentNodes = adjacentNodes;
+		}
+	}
+
+	private PairNodeList[] adjacencyList;
+
+	//TODO: continue from here
 
 	private void __assertNodeExists(int node) {
         try {

@@ -3,27 +3,27 @@ package movida.borghicremona.graph;
 import movida.borghicremona.KeyValueElement;
 
 public interface Graph {
-    public int nodesNumber();
+	public int nodesNumber();
    
-    public int archsNumber();
+	public int archsNumber();
 
-    public int grade(int node);
- 
-    public Arch[] incidentArchs(int node);
+	public int grade(Comparable nodeKey);
 
-    public int[] edges(Arch arch);
+	public Arch[] incidentArchs(Comparable nodeKey);
 
-    public int opposite(int node, Arch arch);
+	public Comparable[] edges(Arch arch);
 
-    public boolean areAdjacent(int nodeA, int nodeB);
+	public Comparable opposite(Comparable nodeKey, Arch arch);
 
-    public void addNode(int node, Object data);
+	public boolean areAdjacent(Comparable nodeKeyA, Comparable nodeKeyB);
 
-    public void addArch(int nodeA, int nodeB);
+	public void addNode(KeyValueElement item);
 
-    public void removeNode(int node);
+	public void addArch(Comparable nodeKeyA, Comparable nodeKeyB);
 
-    public void removeArch(Arch arch);
+	public void removeNode(Comparable nodeKey);
+
+	public void removeArch(Arch arch);
 
 	public VisitTree breadthFirstVisit(NodeOperation item, int start);
 }
