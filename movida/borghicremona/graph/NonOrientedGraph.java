@@ -1,6 +1,7 @@
 package movida.borghicremona.graph;
 
 import movida.borghicremona.KeyValueElement;
+import movida.borghicremona.hashmap.HashMap;
 import java.lang.RuntimeException;
 import java.util.*;
 //import java.util.List;
@@ -25,6 +26,7 @@ public class NonOrientedGraph implements Graph {
 
     private __couple_list[] adjacencyList;*/
 
+//TODO: continue from here, use an array of KeyValueElement.
 	static private class PairNodeList {
 		public String nodeKey;
 		public List<String> adjacentNodes;
@@ -42,16 +44,13 @@ public class NonOrientedGraph implements Graph {
 
 	private PairNodeList[] adjacencyList;
 
-	//TODO: continue from here
+	private void __assertNodeExists(String nodeKey) {
+		int index = HashMap.hash(nodeKey);
 
-	private void __assertNodeExists(int node) {
-        try {
-            if (this.adjacencyList.length <= node || 0 > node || this.adjacencyList[node].emptyNode)
-				throw new IllegalArgumentException("Nonexistent node");
-        } catch(IllegalArgumentException exception) {
-            System.err.println(exception.getMessage());
+		for (int i = 0; this.adjacencyList.length < i; ++i) {
+			System.err.println(exception.getMessage());
 			System.exit(-1);
-        }
+		}
 	}
 
 	private void __assertInexistentNode(int node) {
