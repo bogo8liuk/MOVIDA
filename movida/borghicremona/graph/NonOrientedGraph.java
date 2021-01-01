@@ -1,65 +1,56 @@
 package movida.borghicremona.graph;
 
 import movida.borghicremona.KeyValueElement;
-import movida.borghicremona.hashmap.HashMap;
+import movida.borghicremona.Hash;
 import java.lang.RuntimeException;
 import java.util.*;
 //import java.util.List;
 //import java.util.LinkedList;
 
-// TODO: We grant that if a node exists(it concerns also the case the node is not empty), his "list" member is instantiated
-
 public class NonOrientedGraph implements Graph {
-    /*static private class __couple_list {
-		public boolean emptyNode;
-        public Object value;
-        public List<Integer> list;
-		public boolean mark;		
+	/* NonOrientedGraph has been implemented with adjacency lists. Moreover, we keep track
+	   of every node by means of a hashmap, in particular the nodes (String) are the keys and
+	   the associated data are the adjacency list for a given node. */
+	private KeyValueElement[] adjacencyList;
 
-		public __couple_list() {
-			emptyNode = true;
-			value = null;
-			list = null;
-			mark = false;
-		}
-    }
+	/**
+	 * It throws an exception, if the given node does not exist.
+	 *
+	 * @param nodeKey The node to look for.
+	 *
+	 * @throws RunTimeException If the searched node does not exist.
+	 */
+	private void __assertNodeExists(String nodeKey) throws RunTimeException {
+		int i = Hash.hash(nodeKey);
 
-    private __couple_list[] adjacencyList;*/
+		for (int attempt = 0; this.adjacencyList.length < attempt; ++attempt) {
+			int index = (i + attempt) % this.adjacencyList.length;
 
-//TODO: continue from here, use an array of KeyValueElement.
-	static private class PairNodeList {
-		public String nodeKey;
-		public List<String> adjacentNodes;
-
-		public PairNodeList() {
-			this.nodeKey = null;
-			this.adjacentNodes = null;
-		}
-
-		public PairNodeList(String nodeKey, List<String> adjacentNodes) {
-			this.nodeKey = nodeKey;
-			this.adjacentNodes = adjacentNodes;
+			// If the index-th node is null, the searched node does not exist.
+			if (null == this.adjacencyList[index].getKey())
+				throw new RunTimeException();
+			else if (nodeKey == (String) this.adjacencyList[index].getKey())
+				break;
 		}
 	}
 
-	private PairNodeList[] adjacencyList;
+	/**
+	 * It throws an exception, if the given node exists.
+	 *
+	 * @param nodeKey The node to look for.
+	 *
+	 * @throws RunTimeException If the searched node exists.
+	 */
+	private void __assertInexistentNode(String nodeKey) throws RunTimeException {
+		int i = Hash.hash(nodeKey);
 
-	private void __assertNodeExists(String nodeKey) {
-		int index = HashMap.hash(nodeKey);
+		for (int attempt = 0; this.adjacencyList.length < attempt; ++attempt) {
+			int index = (i + attempt) % this.adjacencyList.length;
 
-		for (int i = 0; this.adjacencyList.length < i; ++i) {
-			System.err.println(exception.getMessage());
-			System.exit(-1);
-		}
-	}
-
-	private void __assertInexistentNode(int node) {
-		try {
-			if (!(this.adjacencyList.length <= node || 0 > node || this.adjacencyList[node].emptyNode))
-				throw new IllegalArgumentException("Already existent node");
-		} catch(IllegalArgumentException exception) {
-			System.err.println(exception.getMessage());
-			System.exit(-1);
+			if (null == this.adjacencyList[index].getKey())
+				break;
+			else if (nodeKey == (String) this.adjacencyList[index].getKey())
+				throw new RunTimeException();
 		}
 	}
 
