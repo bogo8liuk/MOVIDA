@@ -15,10 +15,6 @@ import java.util.*;
 public class HashMap implements Dictionary {
     private KeyValueElement[] table;
 
-	// Deafult hash value, necessary for hash function.
-    private final static int HASH = 7;
-    private final static int MAXINT = 2147483647;
-
 	// Label to replace removed elements.
     private final static KeyValueElement _DELETED_ = new KeyValueElement("_DELETED_", null);
 
@@ -32,12 +28,12 @@ public class HashMap implements Dictionary {
 	 * non-checked runtime error.
 	 */
 	private static void __assertNotDeletedKey(Comparable key) {
-        try {
-            if ("_DELETED_" == (String) key) throw new IllegalArgumentException("Illegal key: aborting");
-        } catch (IllegalArgumentException exception) {
-            System.err.println(exception.getMessage());
+		try {
+			if ("_DELETED_" == (String) key) throw new IllegalArgumentException("Illegal key: aborting");
+		} catch (IllegalArgumentException exception) {
+			System.err.println(exception.getMessage());
 			System.exit(-1);
-        }
+		}
 	}
 
 	/**
@@ -48,39 +44,20 @@ public class HashMap implements Dictionary {
 	}
 
     public HashMap(int length) {
-        try {
-            if (0 >= length) throw new IllegalArgumentException("Cannot have a negative length: aborting");
-        } catch (IllegalArgumentException exception) {
-            System.err.println(exception.getMessage());
-			System.exit(-1);
-        }
-
-        this.table = new KeyValueElement[length];
-    }
-
-    public int length() {
-        if (null != table) return this.table.length;
-        else return 0;
-    }
-
-    /*public static int hash(String key) {
 		try {
-			Assert.notNullKey(key);
+			if (0 >= length) throw new IllegalArgumentException("Cannot have a negative length: aborting");
 		} catch (IllegalArgumentException exception) {
-			System.err.println(exception.getMessage() + ": aborting");
+			System.err.println(exception.getMessage());
 			System.exit(-1);
 		}
 
-        int h = HASH;
+		this.table = new KeyValueElement[length];
+	}
 
-        for (int i = 0; i < key.length(); ++i) {
-            h = h * 31 + key.charAt(i);
-			// To avoid overflows
-            if (h < 0) h = (h + MAXINT) + 1;
-        }
-
-        return h;
-    }*/
+	public int length() {
+		if (null != table) return this.table.length;
+		else return 0;
+	}
 
     public Object search(Comparable key) {
 		try {
@@ -107,13 +84,11 @@ public class HashMap implements Dictionary {
         return null;
     }
 
-	
-//TODO: docs
 	/**
-	 * If the table is not full, it inserts an item.
+	 * It inserts an item in a table, if the latter is not full.
 	 *
-	 * @param item the element to insert.
-	 * @param index the starting point of the table for attempting the insertion.
+	 * @param table The table where the insertion has to be performed.
+	 * @param item The element to insert.
 	 *
 	 * @attention Passing an index not calculated with hash function may lead at an inconsistent state.
 	 *
@@ -143,39 +118,6 @@ public class HashMap implements Dictionary {
         return inserted;
     }
 
-	/**
-	 * It moves the items of an old hashmap in a new bigger (in size) one.
-	 *
-	 * @param oldTable previous hashmap containing the items to recalculate.
-	 *
-	 * @attention This function should be invoked only when the length of the hashmap is increased,
-	 * passing the instance of the previous table.
-	 */
-    /*private void rehash(KeyValueElement[] oldTable) {
-        for (int oldIndex = 0; oldTable.length > oldIndex; ++oldIndex) {
-            int index = hash((String) oldTable[oldIndex].getKey()) % this.table.length;
-
-            __insert(oldTable[oldIndex], index);
-        }
-    }*/
-
-	/**
-	 * It increases the length of the hashmap, preserving the state of all the items.
-	 *
-	 * @param quantity value of which the length of the hashmap has to increase.
-	 *
-	 * @attention This function should be called only when the hashmap is full.
-	 */
-    /*private void grow(int quantity) {
-        if (0 >= quantity) return;
-
-        KeyValueElement[] oldTable = this.table;
-        int newLength = this.table.length + quantity;
-        KeyValueElement[] newTable = new KeyValueElement[newLength];
-        this.table = newTable;
-        rehash(oldTable);
-    }*/
-
     public void insert(KeyValueElement item) {
 		try {
 			Assert.notNullData(item);
@@ -189,17 +131,18 @@ public class HashMap implements Dictionary {
 			System.err.println(exception.getMessage() + ": aborting");
 			System.exit(-1);
 		}
+
 		__assertNotDeletedKey(item.getKey());
 
-        boolean inserted = __insert(this.table, item).booleanValue();
+		boolean inserted = __insert(this.table, item).booleanValue();
 
 		// In this case the table is full, so its length must be increased.
-        if (!inserted) {
+		if (!inserted) {
 			Hash.InsertOperation ins = (t, i) -> __insert(t, i);
-            Hash.grow(this.table, ins, 10);
-            insert(item);
-        }
-    }
+			this.table = Hash.grow(this.table, ins, 10);
+			insert(item);
+		}
+	}
 
     public Object delete(Comparable key) {
 		try {
