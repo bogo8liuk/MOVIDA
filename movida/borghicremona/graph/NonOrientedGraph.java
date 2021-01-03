@@ -11,27 +11,35 @@ public class NonOrientedGraph implements Graph {
 	/* NonOrientedGraph has been implemented with adjacency lists. Moreover, we keep track
 	   of every node by means of a hashmap, in particular the nodes (String) are the keys and
 	   the associated data are the adjacency list for a given node. */
-	private KeyValueElement[] adjacencyList;
+	private KeyValueElement[] adjacencyLists;
 
 	/**
 	 * It throws an exception, if the given node does not exist.
 	 *
 	 * @param nodeKey The node to look for.
 	 *
-	 * @throws RunTimeException If the searched node does not exist.
+	 * @throws RuntimeException If the searched node does not exist.
 	 */
-	private void __assertNodeExists(String nodeKey) throws RunTimeException {
+	private void __assertNodeExists(String nodeKey) throws RuntimeException {
 		int i = Hash.hash(nodeKey);
+		boolean found = false;
 
-		for (int attempt = 0; this.adjacencyList.length < attempt; ++attempt) {
-			int index = (i + attempt) % this.adjacencyList.length;
+		for (int attempt = 0; this.adjacencyLists.length < attempt; ++attempt) {
+			int index = (i + attempt) % this.adjacencyLists.length;
 
 			// If the index-th node is null, the searched node does not exist.
-			if (null == this.adjacencyList[index].getKey())
-				throw new RunTimeException();
-			else if (nodeKey == (String) this.adjacencyList[index].getKey())
+			if (null == this.adjacencyLists[index].getKey())
+				throw new RuntimeException();
+			else if (nodeKey == (String) this.adjacencyLists[index].getKey()) {
+				found = true;
 				break;
+			}
 		}
+
+		/* If after the whole table has been scanned the searched node is not found,
+		   then the exception must be thrown. */
+		if (!found)
+			throw new RuntimeException();
 	}
 
 	/**
@@ -39,115 +47,138 @@ public class NonOrientedGraph implements Graph {
 	 *
 	 * @param nodeKey The node to look for.
 	 *
-	 * @throws RunTimeException If the searched node exists.
+	 * @throws RuntimeException If the searched node exists.
 	 */
-	private void __assertInexistentNode(String nodeKey) throws RunTimeException {
+	private void __assertInexistentNode(String nodeKey) throws RuntimeException {
 		int i = Hash.hash(nodeKey);
 
-		for (int attempt = 0; this.adjacencyList.length < attempt; ++attempt) {
-			int index = (i + attempt) % this.adjacencyList.length;
+		for (int attempt = 0; this.adjacencyLists.length < attempt; ++attempt) {
+			int index = (i + attempt) % this.adjacencyLists.length;
 
-			if (null == this.adjacencyList[index].getKey())
+			if (null == this.adjacencyLists[index].getKey())
 				break;
-			else if (nodeKey == (String) this.adjacencyList[index].getKey())
-				throw new RunTimeException();
+			else if (nodeKey == (String) this.adjacencyLists[index].getKey())
+				throw new RuntimeException();
 		}
 	}
 
-	private void __assertArchExists(Arch arch) {
-		int[] couple = arch.getArchNodes();
+	/**
+	 * It throws an exception, if the given arch does not exist.
+	 *
+	 * @param arch The arch to look for.
+	 *
+	 * @throws RuntimeException If the searched arch does not exist
+	 */
+	private void __assertArchExists(Arch arch) throws RuntimeException {
+		String[] archNodes = arch.getArchNodes();
 
-		try {
-			if (this.adjacencyList.length <= couple[0] || 0 > couple[0] || this.adjacencyList[couple[0]].emptyNode)
-				throw new IllegalArgumentException("Nonexistent arch");
+		LinkedList<String> adjList0;
+		boolean found = false;
+		int index = 0;
 
-			boolean found = false;
+		int i = Hash.hash(archNodes[0]);
 
-			for (int n = 0; this.adjacencyList[couple[0]].list.size() > n; ++n) {
-				if (this.adjacencyList[couple[0]].list.get(n) == couple[1]) {
-					found = true;
-					break;
-				}
+		// Looking for the node first node of the arch.
+		for (int attempt = 0; this.adjacencyLists.length < attempt; ++attempt) {
+			index = (i + attempt) % this.adjacencyLists.length;
+
+			if (null == this.adjacencyLists[index].getKey())
+				throw new RuntimeException();
+			else if (archNodes[0] == (String) this.adjacencyLists[index].getKey()) {
+				found = true;
+				break;
 			}
-
-			if (!found) throw new IllegalArgumentException("Nonexistent arch");
-
-		} catch(IllegalArgumentException exception) {
-			System.err.println(exception.getMessage());
-			System.exit(-1);
 		}
-	}
 
-	private void __assertInexistentArch(int nodeA, int nodeB) {
-		try {
-			if (!(this.adjacencyList[nodeA].emptyNode || 0 > nodeA || this.adjacencyList.length <= nodeA)) {
-				if (!(this.adjacencyList[nodeB].emptyNode || 0 > nodeB || this.adjacencyList.length <= nodeB)) {
-					boolean found = false;
+		// If the first node does not exist, even the arch doen not exist.
+		if (!found)
+			throw new RuntimeException();
 
-					Iterator<Integer> iter = this.adjacencyList[nodeA].list.iterator();
-					while (iter.hasNext()) {
-						if (iter.next() == nodeB)
-							throw new IllegalArgumentException("Already existent arch between the two node");
-					}
-				}
-			}
-		} catch (IllegalArgumentException exception) {
-			System.err.println(exception.getMessage());
-			System.exit(-1);
-		}
+		/* If the second node of the arch does not exist in the adjacency list of the first node,
+		   then even the arch does not exist. */
+		adjList0 = (LinkedList<String>) this.adjacencyLists[index].getValue();
+		if (-1 == adjList0.indexOf(archNodes[1]))
+			throw new RuntimeException();
+
+		/* The check must not be carried out on the second node, because we grant that if a node A
+		   stands in an adjacency list of another node B, then A must exist. */
 	}
 
 	public NonOrientedGraph() {
-		this.adjacencyList = new __couple_list[15];
+		// Default number.
+		this.adjacencyLists = new KeyValueElement[20];
 	}
 
-    public int nodesNumber() {
+	public int nodesNumber() {
 		int nodesNumber = 0;
 
-		for (__couple_list k: this.adjacencyList) {
-			if (!k.emptyNode)
+		for (KeyValueElement k: this.adjacencyLists) {
+			if (null != k)
 				++nodesNumber;
 		}
 
 		return nodesNumber;
+	}
+
+	public int archsNumber() {
+		int counter = 0;
+
+		for (KeyValueElement k: this.adjacencyLists)
+			if (null != k) {
+				LinkedList<String> list = (LinkedList<String>) k.getValue();
+				counter += list.size();
+			}
+
+		/* The presence of a node A in the adjacency list of another node B implies that the node B
+		   stands in the adjacency list of the node A, so every node is counted twice. */
+		return counter / 2;
+	}
+
+	public int grade(Comparable nodeKey) {
+		if (null == nodeKey)
+			return -1;
+
+		try {
+			__assertNodeExist((String) nodeKey)
+		} catch (RuntimeException exception) {
+			return -1;
+		}
+
+		int i = Hash.hash((String) nodeKey) % this.adjacencyLists.length;
+
+		LinkedList<String> list = (LinkedList<String>) this.adjacencyLists[i].getValue();
+		return list.size();
     }
 
-    public int archsNumber() {
-        int counter = 0;
+	public Arch[] incidentArchs(Comparable nodeKey) {
+		__assertNodeExists((String) nodeKey);
 
-        for (__couple_list k: this.adjacencyList)
-			if (!k.emptyNode)
-            	counter += k.list.size();
+		int i = Hash.hash((String) nodeKey) % this.adjacencyLists.length;
+		LinkedList<String> list = (LinkedList<String>) this.adjcencyLists[i].getValue();
 
-        return counter / 2;
-    }
+		Arch[] archs = new Arch[list.size()];
 
-    public int grade(int node) {
-		__assertNodeExists(node);
-
-        return this.adjacencyList[node].list.size();
-    }
-
-    public Arch[] incidentArchs(int node) {
-		__assertNodeExists(node);
-
-        Arch[] archs = new Arch[this.adjacencyList[node].list.size()];
-
-        for (int n = 0; this.adjacencyList[node].list.size() > n; ++n) {
-            int opposite = this.adjacencyList[node].list.get(n);
-            Arch arch = new Arch(node, opposite);
-            archs[n] = arch;
-        }
+		int j = 0;
+		Iterator<String> iter = list.iterator();
+		while (iter.hasNext()) {
+			Arch arch = new Arch(nodeKey, iter.next());
+			archs[j++] = arch;
+		}
 
         return archs;
     }
 
-	public int[] edges(Arch arch) {
-		__assertArchExists(arch);
+	public Comparable[] edges(Arch arch) {
+		try {
+			__assertArchExists(arch);
+		} catch (RuntimeException exception) {
+			return null;
+		}
 
 		return arch.getArchNodes();
 	}
 
+//TODO: continue from here
 	public int opposite(int node, Arch arch) {
 		__assertNodeExists(node);
 		__assertArchExists(arch);
