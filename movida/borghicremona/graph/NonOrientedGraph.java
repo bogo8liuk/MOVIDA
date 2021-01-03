@@ -148,13 +148,19 @@ public class NonOrientedGraph implements Graph {
 
 		LinkedList<String> list = (LinkedList<String>) this.adjacencyLists[i].getValue();
 		return list.size();
-    }
+	}
 
 	public Arch[] incidentArchs(Comparable nodeKey) {
+		if (null == nodeKey)
+			return null;
+
 		__assertNodeExists((String) nodeKey);
 
 		int i = Hash.hash((String) nodeKey) % this.adjacencyLists.length;
 		LinkedList<String> list = (LinkedList<String>) this.adjcencyLists[i].getValue();
+
+		if (0 == list.size())
+			return null;
 
 		Arch[] archs = new Arch[list.size()];
 
@@ -166,9 +172,12 @@ public class NonOrientedGraph implements Graph {
 		}
 
         return archs;
-    }
+	}
 
 	public Comparable[] edges(Arch arch) {
+		if (null == arch)
+			return null;
+
 		try {
 			__assertArchExists(arch);
 		} catch (RuntimeException exception) {
@@ -178,56 +187,57 @@ public class NonOrientedGraph implements Graph {
 		return arch.getArchNodes();
 	}
 
-//TODO: continue from here
-	public int opposite(int node, Arch arch) {
-		__assertNodeExists(node);
-		__assertArchExists(arch);
+	public Comparable opposite(Comparable nodeKey, Arch arch) {
+		if (null == nodeKey || null == arch)
+			return null;
 
-		int[] couple = arch.getArchNodes();
-		if (couple[0] == node)
-			return couple[1];
-
-		else if (couple[1] == node)
-			return couple[0];
-
-		else {
-			try {
-				throw new IllegalArgumentException("The node does not belong to the arch");
-			} catch (IllegalArgumentException exception) {
-				System.err.println(exception.getMessage());
-				System.exit(-1);
-			}
-
-			// This is unreachable
-			return -1;
+		/* The check is only on the arch, because if the node does not exist, then
+		   it won't be one of the arch's nodes. */
+		try {
+			__assertArchExists(arch);
+		} catch (RuntimeException exception) {
+			return null;
 		}
+
+		Comparable[] archNodes = arch.getArchNodes();
+		String archNode0 = (String) archNodes[0];
+		String archNode1 = (String) archNodes[1];
+
+		if (archNode0 == (String) nodeKey)
+			return archNode1;
+
+		else if (archNode1 == (String) nodeKey)
+			return archNode0;
+
+		else
+			return null;
 	}
 
-	public boolean areAdjacent(int nodeA, int nodeB) {
-		__assertNodeExists(nodeA);
-		__assertNodeExists(nodeB);
+	public boolean areAdjacent(Comparable nodeKeyA, Comparable nodeKeyB) {
+		if (null == nodeKeyA || null == nodeKeyB)
+			return null;
 
-		int sizeNodeA = this.adjacencyList[nodeA].list.size();
-		int sizeNodeB = this.adjacencyList[nodeB].list.size();
+		Arch arch = new Arch(nodeKeyA, nodeKeyB);
 
-		if (sizeNodeA < sizeNodeB) {
-			for (int n = 0; n < sizeNodeA; ++n) {
-				if (this.adjacencyList[nodeA].list.get(n) == nodeB)
-					return true;
-			}
-
-			return false;
-		} else {
-			for (int n = 0; n < sizeNodeB; ++n) {
-				if (this.adjacencyList[nodeB].list.get(n) == nodeA)
-					return true;
-			}
-
+		try {
+			__assertArchExists(arch);
+		} catch (RuntimeException exception) {
 			return false;
 		}
+
+		/* If no exception has been thrown at this point of the code, then it's assured that
+		   the two nodes are adjacent. */
+		return true;
 	}
 
-	public void addNode(int node, Object data) {
+	private Boolean insertNode(KeyValueElement[] table, KeyValueElement item) {
+		//TODO: continue from here
+	}
+
+	public void addNode(KeyValueElement item) {
+		if (null == item)
+			return;
+
 		__assertInexistentNode(node);
 
 		if (this.adjacencyList.length > node) {
