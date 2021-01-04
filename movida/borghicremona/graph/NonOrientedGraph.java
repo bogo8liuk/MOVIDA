@@ -32,7 +32,7 @@ public class NonOrientedGraph implements Graph {
 	 * @throws RuntimeException If the searched node does not exist.
 	 */
 	private void __assertNodeExists(String nodeKey) throws RuntimeException {
-		int i = Hash.hash(nodeKey);
+		int i = Hash.hash(nodeKey) % this.adjacencyLists.length;
 		boolean found = false;
 
 		for (int attempt = 0; this.adjacencyLists.length < attempt; ++attempt) {
@@ -61,7 +61,7 @@ public class NonOrientedGraph implements Graph {
 	 * @throws RuntimeException If the searched node exists.
 	 */
 	private void __assertInexistentNode(String nodeKey) throws RuntimeException {
-		int i = Hash.hash(nodeKey);
+		int i = Hash.hash(nodeKey) % this.adjacencyLists.length;
 
 		for (int attempt = 0; this.adjacencyLists.length < attempt; ++attempt) {
 			int index = (i + attempt) % this.adjacencyLists.length;
@@ -84,7 +84,7 @@ public class NonOrientedGraph implements Graph {
 		if (null == arch)
 			throw new RuntimeException();
 
-		String[] archNodes = arch.getArchNodes();
+		String[] archNodes = (String[]) arch.getArchNodes();
 
 		if (null == archNodes[0] || null == archNodes[1])
 			throw new RuntimeException();
@@ -93,7 +93,7 @@ public class NonOrientedGraph implements Graph {
 		boolean found = false;
 		int index = 0;
 
-		int i = Hash.hash(archNodes[0]);
+		int i = Hash.hash(archNodes[0]) % this.adjacencyLists.length;
 
 		// Looking for the node first node of the arch.
 		for (int attempt = 0; this.adjacencyLists.length < attempt; ++attempt) {
@@ -204,7 +204,7 @@ public class NonOrientedGraph implements Graph {
 			archs[j++] = arch;
 		}
 
-        return archs;
+		return archs;
 	}
 
 	public Comparable[] edges(Arch arch) {
@@ -279,7 +279,7 @@ public class NonOrientedGraph implements Graph {
 	 * already exists in the key, false otherwise.
 	 */
 	private static Boolean insertNode(KeyValueElement[] table, KeyValueElement item) {
-		int i = Hash.hash((String) item.getKey());
+		int i = Hash.hash((String) item.getKey()) % this.adjacencyLists.length;
 
 		for (int attempt = 0; table.length > attempt; ++attempt) {
 			int index = (i + attempt) % this.adjacencyLists.length;
@@ -324,39 +324,106 @@ public class NonOrientedGraph implements Graph {
 		}
 	}
 
-	public void addArch(int nodeA, int nodeB) {
-		__assertNodeExists(nodeA);
-		__assertNodeExists(nodeB);
-		__assertInexistentArch(nodeA, nodeB);
+	public void addArch(Comparable nodeKeyA, Comparable nodeKeyB) {
+		try {
+			Assert.notNullKey(nodeKeyA);
+			Assert.notNullKey(nodeKeyB);
+		} catch (IllegalArgumentException exception) {
+			System.err.println("Invalid node: aborting");
+			System.exit(-1);
+		}
 
-		this.adjacencyList[nodeA].list.add(nodeB);
-		this.adjacencyList[nodeB].list.add(nodeA);
-	}
+		try {
+			__assertNodeExists(nodeKeyA);
+			__assertNodeExists(nodeKeyB);
+		} catch (RuntimeException exception) {
+			return;
+		}
 
-	private void __removeArch(Integer nodeA, Integer nodeB) {
-		this.adjacencyList[nodeA].list.remove(nodeB);
-		this.adjacencyList[nodeB].list.remove(nodeA);
+		String keyA = (String) nodeKeyA;
+		String keyB = (String) nodeKeyB;
+
+		int a = Hash.hash(keyA) % this.adjacencyLists.length;
+		while (0 != nodeKeyA.compareTo(this.adjacencyLists[a].getKey()))
+			a = (a + 1) % this.adjacencyLists.length;
+
+		int b = Hash.hash(keyB) % this.adjacencyLists.length;
+		while (0 != nodeKeyB.compareTo(this.adjacencyLists[b].getKey()))
+			b = (b + 1) % this.adjacencyLists.length;
+		/* The previous loops are granted to terminate and not to come across a null or _DELETED_ node
+		   because the existence of the two nodes have been already asserted. */
+
+		LinkedList<String> listA = (LinkedList<String>) this.adjacencyLists[a].getValue();
+		LinkedList<String> listB = (LinkedList<String>) this.adjacencyLists[b].getValue();
+
+		// If the arch already exists, then no insertion will be performed.
+		if (-1 == listA.indexOf(b)) {
+			listA.add(b);
+			listB.add(a);
+		}
 	}
 
 	public void removeArch(Arch arch) {
-		__assertArchExists(arch);
+		try {
+			__assertArchExists(arch);
+		} catch (RuntimeException exception) {
+			return;
+		}
 
-		int[] couple = arch.getArchNodes();
-		__removeArch(couple[0], couple[1]);
+		Comparable[] pair = arch.getArchNodes();
+		String key0 = (String) pair[0];
+		String key1 = (String) pair[1];
+
+		int i = Hash.hash(key0) % this.adjacencyLists.length;
+		while (0 != pair[0].compareTo(this.adjacencyLists[i].getKey()))
+			i = (i + 1) % this.adjacencyLists.length;
+
+		int j = Hash.hash(key1) % this.adjacencyLists.length;
+		while (0 != pair[1].compareTo(this.adjacencyLists[j].getKey()))
+			j = (j + 1) % this.adjacencyLists.length;
+
+		LinkedList<String> list0 = (LinkedList<String>) this.adjacencyLists[i].getValue();
+		LinkedList<String> list1 = (LinkedList<String>) this.adjacencyLists[j].getValue();
+
+		list0.remove(key1);
+		list1.remove(key0);
 	}
 
-	public void removeNode(int node) {
-		__assertNodeExists(node);
+	public void removeNode(Comparable nodeKey) {
+		try {
+			Assert.notNullKey(nodeKey);
+		} catch (IllegalArgumentException exception) {
+			System.err.println("Invalid node: aborting");
+			System.exit(-1);
+		}
 
-		Iterator<Integer> iter = this.adjacencyList[node].list.iterator();
+		__assertNodeExists(nodeKey);
 
-		while (iter.hasNext())
-			__removeArch(node, iter.next());
+		int i = Hash.hash((String) nodeKey) % this.adjacencyLists.length;
 
-		this.adjacencyList[node].emptyNode = true;
+		while (0 != nodeKey.compareTo(this.adjacencyLists[i].getKey()))
+			i = (i + 1) % this.adjacencyLists.length;
+
+		LinkedList<String> list = (LinkedList<String>) this.adjacencyLists[i].getValue();
+		Iterator<String> iter = list.iterator();
+
+		/* Deletion of the archs of the node to remove: the adjacency list of every node involved in the
+		   archs has to be modified. */
+		while (iter.hasNext()) {
+			String cur = iter.next();
+
+			int j = Hash.hash(cur) % this.adjacencyLists.length;
+			while (cur != (String) this.adjacencyLists[j].getKey())
+				j = (j + 1) % this.adjacencyLists.length;
+
+			LinkedList<String> curList = (LinkedList<String>) this.adjacencyLists[j].getValue();
+			curList.remove((String) nodeKey);
+		}
+
+		this.adjacencyLists[i] = _DELETED_;
 	}
-	
-	private static void apply(NodeOperation item, int node) {
+
+	/*private static void apply(NodeOperation item, int node) {
 		item.operation(node);
 	}
 	
@@ -397,5 +464,5 @@ public class NonOrientedGraph implements Graph {
 
 	public void depthFirstVisit(NodeOperation item) {
 
-	}
+	}*/
 }
