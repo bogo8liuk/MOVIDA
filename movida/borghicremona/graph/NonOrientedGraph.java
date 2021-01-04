@@ -4,6 +4,7 @@ import movida.borghicremona.KeyValueElement;
 import movida.borghicremona.Hash;
 import movida.borghicremona.Assert;
 import java.lang.RuntimeException;
+import java.lang.IllegalArgumentException;
 import java.util.*;
 //import java.util.List;
 //import java.util.LinkedList;
@@ -17,8 +18,8 @@ public class NonOrientedGraph implements Graph {
 	// Label useful to identify elements that do not stand in the table anymore.
 	private static final KeyValueElement _DELETED_ = new KeyValueElement("_DELETED_", null);
 
-	private static void __assertNotDeletedNode(KeyValueElement item) {
-		if (_DELETED_ == item || "_DELETED_" == (String) item.getKey()) {
+	private static void __assertNotDeletedNode(String nodeKey) {
+		if ("_DELETED_" == nodeKey) {
 			System.err.println("Invalid key: aborting");
 			System.exit(-1);
 		}
@@ -153,16 +154,16 @@ public class NonOrientedGraph implements Graph {
 
 	public int grade(Comparable nodeKey) {
 		try {
-			Assert.notNullKey(nodeKey)
+			Assert.notNullKey(nodeKey);
 		} catch (IllegalArgumentException exception) {
 			System.err.println("Invalid node: aborting");
 			System.exit(-1);
 		}
 
-		__assertNotDeletedKey((String) nodeKey);
+		__assertNotDeletedNode((String) nodeKey);
 
 		try {
-			__assertNodeExist((String) nodeKey)
+			__assertNodeExists((String) nodeKey);
 		} catch (RuntimeException exception) {
 			return -1;
 		}
@@ -175,22 +176,22 @@ public class NonOrientedGraph implements Graph {
 
 	public Arch[] incidentArchs(Comparable nodeKey) {
 		try {
-			Assert.notNullKey(nodeKey)
+			Assert.notNullKey(nodeKey);
 		} catch (IllegalArgumentException exception) {
 			System.err.println("Invalid node: aborting");
 			System.exit(-1);
 		}
 
-		__assertNotDeletedKey((String) nodeKey);
+		__assertNotDeletedNode((String) nodeKey);
 
 		try {
-			__assertNodeExist((String) nodeKey)
+			__assertNodeExists((String) nodeKey);
 		} catch (RuntimeException exception) {
 			return null;
 		}
 
 		int i = Hash.hash((String) nodeKey) % this.adjacencyLists.length;
-		LinkedList<String> list = (LinkedList<String>) this.adjcencyLists[i].getValue();
+		LinkedList<String> list = (LinkedList<String>) this.adjacencyLists[i].getValue();
 
 		if (0 == list.size())
 			return null;
@@ -251,7 +252,7 @@ public class NonOrientedGraph implements Graph {
 		try {
 			Assert.notNullKey(nodeKeyA);
 			Assert.notNullKey(nodeKeyB);
-		} catch (IllegalArgumentExcepiton exception) {
+		} catch (IllegalArgumentException exception) {
 			System.err.println("Invalid node: aborting");
 			System.exit(-1);
 		}
@@ -277,12 +278,14 @@ public class NonOrientedGraph implements Graph {
 	 *
 	 * @return true if the insertion has success or the item has not been inserted because of its key
 	 * already exists in the key, false otherwise.
+	 *
+	 * @attention The allocation of the parameters is an unchecked runtime error.
 	 */
 	private static Boolean insertNode(KeyValueElement[] table, KeyValueElement item) {
-		int i = Hash.hash((String) item.getKey()) % this.adjacencyLists.length;
+		int i = Hash.hash((String) item.getKey()) % table.length;
 
 		for (int attempt = 0; table.length > attempt; ++attempt) {
-			int index = (i + attempt) % this.adjacencyLists.length;
+			int index = (i + attempt) % table.length;
 
 			if (null == table[index] || _DELETED_ == table[index]) {
 				table[index] = item;
@@ -309,7 +312,7 @@ public class NonOrientedGraph implements Graph {
 		KeyValueElement entry = new KeyValueElement(nodeKey, list);
 
 		try {
-			__assertNotDeletedKey(entry);
+			__assertNotDeletedNode((String) nodeKey);
 		} catch (RuntimeException exception) {
 			return;
 		}
@@ -333,15 +336,15 @@ public class NonOrientedGraph implements Graph {
 			System.exit(-1);
 		}
 
+		String keyA = (String) nodeKeyA;
+		String keyB = (String) nodeKeyB;
+
 		try {
-			__assertNodeExists(nodeKeyA);
-			__assertNodeExists(nodeKeyB);
+			__assertNodeExists(keyA);
+			__assertNodeExists(keyB);
 		} catch (RuntimeException exception) {
 			return;
 		}
-
-		String keyA = (String) nodeKeyA;
-		String keyB = (String) nodeKeyB;
 
 		int a = Hash.hash(keyA) % this.adjacencyLists.length;
 		while (0 != nodeKeyA.compareTo(this.adjacencyLists[a].getKey()))
@@ -351,15 +354,15 @@ public class NonOrientedGraph implements Graph {
 		while (0 != nodeKeyB.compareTo(this.adjacencyLists[b].getKey()))
 			b = (b + 1) % this.adjacencyLists.length;
 		/* The previous loops are granted to terminate and not to come across a null or _DELETED_ node
-		   because the existence of the two nodes have been already asserted. */
+		   because the existence of the two nodes has been already asserted. */
 
 		LinkedList<String> listA = (LinkedList<String>) this.adjacencyLists[a].getValue();
 		LinkedList<String> listB = (LinkedList<String>) this.adjacencyLists[b].getValue();
 
 		// If the arch already exists, then no insertion will be performed.
-		if (-1 == listA.indexOf(b)) {
-			listA.add(b);
-			listB.add(a);
+		if (-1 == listA.indexOf(keyB)) {
+			listA.add(keyB);
+			listB.add(keyA);
 		}
 	}
 
@@ -397,7 +400,7 @@ public class NonOrientedGraph implements Graph {
 			System.exit(-1);
 		}
 
-		__assertNodeExists(nodeKey);
+		__assertNodeExists((String) nodeKey);
 
 		int i = Hash.hash((String) nodeKey) % this.adjacencyLists.length;
 

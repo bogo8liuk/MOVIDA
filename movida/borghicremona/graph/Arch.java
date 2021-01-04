@@ -5,8 +5,8 @@ public class Arch {
 	private Comparable nodeKeyB;
 
 	public Arch(Comparable nodeKeyA, Comparable nodeKeyB) {
-		this.nodeKeyA = nodeA;
-		this.nodeKeyB = nodeB;
+		this.nodeKeyA = nodeKeyA;
+		this.nodeKeyB = nodeKeyB;
 	}
 
 	public Comparable[] getArchNodes() {

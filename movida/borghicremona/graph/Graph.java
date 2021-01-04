@@ -25,5 +25,5 @@ public interface Graph {
 
 	public void removeArch(Arch arch);
 
-	public VisitTree breadthFirstVisit(NodeOperation item, int start);
+	//public VisitTree breadthFirstVisit(NodeOperation item, int start);
 }
