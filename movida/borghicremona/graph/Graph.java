@@ -17,7 +17,7 @@ public interface Graph {
 
 	public boolean areAdjacent(Comparable nodeKeyA, Comparable nodeKeyB);
 
-	public void addNode(KeyValueElement item);
+	public void addNode(Comparable item);
 
 	public void addArch(Comparable nodeKeyA, Comparable nodeKeyB);
 

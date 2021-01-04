@@ -140,7 +140,7 @@ public class HashMap implements Dictionary {
 		if (!inserted) {
 			Hash.InsertOperation ins = (t, i) -> __insert(t, i);
 			this.table = Hash.grow(this.table, ins, 10);
-			insert(item);
+			__insert(this.table, item);
 		}
 	}
 
