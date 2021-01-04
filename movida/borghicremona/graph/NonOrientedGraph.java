@@ -6,9 +6,9 @@ import movida.borghicremona.Assert;
 import java.lang.RuntimeException;
 import java.lang.IllegalArgumentException;
 import java.util.*;
-//import java.util.List;
-//import java.util.LinkedList;
 
+/* ATTENTION! This implementation of Graph uses only keys with String type. Using a different
+   type for nodes of the graph may lead to unchecked runtime errors. */
 public class NonOrientedGraph implements Graph {
 	/* NonOrientedGraph has been implemented with adjacency lists. Moreover, we keep track
 	   of every node by means of a hashmap, in particular the nodes (String) are the keys and
@@ -18,6 +18,11 @@ public class NonOrientedGraph implements Graph {
 	// Label useful to identify elements that do not stand in the table anymore.
 	private static final KeyValueElement _DELETED_ = new KeyValueElement("_DELETED_", null);
 
+	/**
+	 * It terminates the program if the key is equal to the one of _DELETED_ label.
+	 *
+	 * @param nodeKey Key to check.
+	 */
 	private static void __assertNotDeletedNode(String nodeKey) {
 		if ("_DELETED_" == nodeKey) {
 			System.err.println("Invalid key: aborting");
