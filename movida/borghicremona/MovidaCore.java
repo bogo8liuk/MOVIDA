@@ -11,7 +11,7 @@ import java.lang.RuntimeException;
 import movida.commons.*;
 import movida.borghicremona.hashmap.HashMap;
 import movida.borghicremona.bstree.BinarySearchTree;
-import movida.borghicremona.graph.NonOrientedGraph;
+import movida.borghicremona.graph.*;
 import movida.borghicremona.sort.Vector;
 
 public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMovidaCollaborations {
@@ -106,7 +106,7 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 	   data about already deleted movies. */
 	private HashMap deletedMovies;
 
-	private NonOrientedGraph graph;
+	private NonOrientedGraph collaborations;
 
 	public MovidaCore() {
 		this.tableMovie = null;
@@ -115,7 +115,7 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		this.treePerson = null;
 		this.arrayData = null;
 		this.deletedMovies = new HashMap();
-		this.graph = null; // TODO: (?)
+		this.collaborations = new NonOrientedGraph();
 		this.dictionary = null;
 		this.algorithm = null;
 	}
@@ -182,7 +182,7 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 
 		this.arrayData = null;
 		this.deletedMovies = new HashMap();
-		this.graph = null; // TODO: (?)
+		this.collaborations = new NonOrientedGraph();
 	}
 
 	public boolean setSort(SortingAlgorithm algorithm) {
@@ -397,6 +397,24 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		return cast;
 	}
 
+	/**
+	 * It inserts nodes corresponding to the people of a cast and archs between these people in the Graph
+	 * istance.
+	 *
+	 * @param cast Elements to insert.
+	 */
+	private void insertCollaboration(Person[] cast) {
+		// First, insertion of every actors.
+		for (int i = 0; cast.length > i; ++i)
+			this.collaborations.addNode(cast[i].getName());
+
+		// Second, insertion of collaborations between every actor.
+		for (int i = 0; cast.length - 1 > i; ++i) {
+			for (int j = i + 1; cast.length > j; ++j)
+				this.collaborations.addArch(cast[i].getName(), cast[j].getName());
+		}
+	}
+
 	public void loadFromFile(File f) throws MovidaFileException {
 		if (null == f)
 			throw new MovidaFileException();
@@ -484,6 +502,9 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 						// Overwriting of Movie in the active dictionary.
 						this.doOn(DictionaryOperation.DELETE, KeyType.MOVIE, title, null);
 						this.doOn(DictionaryOperation.INSERT, KeyType.MOVIE, title, movie);
+
+						// Insertion of collaborations between every actor just parsed.
+						this.insertCollaborations(cast);
 						break;
 
 					default:
@@ -684,7 +705,7 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 
 		this.arrayData = null;
 		this.deletedMovies = new HashMap();
-		this.graph = null; // TODO: (?)
+		this.collaborations = new NonOrientedGraph();
 	}
 
 	public int countMovies() {
@@ -1064,7 +1085,7 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		LinkedList<PairIntPerson> list = new LinkedList<PairIntPerson>();
 
 		/* Insertion of people in a list in order to avoid duplicates and keeping track of
-		   all the appearances of every person. */
+		   all the occurences of every person. */
 		for (int i = 0; actors.length > i; ++i) {
 			Person actor = actors[i].getPerson();
 
@@ -1109,8 +1130,30 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 	}
 
 	public Person[] getDirectCollaboratorsOf(Person actor) {
+		if (null == actor)
+			return null;
 
-		return null;
+		String name = actor.getName();
+		Arch[] directCollaborations = this.collaborations.incidentArchs(name);
+
+		if (null == directCollaborations)
+			return null;
+
+		Person[] collaborators = new Person[directCollaborations.length];
+
+		for (int i = 0; directCollaborations.length > i; ++i) {
+			/* The instantiation of i-th Person object in the array collaborators does not get carried out
+			   directly with the name of the actor, but Person object must be got searched by name in the
+			   dictionary for Person just for a reason of correctness: an existent Person is determined and
+			   got by the search of the Person itself, not by the instantiation from a name, otherwise two
+			   different Person object representing the same actor would be created. */
+			String actorName = (String) this.collaborations.opposite(name, directCollaborations[i]);
+
+			Person actor = (Person) doOn(DictionaryOperation.SEARCH, KeyType.PERSON, actorName, null);
+			collaborators[i] = actor;
+		}
+
+		return collaborators;
 	}
 
 	public Person[] getTeamOf(Person actor) {
