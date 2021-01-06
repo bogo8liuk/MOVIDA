@@ -111,5 +111,16 @@ public interface Graph {
 	 */
 	public void removeArch(Arch arch);
 
-	//public VisitTree breadthFirstVisit(NodeOperation item, int start);
+	/**
+	 * It performs a breadth first visit, namely, from a starting node, it visits every reachable
+	 * node according to an increase of the distance.
+	 *
+	 * @param op The operation to perform on every visited node.
+	 * @param start Starting node.
+	 *
+	 * @return The array of visited nodes.
+	 *
+	 * @attention The check on the validity of parameters is an implementation-defined error.
+	 */
+	public Comparable[] breadthFirstVisit(NodeOperation op, Comparable start);
 }

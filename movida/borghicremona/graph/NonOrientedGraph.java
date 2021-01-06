@@ -127,6 +127,26 @@ public class NonOrientedGraph implements Graph {
 		   stands in an adjacency list of another node B, then A must exist. */
 	}
 
+	/**
+	 * It calculates the index in the table of a node.
+	 *
+	 * @param nodeKey The node from which the index has to be calculated.
+	 *
+	 * @return The index of nodeKey inside the table.
+	 *
+	 * @attention The validity and the existence of nodeKey is an unchecked runtime error.
+	 */
+	private int getIndex(Comparable nodeKey) {
+		int i = Hash.hash((String) nodeKey) % this.adjacencyLists.length;
+
+		/* This loop is granted to terminate and not to encounter a _DELETED_ or null node only in the case
+		   that nodeKey is a valid and existtent node. */
+		while (0 != nodeKey.compareTo(this.adjacencyLists[i].getKey()))
+			i = (i + 1) % this.adjacencyLists.length;
+
+		return i;
+	}
+
 	public NonOrientedGraph() {
 		// Default number.
 		this.adjacencyLists = new KeyValueElement[20];
@@ -351,15 +371,10 @@ public class NonOrientedGraph implements Graph {
 			return;
 		}
 
-		int a = Hash.hash(keyA) % this.adjacencyLists.length;
-		while (0 != nodeKeyA.compareTo(this.adjacencyLists[a].getKey()))
-			a = (a + 1) % this.adjacencyLists.length;
-
-		int b = Hash.hash(keyB) % this.adjacencyLists.length;
-		while (0 != nodeKeyB.compareTo(this.adjacencyLists[b].getKey()))
-			b = (b + 1) % this.adjacencyLists.length;
-		/* The previous loops are granted to terminate and not to come across a null or _DELETED_ node
+		/* These calls are granted to terminate and not to come across a null or _DELETED_ node
 		   because the existence of the two nodes has been already asserted. */
+		int a = this.getIndex(nodeKeyA);
+		int b = this.getIndex(nodeKeyB);
 
 		LinkedList<String> listA = (LinkedList<String>) this.adjacencyLists[a].getValue();
 		LinkedList<String> listB = (LinkedList<String>) this.adjacencyLists[b].getValue();
@@ -382,13 +397,8 @@ public class NonOrientedGraph implements Graph {
 		String key0 = (String) pair[0];
 		String key1 = (String) pair[1];
 
-		int i = Hash.hash(key0) % this.adjacencyLists.length;
-		while (0 != pair[0].compareTo(this.adjacencyLists[i].getKey()))
-			i = (i + 1) % this.adjacencyLists.length;
-
-		int j = Hash.hash(key1) % this.adjacencyLists.length;
-		while (0 != pair[1].compareTo(this.adjacencyLists[j].getKey()))
-			j = (j + 1) % this.adjacencyLists.length;
+		int i = this.getIndex(pair[0]);
+		int j = this.getIndex(pair[1]);
 
 		LinkedList<String> list0 = (LinkedList<String>) this.adjacencyLists[i].getValue();
 		LinkedList<String> list1 = (LinkedList<String>) this.adjacencyLists[j].getValue();
@@ -407,10 +417,7 @@ public class NonOrientedGraph implements Graph {
 
 		__assertNodeExists((String) nodeKey);
 
-		int i = Hash.hash((String) nodeKey) % this.adjacencyLists.length;
-
-		while (0 != nodeKey.compareTo(this.adjacencyLists[i].getKey()))
-			i = (i + 1) % this.adjacencyLists.length;
+		int i = this.getIndex(nodeKey);
 
 		LinkedList<String> list = (LinkedList<String>) this.adjacencyLists[i].getValue();
 		Iterator<String> iter = list.iterator();
@@ -420,9 +427,7 @@ public class NonOrientedGraph implements Graph {
 		while (iter.hasNext()) {
 			String cur = iter.next();
 
-			int j = Hash.hash(cur) % this.adjacencyLists.length;
-			while (cur != (String) this.adjacencyLists[j].getKey())
-				j = (j + 1) % this.adjacencyLists.length;
+			int j = this.getIndex(cur);
 
 			LinkedList<String> curList = (LinkedList<String>) this.adjacencyLists[j].getValue();
 			curList.remove((String) nodeKey);
@@ -431,46 +436,70 @@ public class NonOrientedGraph implements Graph {
 		this.adjacencyLists[i] = _DELETED_;
 	}
 
-	/*private static void apply(NodeOperation item, int node) {
-		item.operation(node);
-	}
-	
-	public VisitTree breadthFirstVisit(NodeOperation item, int start) {
-		__assertNodeExists(start);
+	public Comparable[] breadthFirstVisit(NodeOperation op, Comparable start) {
+		try {
+			Assert.notNullKey(start);
+		} catch (IllegalArgumentException exception) {
+			System.err.println("Invalid node: aborting");
+			System.exit(-1);
+		}
 
-		VisitTree tree = new VisitTree(start);
-		VisitTree currentNode = null;
-		LinkedList<Integer> queue = new LinkedList<Integer>(); 
-		
-		queue.add(start);
-		this.adjacencyList[start].mark = true;
-		
-		while (0 < queue.size()) {
-			Integer n = queue.remove();
-			int node = n.intValue();
-			currentNode = tree.getTree(node);
-			
-			apply(item, node);
-			Iterator<Integer> iter = this.adjacencyList[node].list.iterator();
-			
+		if (null == op) {
+			System.err.println("Invalid operation on nodes: aborting");
+			System.exit(-1);
+		}
+
+		String startNode = (String) start;
+
+		try {
+			__assertNodeExists(startNode);
+		} catch (RuntimeException exception) {
+			return null;
+		}
+
+		// Map of booleans to mark nodes.
+		boolean[] boolmap = new boolean[this.adjacencyLists.length];
+		for (int i = 0; boolmap.length > i; ++i)
+			boolmap[i] = false;
+
+		// List to fill and return.
+		LinkedList<String> list = new LinkedList<String>();
+
+		// Queue to keep track of the nodes to visit.
+		LinkedList<String> queue = new LinkedList<String>();
+
+		list.add(startNode);
+		queue.add(startNode);
+
+		// The first node has to be marked.
+		int startIndex = getIndex(start);
+		boolmap[startIndex] = true;
+
+		// If the queue is empty, then all the reachable nodes have been visited.
+		while (0 != queue.size()) {
+			String cur = queue.remove();
+
+			// Node visit.
+			op.visitNode(cur);
+			list.add(cur);
+
+			int i = this.getIndex(cur);
+			LinkedList<String> adjList = (LinkedList<String>) this.adjacencyLists[i].getValue();
+
+			Iterator<String> iter = adjList.iterator();
+			// "For every adjacent nodes"
 			while (iter.hasNext()) {
-				__couple_list currentItem = this.adjacencyList[iter.next()];
-				if (!currentItem.mark && !currentItem.emptyNode) {
-					currentItem.mark = true;
-					queue.add(iter.next());
-					tree.addChild(iter.next(), currentNode);
+				String node = iter.next();
+
+				int j = this.getIndex(node);
+				// If the j-th node is not marked, then add it to the queue and mark it.
+				if (!boolmap[j]) {
+					boolmap[j] = true;
+					queue.add(node);
 				}
 			}
 		}
 
-		for (__couple_list k: this.adjacencyList) {
-			k.mark = false;
-		}
-
-		return tree;
+		return (String[]) list.toArray();
 	}
-
-	public void depthFirstVisit(NodeOperation item) {
-
-	}*/
 }
