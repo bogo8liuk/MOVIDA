@@ -487,7 +487,7 @@ public class NonOrientedGraph implements Graph {
 			LinkedList<String> adjList = (LinkedList<String>) this.adjacencyLists[i].getValue();
 
 			Iterator<String> iter = adjList.iterator();
-			// "For every adjacent nodes"
+			// "For each adjacent node"
 			while (iter.hasNext()) {
 				String node = iter.next();
 

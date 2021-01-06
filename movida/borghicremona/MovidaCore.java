@@ -1134,6 +1134,11 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 			return null;
 
 		String name = actor.getName();
+
+		// The actor taken as parameter must exist.
+		if (null == this.doOn(DictionaryOperation.SEARCH, KeyType.PERSON, name, null))
+			return null;
+
 		Arch[] directCollaborations = this.collaborations.incidentArchs(name);
 
 		if (null == directCollaborations)
@@ -1142,14 +1147,11 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		Person[] collaborators = new Person[directCollaborations.length];
 
 		for (int i = 0; directCollaborations.length > i; ++i) {
-			/* The instantiation of i-th Person object in the array collaborators does not get carried out
-			   directly with the name of the actor, but Person object must be got searched by name in the
-			   dictionary for Person just for a reason of correctness: an existent Person is determined and
-			   got by the search of the Person itself, not by the instantiation from a name, otherwise two
-			   different Person object representing the same actor would be created. */
+			/* The Person instantiated from the direct collaborator of the actor taken as parameter is
+			   granted to exist because each arch of directCollaborations exists. */
 			String actorName = (String) this.collaborations.opposite(name, directCollaborations[i]);
 
-			Person actor = (Person) doOn(DictionaryOperation.SEARCH, KeyType.PERSON, actorName, null);
+			Person actor = new Person(actorName);
 			collaborators[i] = actor;
 		}
 
@@ -1157,8 +1159,27 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 	}
 
 	public Person[] getTeamOf(Person actor) {
+		if (null == actor)
+			return null;
 
-		return null;
+		// The actor taken as parameter must exist.
+		if (null == this.doOn(DictionaryOperation.SEARCH, KeyType.PERSON, actor.getName(), null))
+			return null;
+
+		/* At this point, there's no need to do a specific operation on visited nodes, so the function
+		   passed to the visit algorithm does nothing. */
+		NodeOperation op = n -> {};
+		String[] teamNames = (String[]) this.collaborations.breadthFirstVisit(op, actor.getName());
+
+		if (null == teamNames)
+			return null;
+
+		Person[] team = new Person[teamNames.length];
+
+		for (int i = 0; team.length > i; ++i)
+			team[i] = new Person(teamNames[i]);
+
+		return team;
 	}
 
 	public Collaboration[] maximizeCollaborationsInTheTeamOf(Person actor) {
