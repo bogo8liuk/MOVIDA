@@ -31,5 +31,13 @@ public class Collaboration {
 		
 		return score / movies.size();
 	}
-	
+
+	public int moviesNumber() {
+		return movies.size();
+	}
+
+	public void addMovie(Movie m) {
+		if (-1 != this.movies.indexOf(m))
+			this.movies.add(m);
+	}
 }

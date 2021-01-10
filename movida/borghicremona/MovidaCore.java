@@ -28,6 +28,7 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		DELETE;
 	}
 
+	// Variables to index arrays of arrayData (see below, arrayData is an attribute).
 	private final static int YEARS = 0;
 	private final static int VOTES = 1;
 	private final static int DIRECTORS = 2;
@@ -842,71 +843,20 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 	 * @attention The correctness of arrayIndex is a checked runtime error.
 	 */
 	private void sort(Integer arrayIndex) {
-		switch (arrayIndex) {
-			case YEARS:
-				switch (this.algorithm) {
-					case SelectionSort:
-						this.arrayData[YEARS].selectionSort();
-						break;
+		if (YEARS != arrayIndex || VOTES != arrayIndex || DIRECTORS != arrayIndex || ACTORS != arrayIndex) {
+			System.err.println("sort() default case: aborting");
+			System.exit(-1);
+		}
 
-					case QuickSort:
-						this.arrayData[YEARS].quickSort();
-						break;
-
-					default:
-						System.err.println("sort() default case: aborting");
-						System.exit(-1);
-				}
+		switch (this.algorithm) {
+			case SelectionSort:
+				this.arrayData[arrayIndex].selectionSort();
 				break;
 
-			case VOTES:
-				switch (this.algorithm) {
-					case SelectionSort:
-						this.arrayData[VOTES].selectionSort();
-						break;
-
-					case QuickSort:
-						this.arrayData[VOTES].quickSort();
-						break;
-						
-					default:
-						System.err.println("sort() default case: aborting");
-						System.exit(-1);
-				}
+			case QuickSort:
+				this.arrayData[arrayIndex].quickSort();
 				break;
 
-			case DIRECTORS:
-				switch (this.algorithm) {
-					case SelectionSort:
-						this.arrayData[DIRECTORS].selectionSort();
-						break;
-
-					case QuickSort:
-						this.arrayData[DIRECTORS].quickSort();
-						break;
-
-					default:
-						System.err.println("sort() default case: aborting");
-						System.exit(-1);
-				}
-				break;
-
-			case ACTORS:
-				switch (this.algorithm) {
-					case SelectionSort:
-						this.arrayData[ACTORS].selectionSort();
-						break;
-
-					case QuickSort:
-						this.arrayData[ACTORS].quickSort();
-						
-					default:
-						System.err.println("sort() default case: aborting");
-						System.exit(-1);
-				}
-				break;
-
-			// Any other integer value is not a valid index for arrayData.
 			default:
 				System.err.println("sort() default case: aborting");
 				System.exit(-1);
@@ -1181,8 +1131,72 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		return team;
 	}
 
-	public Collaboration[] maximizeCollaborationsInTheTeamOf(Person actor) {
+	private Collaboration getCollaboration(Comparable nameA, Comparable nameB) {
+		this.sort(ACTORS);
 
+		Person actorA = new Person((String) nameA);
+		Person actorB = new Person((String) nameB);
+
+		PairPersonMovie[] actors = this.arrayData[ACTORS].getArray();
+		Collaboration collab = new Collaboration(actorA, actorB);
+
+		for (int i = 0; actors.length > i; ++i) {
+			String name = actors[i].getPerson().getName();
+			if (name != actorA.getName() && name != actorB.getName())
+				continue;
+
+			else if (name == actorA.getName()) {
+				while (actors.length > i && actors[i].getPerson().getName() == name) {
+					Movie movie = actors[i].getMovie();
+					Person[] cast = actors[i].getMovie().getCast();
+
+					for (int j = 0; cast.length > j; ++j) {
+						if (actorB.getName() == cast[j].getName())
+							collab.add(movie);
+							break;
+					}
+
+					++i;
+				}
+
+				break;
+			}
+
+			else {
+				while (actors.length > i && actors[i].getPerson().getName() == name) {
+					Movie movie = actors[i].getMovie();
+					Person[] cast = actors[i].getMovie().getCast();
+
+					for (int j = 0; cast.length > j; ++j) {
+						if (actorA.getName() == cast[j].getName())
+							collab.add(movie);
+							break;
+					}
+
+					++i;
+				}
+
+				break;
+			}
+		}
+
+		return collab;
+	}
+
+	private Double countScore(Comparable nameA, Comparable nameB) {
+		return getCollaboration(nameA, nameB).getScore();
+	}
+
+	public Collaboration[] maximizeCollaborationsInTheTeamOf(Person actor) {
+		if (null == actor)
+			return null;
+
+		// The actor taken as parameter must exist.
+		if (null == this.doOn(DictionaryOperation.SEARCH, KeyType.PERSON, actor.getName(), null))
+			return null;
+
+		Weight weight = (nodeA, nodeB) -> countScore(nodeA, nodeB);
+		// TODO: continue from here
 		return null;
 	}
 }

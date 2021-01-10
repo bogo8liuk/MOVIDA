@@ -18,7 +18,6 @@ public class NonOrientedGraph implements Graph {
 	// Label useful to identify elements that do not stand in the table anymore.
 	private static final KeyValueElement _DELETED_ = new KeyValueElement("_DELETED_", null);
 
-	private static final int MAXINT = 2147483647;
 	private static final int ROOT_NODE = -1;
 
 	/**
@@ -518,7 +517,7 @@ public class NonOrientedGraph implements Graph {
 	 * @attention The parameters != null is an unchecked runtime error.
 	 * @attention It is assumed that in array there is at least a non-null element.
 	 */
-	private static int findIndex(NodeFind find, Integer[] array) {
+	private static int findIndex(NodeFind find, Double[] array) {
 		switch (find) {
 			case MIN:
 				Integer min = -1;
@@ -530,9 +529,8 @@ public class NonOrientedGraph implements Graph {
 						min = i;
 				}
 
-				int indexMin = array[min].intValue();
 				array[min] = null;
-				return indexMin;
+				return min;
 
 			case MAX:
 				Integer max = -1;
@@ -544,9 +542,8 @@ public class NonOrientedGraph implements Graph {
 						max = i;
 				}
 
-				int indexMax = array[max].intValue();
 				array[max] = null;
-				return indexMax;
+				return max;
 		}
 
 		// Unreachable: to quiet the compiler.
@@ -609,14 +606,14 @@ public class NonOrientedGraph implements Graph {
 		}
 
 		// The value to associate to the starting node.
-		Integer init;
+		Double init;
 		NodeFind finder = null;
 		if (null == find) {
 			finder = NodeFind.MIN;
-			init = 0;
+			init = 0.0;
 		}
 		else {
-			init = (finder == NodeFind.MIN) ? 0 : MAXINT;
+			init = (finder == NodeFind.MIN) ? 0.0 : Double.MAX_VALUE;
 			finder = find;
 		}
 
@@ -624,8 +621,8 @@ public class NonOrientedGraph implements Graph {
 		List<Arch> list = new LinkedList<Arch>();
 		/* An array of values: the indexes correspond to the indexes of the existent nodes in adjacencyLists;
 		   each value represents a temporary value for the weight of each node, the start node is associated
-		   with 0, if a minimum spanning tree will be built, else it is associated with MAXINT value. */
-		Integer[] tmpWeights = new Integer[this.adjacencyLists.length];
+		   with 0, if a minimum spanning tree will be built, else it is associated with maximum double value. */
+		Double[] tmpWeights = new Double[this.adjacencyLists.length];
 		/* An array of values: the indexes correspond to the indexes of the existent nodes in adjacencyLists;
 		   each value represent the index of the temporary father of the indexed element (e.g. in fathers[3]
 		   there is the index of father of the node that has index 3 in adjacencyLists). The start node has
@@ -642,7 +639,7 @@ public class NonOrientedGraph implements Graph {
 				// The start node is already inserted in the queue.
 				queue[i] = true;
 				fathers[i] = ROOT_NODE;
-				tmpWeights[i] = MAXINT;
+				tmpWeights[i] = init;
 			}
 			else {
 				queue[i] = false;
@@ -673,7 +670,7 @@ public class NonOrientedGraph implements Graph {
 			if (null != adjacentNodes) {
 				for (int i = 0; adjacentNodes.length > i; ++i) {
 					int j = adjacentNodes[i];
-					int weight = op.weight(this.adjacencyLists[index].getKey(), this.adjacencyLists[j].getKey());
+					Double weight = op.weight(this.adjacencyLists[index].getKey(), this.adjacencyLists[j].getKey());
 
 					// In this case, the node is not been yet inserted.
 					if (null == tmpWeights[j]) {
