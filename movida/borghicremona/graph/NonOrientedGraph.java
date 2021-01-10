@@ -18,6 +18,9 @@ public class NonOrientedGraph implements Graph {
 	// Label useful to identify elements that do not stand in the table anymore.
 	private static final KeyValueElement _DELETED_ = new KeyValueElement("_DELETED_", null);
 
+	private static final int MAXINT = 2147483647;
+	private static final int ROOT_NODE = -1;
+
 	/**
 	 * It terminates the program if the key is equal to the one of _DELETED_ label.
 	 *
@@ -501,5 +504,212 @@ public class NonOrientedGraph implements Graph {
 		}
 
 		return (String[]) list.toArray();
+	}
+
+	/**
+	 * It finds the index of the element with the highest/lowest value in an array.
+	 *
+	 * @param find If MIN, it returns the index of the element with lowest value, else it returns
+	 * the index of the element with highest value.
+	 * @param array The array to iterate over.
+	 *
+	 * @return The index of the element with highest or lowest value in array, according to find.
+	 *
+	 * @attention The parameters != null is an unchecked runtime error.
+	 * @attention It is assumed that in array there is at least a non-null element.
+	 */
+	private static int findIndex(NodeFind find, Integer[] array) {
+		switch (find) {
+			case MIN:
+				Integer min = -1;
+				for (int i = 0; array.length > i; ++i) {
+					if (null == array[i])
+						continue;
+
+					else if (-1 == min || array[min] < array[i])
+						min = i;
+				}
+
+				int indexMin = array[min].intValue();
+				array[min] = null;
+				return indexMin;
+
+			case MAX:
+				Integer max = -1;
+				for (int i = 0; array.length > i; ++i) {
+					if (null == array[i])
+						continue;
+
+					else if (-1 == max || array[max] < array[i])
+						max = i;
+				}
+
+				int indexMax = array[max].intValue();
+				array[max] = null;
+				return indexMax;
+		}
+
+		// Unreachable: to quiet the compiler.
+		return -1;
+	}
+
+	/**
+	 * It finds the indexes of the adjacent nodes of the node that has a certain index.
+	 *
+	 * @param nodeIndex The index of the node from which searching the adjacent nodes.
+	 *
+	 * @return An array of indexes, if the node with nodeIndex as index has adjacent nodes, null otherwise.
+	 *
+	 * @attention It is assumed that nodeIndex is a valid index and that the indexed node exists.
+	 */
+	private int[] adjacentNodesIndexes(int nodeIndex) {
+		LinkedList<String> list = (LinkedList<String>) this.adjacencyLists[nodeIndex].getValue();
+
+		// In this case, the node has no adjacent nodes.
+		if (0 == list.size())
+			return null;
+
+		Iterator<String> iter = list.iterator();
+		int[] indexes = new int[list.size()];
+		int i = 0;
+
+		while (iter.hasNext())
+			// It finds the index of each adjacent node.
+			indexes[i++] = this.getIndex(iter.next());
+
+		return indexes;
+	}
+
+	/**
+	 * It finds the minimum/maximum spanning tree.
+	 *
+	 * @param start The node from which building the the spanning tree.
+	 * @param find If it is MIN, the function builds a minimum spanning tree, else it builds a maximum
+	 * spanning tree.
+	 * @param op The function that calculates the weight of the archs.
+	 *
+	 * @return An array of Arch that are part of the spanning tree.
+	 *
+	 * @attention The existence of start and start != null are checked runtime errors: it terminates
+	 * the process.
+	 * @attention If find is null, the function builds a minimum spanning tree.
+	 * @attention op != null is a checked runtime error: it terminates the process.
+	 */
+	public Arch[] spanningTree(Comparable start, NodeFind find, Weight op) {
+		try {
+			Assert.notNullKey(start);
+		} catch (IllegalArgumentException exception) {
+			System.err.println("Illegal node: aborting");
+			System.exit(-1);
+		}
+
+		if (null == op) {
+			System.err.println("Illegal operation on node: aborting");
+			System.exit(-1);
+		}
+
+		// The value to associate to the starting node.
+		Integer init;
+		NodeFind finder = null;
+		if (null == find) {
+			finder = NodeFind.MIN;
+			init = 0;
+		}
+		else {
+			init = (finder == NodeFind.MIN) ? 0 : MAXINT;
+			finder = find;
+		}
+
+		// The list of Arch to return.
+		List<Arch> list = new LinkedList<Arch>();
+		/* An array of values: the indexes correspond to the indexes of the existent nodes in adjacencyLists;
+		   each value represents a temporary value for the weight of each node, the start node is associated
+		   with 0, if a minimum spanning tree will be built, else it is associated with MAXINT value. */
+		Integer[] tmpWeights = new Integer[this.adjacencyLists.length];
+		/* An array of values: the indexes correspond to the indexes of the existent nodes in adjacencyLists;
+		   each value represent the index of the temporary father of the indexed element (e.g. in fathers[3]
+		   there is the index of father of the node that has index 3 in adjacencyLists). The start node has
+		   a special value (ROOT_NODE) to indicate that it has not a father in the spanning tree. */
+		Integer[] fathers = new Integer[this.adjacencyLists.length];
+		/* An array of boolean: the indexes correspond to the indexes of the existent node in adjacencyLists;
+		   this array simulates the entrance and the exit from a queue: if queue[i] is true, than the i-th
+		   node is in the queue, else it is not in the queue (because it is not been yet inserted or it is
+		   already been removed). */
+		boolean[] queue = new boolean[this.adjacencyLists.length];
+
+		for (int i = 0; this.adjacencyLists.length > i; ++i) {
+			if (0 == this.adjacencyLists[i].getKey().compareTo(start)) {
+				// The start node is already inserted in the queue.
+				queue[i] = true;
+				fathers[i] = ROOT_NODE;
+				tmpWeights[i] = MAXINT;
+			}
+			else {
+				queue[i] = false;
+				fathers[i] = null;
+				tmpWeights[i] = null;
+			}
+		}
+
+		// Counter to keep track which node enters the queue and which node exits from the queue.
+		int counter = 1;
+
+		while (0 != counter) {
+			counter -= 1;
+
+			// It finds the max/min index and it removes it from the queue.
+			int index = findIndex(finder, tmpWeights);
+			queue[index] = false;
+
+			/* If index does not represent the start node, then it creates a new Arch with index node's father to
+			   add to the list of archs to return. The start node has not a father, so it can't create a new Arch. */
+			if (ROOT_NODE != fathers[index]) {
+				Arch arch = new Arch(this.adjacencyLists[index].getKey(), this.adjacencyLists[fathers[index]].getKey());
+				list.add(arch);
+			}
+
+			// It iterates over the adjacent nodes.
+			int[] adjacentNodes = adjacentNodesIndexes(index);
+			if (null != adjacentNodes) {
+				for (int i = 0; adjacentNodes.length > i; ++i) {
+					int j = adjacentNodes[i];
+					int weight = op.weight(this.adjacencyLists[index].getKey(), this.adjacencyLists[j].getKey());
+
+					// In this case, the node is not been yet inserted.
+					if (null == tmpWeights[j]) {
+						tmpWeights[j] = weight;
+						queue[j] = true;
+						fathers[j] = index;
+						counter += 1;
+					}
+
+					/* In this case, the node is been already inserted and his temporary father and weight have to be
+					   updated under a certain condition (that depends from the building of a maximum or a minimum
+					   spanning tree). */
+					else if (queue[j]) {
+						boolean entered = false;
+
+						switch (finder) {
+							case MIN:
+								if (weight < tmpWeights[j])
+									entered = true;
+								break;
+
+							case MAX:
+								if (weight > tmpWeights[j])
+									entered = true;
+								break;
+						}
+
+						if (entered) {
+							tmpWeights[j] = weight;
+							fathers[j] = index;
+						}
+					}
+				}
+			}
+		}
+
+		return (0 == list.size()) ? null : (Arch[]) list.toArray();
 	}
 }

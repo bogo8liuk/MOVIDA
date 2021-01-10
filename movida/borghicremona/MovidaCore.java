@@ -420,8 +420,7 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 			throw new MovidaFileException();
 
 		// Instantiation of arrayData, namely the arrays containing data about movies.
-		for (int i = 0; this.arrayData.length > i; ++i)
-			this.arrayData[i] = null;
+		this.arrayData = new Vector[4];
 
 		List<String> lines;
 		Path path = f.toPath();
