@@ -1212,6 +1212,14 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		return team;
 	}
 
+	/**
+	 * It builds a collaboration from two actors by .
+	 *
+	 * @param nameA The name of the first actor.
+	 * @param nameB The name of the second actor.
+	 *
+	 * @return A collaboration between the two actors.
+	 */
 	private Collaboration getCollaboration(Comparable nameA, Comparable nameB) {
 		this.sort(ACTORS);
 
@@ -1221,16 +1229,21 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		PairPersonMovie[] actors = this.arrayData[ACTORS].getArray();
 		Collaboration collab = new Collaboration(actorA, actorB);
 
+		/* Looking at the first actor having as name the value of nameA or nameB and from there calculating
+		   the collaboration: the array of actors is already sorted, so the actors with nameA or nameB as
+		   their name, are all positioned sequentially. */
 		for (int i = 0; actors.length > i; ++i) {
 			String name = actors[i].getPerson().getName();
 			if (name != actorA.getName() && name != actorB.getName())
 				continue;
 
 			else if (name == actorA.getName()) {
+				// Found the actors with nameA.
 				while (actors.length > i && actors[i].getPerson().getName() == name) {
 					Movie movie = actors[i].getMovie();
 					Person[] cast = actors[i].getMovie().getCast();
 
+					// Adding the movies with the actors that have nameB as their name.
 					for (int j = 0; cast.length > j; ++j) {
 						if (actorB.getName() == cast[j].getName())
 							collab.add(movie);
@@ -1264,8 +1277,16 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		return collab;
 	}
 
+	/**
+	 * It gets the score of the collaboration between two actors.
+	 *
+	 * @param nameA The name of first actor.
+	 * @param nameB The name of the second actor.
+	 *
+	 * @return The score of the collaboration between the two actors.
+	 */
 	private Double countScore(Comparable nameA, Comparable nameB) {
-		return getCollaboration(nameA, nameB).getScore();
+		return this.getCollaboration(nameA, nameB).getScore();
 	}
 
 	public Collaboration[] maximizeCollaborationsInTheTeamOf(Person actor) {
@@ -1277,7 +1298,19 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 			return null;
 
 		Weight weight = (nodeA, nodeB) -> countScore(nodeA, nodeB);
-		// TODO: continue from here
-		return null;
+		Arch archs = this.collaborations.spanningTree(actor.getName(), MAX, weight);
+
+		if (null == archs)
+			return null;
+
+		Collaboration[] collaborations = new Collaboration[archs.length];
+
+		for (int i = 0; archs.length > i; ++i) {
+			Comparable[] edges = archs.getArchNodes();
+
+			collaborations[i] = this.getCollaboration(edges[0], edges[1]);
+		}
+
+		return collaborations;
 	}
 }
