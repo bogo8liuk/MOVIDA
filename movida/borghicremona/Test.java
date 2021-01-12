@@ -21,7 +21,7 @@ public class Test {
         store[index] = hashTmp;
         System.out.println(toHash + ": " + hashTmp);
     }
-
+	
 	/**
 	 * It prints the results of collisions between 50 names, given the hash function of HashMap class.
 	 */
@@ -103,6 +103,20 @@ public class Test {
 
         System.out.println("");
     }
+	
+	public static void checkForUniqueKey (HashMap hashmap, KeyValueElement x) throws Exception {
+		boolean found = false;
+
+		for (int i = 0; hashmap.length() > i; ++i) {
+			if (found == true) {
+				throw new Exception ("invalid key");
+			}
+ 
+			if (hashmap.getAtIndex(i).key == x.key) {
+				found = true;
+			}	
+		}
+	}
 
 	/**
 	 * It tests the consistency of HashMap data structure, printing every successful result.
@@ -117,25 +131,20 @@ public class Test {
         System.out.println("Hashmap of 10 elements");
         HashMap hashmap = new HashMap(10);
 
+		// Testing that after inserting a specific KeyValueElement multiple times, there are no duplicated keys.
         System.out.println("Insertion of 10 \"Tony Parker\" keys");
         int oldLen = hashmap.length();
-        for (int i = 0; oldLen > i; ++i) {
-            KeyValueElement tp = new KeyValueElement("Tony Parker", data);
-            hashmap.insert(tp);
-        }
-        if (hashmap.length() != oldLen)
+		
+		KeyValueElement tp = new KeyValueElement("Tony Parker", data);
+        
+		for (int i = 0; oldLen > i; ++i) {
+           hashmap.insert(tp);
+		}
+        
+		checkForUniqueKey(hashmap, tp);
+		
+		if (hashmap.length() != oldLen)
             throw new Exception("The length must not change after a number of insertions equal to the length of an empty hashmap");
-
-        System.out.println("");
-        hashmap.printTable();
-        System.out.println("");
-
-        System.out.println("Insertion of \"DeAndre Jordan\" key");
-        KeyValueElement daj = new KeyValueElement("DeAndre Jordan", data);
-        hashmap.insert(daj);
-
-        if (hashmap.length() == oldLen)
-            throw new Exception("The length must change after a number of insertions higher to the length of an hashmap, without any delete()");
 
         System.out.println("");
         hashmap.printTable();
@@ -144,13 +153,34 @@ public class Test {
         System.out.println("New hashmap of 10 elements created");
         hashmap = new HashMap(10);
 
-        if (null != hashmap.search("Russell Westbrook"))
+        if (null != hashmap.search("Tony Parker"))
             throw new Exception("search() must return null if the table is empty");
 
+		//Testing that inserting a new value does not modify old elements.
+		System.out.println("Insertion of \"Bo McCalebb\" key");
+        String t = "Bo McCalebb";
+        KeyValueElement bmc = new KeyValueElement(t, data);
+        hashmap.insert(bmc);
+		checkForUniqueKey(hashmap, bmc);
+
+        System.out.println("Insertion of 10 \"Bill Russell\" keys");
+		KeyValueElement br = new KeyValueElement("Bill Russell", data);
+		hashmap.insert(br);
+		checkForUniqueKey(hashmap, br);
+
+        if (null == hashmap.search(t))
+            throw new Exception("Adding new elements to the table must not remove old elements in it.");
+
+        System.out.println("");
+        hashmap.printTable();
+        System.out.println("");
+
+		//Testing that search method works when a key is present.
         System.out.println("Insertion of \"Joe Johnson\" key");
         final String s = "Joe Johnson";
         KeyValueElement jj = new KeyValueElement(s, data);
         hashmap.insert(jj);
+		checkForUniqueKey(hashmap, jj);
 
         if (null == hashmap.search(s))
             throw new Exception("search() must return valid data if its parameter is a key already inserted and not deleted");
@@ -159,56 +189,48 @@ public class Test {
         hashmap.printTable();
         System.out.println("");
 
-        System.out.println("Insertion of 3 \"Bo McCalebb\" keys");
+		//Testing that delete method works.
+        System.out.println("Insertion of \"Bo McCalebb\" key");
         int oldLen1 = hashmap.length();
-        String t = "Bo McCalebb";
-        for (int i = 0; 3 > i; ++i) {
-            KeyValueElement bmc = new KeyValueElement(t, data);
-            hashmap.insert(bmc);
-        }
 
+		hashmap.insert(bmc);	
+		checkForUniqueKey(hashmap, bmc);
+		
         if (hashmap.length() != oldLen1)
             throw new Exception("The number of insertions did not overcome the length of the hashmap");
 
         System.out.println("Removal of \"Bo McCalebb\" key");
         hashmap.delete(t);
-
-        if (null == hashmap.search(t))
-            throw new Exception("The searched key should have been inserted three times and deleted once, search() must return valid data");
-
-        System.out.println("");
-        hashmap.printTable();
-        System.out.println("");
-
-        System.out.println("Removal of 2 \"Bo McCalebb\" keys");
-        hashmap.delete(t);
-        hashmap.delete(t);
-
-        if (null != hashmap.search(t))
-            throw new Exception("The elements with the searched key should have been removed all, search() must return null");
+ 
+		if (null != hashmap.search(t))
+        	throw new Exception("The element with the searched key should have been removed, search() must return null");
 
         System.out.println("");
         hashmap.printTable();
         System.out.println("");
+		
+		//Testing that a hashmap that is already full, after a new insert call, extends its size.
+		hashmap = new HashMap(3);
+		int lunghezza = hashmap.length();
+		hashmap.insert(tp);
+		hashmap.insert(jj);
+		hashmap.insert(bmc);
+		hashmap.insert(br);
 
-        System.out.println("Insertion of \"Bo McCalebb\" key");
-        KeyValueElement bmc = new KeyValueElement(t, data);
-        hashmap.insert(bmc);
-
-        System.out.println("Insertion of 10 \"Bill Russell\" keys");
-        int l = hashmap.length();
-        for (int i = 0; l > i; ++i) {
-            KeyValueElement br = new KeyValueElement("Bill Russell", data);
-            hashmap.insert(br);
-        }
-
-        if (null == hashmap.search(t))
-            throw new Exception("The growing of the table must not affect the success of searching an existing key in the table");
-
-        System.out.println("");
+		if (lunghezza == hashmap.length()) {
+			throw new Exception("length must be modified coherently after adding more elements beyond the hashmap initial length");
+		}
+		
+		System.out.println("");
         hashmap.printTable();
         System.out.println("");
-
+		
+	/*	System.out.println("");
+        hashmap.toArray();
+		System.out.prinln(l);
+        System.out.println("");
+	*/	
+		
         System.out.println("HashMap implementation test terminated successfully!\n");
     }
 
@@ -331,10 +353,21 @@ public class Test {
 
 		System.out.println("\nSorting algorithms implementation test terminated successfully!\n");
 	}
+	
+	public static void checkForUniqueKeyBST(BinarySearchTree tree, KeyValueElement item) throws Exception {
+		boolean found = false;
+ 
+		if (null != tree.search(item.key)) {
+			found = true;
+		}
+		if (found == true) {
+			throw new Exception ("invalid key");
+		}
+	}
 
 	private static void implementationTestBSTree() throws Exception {
 		String data = "data";
-
+		
 		System.out.println("Inserting node with key 70");
 		KeyValueElement init = new KeyValueElement(70, data);
 		BinarySearchTree tree = new BinarySearchTree(init);
@@ -350,58 +383,57 @@ public class Test {
 		KeyValueElement x9 = new KeyValueElement(89, data);
 		KeyValueElement x10 = new KeyValueElement(30, data);
 		KeyValueElement x11 = new KeyValueElement(60, data);
-
+		
 		System.out.println("Deleting and reinserting node with key 70");
 		tree.delete(70);
+		checkForUniqueKeyBST(tree, init);
 		tree.insert(init);
 
+		//non potremmo controllare dopo una chiamata ad insert, il numero di elementi dell'albero come verifica del non inserimento di duplicati? 
+		// per farlo dovremmo pero' modificare i campi di bstree e hashmap in modo tale che un elemento indichi la capacita' massima e quanto elementi ci sono effettivamente dentro.
+
+		//Testing insert method, always checking for unique keys, before inserting.
 		System.out.println("");
 		System.out.println("Printing out the tree");
 		tree.inOrderVisitPrint();
 		System.out.println("");
 
 		System.out.println("Inserting node with key 64");
+		checkForUniqueKeyBST(tree, x1);
 		tree.insert(x1);
 		System.out.println("Inserting node with key 8");
+		checkForUniqueKeyBST(tree, x2);
 		tree.insert(x2);
 
 		System.out.println("");
 		System.out.println("Printing out the tree");
 		tree.inOrderVisitPrint();
 		System.out.println("");
-
-		if (null != tree.search(9))
-			throw new Exception("Key 9 has not been inserted: aborting");
-
+		
+		//Testing search method on an inserted node in the tree.
 		System.out.println("Inserting node with key 9");
+		checkForUniqueKeyBST(tree, x3);
 		tree.insert(x3);
 
 		if (null == tree.search(9))
 			throw new Exception("Key 9 has been inserted: aborting");
 
 		System.out.println("Inserting node with key 73");
+		checkForUniqueKeyBST(tree, x4);
 		tree.insert(x4);
 		System.out.println("Inserting node with key 107");
+		checkForUniqueKeyBST(tree, x5);
 		tree.insert(x5);
 		System.out.println("Inserting node with key 22");
+		checkForUniqueKeyBST(tree, x6);
 		tree.insert(x6);
-		System.out.println("Re-inserting node with key 22");
-		tree.insert(x6);
-
-		if (null == tree.search(22))
-			throw new Exception("Key 22 has been inserted: aborting");
 
 		System.out.println("");
 		System.out.println("Printing out the tree");
 		tree.inOrderVisitPrint();
 		System.out.println("");
-
-		System.out.println("Deleting node with key 70");
-		tree.delete(70);
-
-		if (null != tree.search(70))
-			throw new Exception("Key 70 has been deleted: aborting");
-
+		
+		//Testing delete method on nodes in the tree.
 		System.out.println("Deleting node with key 73");
 		tree.delete(73);
 
@@ -419,40 +451,12 @@ public class Test {
 		tree.inOrderVisitPrint();
 		System.out.println("");
 
-		System.out.println("Inserting node with key 70");
-		tree.insert(init);
-		System.out.println("Inserting node with key 8");
-		tree.insert(x2);
-		System.out.println("Inserting node with key 73");
-		tree.insert(x4);
-
-		System.out.println("");
-		System.out.println("Printing out the tree");
-		tree.inOrderVisitPrint();
-		System.out.println("");
-
-		System.out.println("Deleting node with key 22");
+		/*System.out.println("Deleting node with key 22");
 		tree.delete(22);
 
 		if (null == tree.search(22))
 			throw new Exception("BinarySearchTree does allow duplicates: aborting");
-
-		System.out.println("Inserting node with key 91");
-		tree.insert(x7);
-		System.out.println("Inserting node with key 90");
-		tree.insert(x8);
-		System.out.println("Inserting node with key 89");
-		tree.insert(x9);
-		System.out.println("Inserting node with key 30");
-		tree.insert(x10);
-		System.out.println("Inserting node with key 60");
-		tree.insert(x11);
-
-		System.out.println("");
-		System.out.println("Printing out the tree");
-		tree.inOrderVisitPrint();
-		System.out.println("");
-
+		*/
 		System.out.println("Deleting node with key 60");
 		tree.delete(60);
 		System.out.println("Deleting node with key 107");
@@ -473,6 +477,13 @@ public class Test {
 		System.out.println("Printing out the tree");
 		tree.inOrderVisitPrint();
 		System.out.println("");
+
+		/*
+		System.out.println("");
+		System.out.println("Printing out the array of the tree nodes");
+		tree.toArray();
+		System.out.println(l + "");
+		*/
 
 		System.out.println("\nBinarySearchTree test terminated\n");
 	}
@@ -506,3 +517,4 @@ public class Test {
 		}
     }
 }
+
