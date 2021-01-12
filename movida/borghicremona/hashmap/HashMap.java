@@ -252,8 +252,4 @@ public class HashMap implements Dictionary {
 		else
 			return null;
 	}
-	
-	public KeyValueElement getAtIndex(int index) {
-		return (this.table[index]);
-	}
 }
