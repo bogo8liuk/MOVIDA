@@ -2,7 +2,7 @@ package movida.borghicremona;
 
 public class KeyValueElement {
     final protected Comparable key;
-    public Object data;
+    protected Object data;
 
     public KeyValueElement() {
         this.key = null;
