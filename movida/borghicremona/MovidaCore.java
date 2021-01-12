@@ -374,7 +374,7 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 
 	/**
 	 * It inserts nodes corresponding to the people of a cast and archs between these people in the Graph
-	 * istance.
+	 * instance.
 	 *
 	 * @param cast Elements to insert.
 	 */
@@ -388,6 +388,45 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 			for (int j = i + 1; cast.length > j; ++j)
 				this.collaborations.addArch(cast[i].getName(), cast[j].getName());
 		}
+	}
+
+	/**
+	 * It removes from the Graph instance the arch between the people in a cast and if a node has no more
+	 * incident archs after the previous operation, then the node is removed as well.
+	 *
+	 * @param cast The people from which removing the archs.
+	 *
+	 * @return The node that have been removed.
+	 */
+	private String[] deleteCollaboration(Person[] cast) {
+		String[] names = new String[cast.length];
+		LinkedList<String> removedNodes = new LinkedList<String>();
+
+		for (int i = 0; cast.length > i; ++i)
+			names[i] = cast[i].getName();
+
+		for (int i = 0; names.length - 1 > i; ++i) {
+			for (int j = i + 1; names.length > j; ++j) {
+				Arch arch = new Arch(names[i], names[j]);
+
+				this.collaborations.removeArch(arch);
+			}
+
+			// Removal of the node.
+			if (null == this.collaborations.incidentArchs(names[i])) {
+				this.collaborations.removeNode(names[i]);
+				removedNodes.add(names[i]);
+			}
+		}
+
+		// Removal of the last node: in the previous loop, the last node is not checked.
+		String last = names[names.length - 1];
+		if (null == this.collaborations.incidentArchs(last)) {
+			this.collaborations.removeNode(last);
+			removedNodes.add(last);
+		}
+
+		return (0 == removedNodes.size()) ? null : (String[]) removedNodes.toArray();
 	}
 
 	public void loadFromFile(File f) throws MovidaFileException {
@@ -694,6 +733,80 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		return -1;
 	}
 
+	/**
+	 * It deletes from arrayData the elements that keep a certain movie with them.
+	 *
+	 * @param movie The movie from which deleting elements.
+	 *
+	 * @attention The movie has to be a just deleted movie, otherwise a call to this function may lead
+	 * to an inconsistent state of MovidaCore.
+	 */
+	private void updateDeletedData(Movie movie) {
+		LinkedList<PairIntMovie> listYears = new LinkedList<PairIntMovie>();
+		LinkedList<PairIntMovie> listVotes = new LinkedList<PairIntMovie>();
+		LinkedList<PairPersonMovie> listActors = new LinkedList<PairPersonMovie>();
+		LinkedList<PairPersonMovie> listDirectors = new LinkedList<PairPersonMovie>();
+
+		PairIntMovie[] arrayYears = this.arrayData[YEARS].getArray();
+		PairIntMovie[] arrayVotes = this.arrayData[VOTES].getArray();
+		PairPersonMovie[] arrayActors = this.arrayData[ACTORS].getArray();
+		PairPersonMovie[] arrayDirectors = this.arrayData[DIRECTORS].getArray();
+
+		// Discarding elements that have movie as associated data.
+		for (int i = 0; arrayYears.length > i; ++i) {
+			if (movie != arrayYears[i].getMovie())
+				listYears.add(arrayYears[i]);
+		}
+
+		for (int i = 0; arrayVotes.length > i; ++i) {
+			if (movie != arrayVotes[i].getMovie())
+				listVotes.add(arrayVotes[i]);
+		}
+
+		for (int i = 0; arrayActors.length > i; ++i) {
+			if (movie != arrayActors[i].getMovie())
+				listActors.add(arrayActors[i]);
+		}
+
+		for (int i = 0; arrayDirectors.length > i; ++i) {
+			if (movie != arrayDirectors[i].getMovie())
+				listDirectors.add(arrayDirectors[i]);
+		}
+
+		this.arrayData[YEARS] = (0 == listYears.size()) ? null : (PairIntMovie[]) listYears.toArray();
+		this.arrayData[VOTES] = (0 == listVotes.size()) ? null : (PairIntMovie[]) listVotes.toArray();
+		this.arrayData[ACTORS] = (0 == listActors.size()) ? null : (PairPersonMovie[]) listActors.toArray();
+		this.arrayData[DIRECTORS] = (0 == listDirectors.size()) ? null : (PairPersonMovie[]) listDirectors.toArray();
+	}
+
+	/**
+	 * It deletes the director from the dictionaries, if the director does not stand in arrayData.
+	 *
+	 * @param director The Person object to delete.
+	 */
+	private void deleteDirector(Person director) {
+		// If the vector of directors in arrayData is null, then the director has to be removed.
+		if (null == this.arrayData[DIRECTOR]) {
+			this.doOn(DictionaryOperation.DELETE, KeyType.PERSON, HashIndirizzamentoAperto, director.getName(), null);
+			this.doOn(DictionaryOperation.DELETE, KeyType.PERSON, ABR, director.getName(), null);
+		}
+
+		PairPersonMovie[] directors = this.arrayData[DIRECTORS].getArray();
+
+		boolean found = false;
+		for (int i = 0; directors.length > i; ++i) {
+			if (director == directors[i].getPerson()) {
+				found = true;
+				break;
+			}
+		}
+
+		if (!found) {
+			this.doOn(DictionaryOperation.DELETE, KeyType.PERSON, HashIndirizzamentoAperto, director.getName(), null);
+			this.doOn(DictionaryOperation.DELETE, KeyType.PERSON, ABR, director.getName(), null);
+		}
+	}
+
 	public boolean deleteMovieByTitle(String title) {
 		if (!this.movieDictIstanceExist(KeyType.MOVIE)) {
 			System.err.println("Dictionary not set: aborting");
@@ -712,9 +825,23 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		else {
 			KeyValueElement item = new KeyValueElement(title, null);
 
-			// TODO: remove Person, looking at their collaborations, if they don't attend to other movies, they have to be deleted.
 			// Insertion of the deleted key in the hashmap in order to keep track of it.
 			this.deletedMovies.insert(item);
+
+			// Removal of actors that have no more collaborations with other actors.
+			String[] removedNodes = this.deleteCollaboration(movie.getCast());
+			if (null != removedNodes) {
+				for (int i = 0; removedNodes.length > i; ++i) {
+					this.doOn(DictionaryOperation.DELETE, KeyType.PERSON, HashIndirizzamentoAperto, removedNodes[i], null);
+					this.doOn(DictionaryOperation.DELETE, KeyType.PERSON, ABR, removedNodes[i], null);
+				}
+			}
+
+			// Updating data in arrayData.
+			this.updateDeletedData(movie);
+			// If the director did not direct another movie, he has to be removed.
+			this.deleteDirector(movie.getDirector());
+
 			return true;
 		}
 	}
