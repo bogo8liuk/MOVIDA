@@ -103,10 +103,6 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 	// Arrays to keep track of data about movies
 	private Vector[] arrayData;
 
-	/* Hashmap used to keep track of deleted movies, in order not to consider
-	   data about already deleted movies. */
-	private HashMap deletedMovies;
-
 	private NonOrientedGraph collaborations;
 
 	public MovidaCore() {
@@ -115,7 +111,6 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		this.treeMovie = null;
 		this.treePerson = null;
 		this.arrayData = null;
-		this.deletedMovies = new HashMap();
 		this.collaborations = new NonOrientedGraph();
 		this.dictionary = null;
 		this.algorithm = null;
@@ -169,7 +164,6 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		}
 
 		this.arrayData = null;
-		this.deletedMovies = new HashMap();
 		this.collaborations = new NonOrientedGraph();
 	}
 
@@ -695,7 +689,6 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		this.tablePerson = null;
 		this.treePerson = null;
 		this.arrayData = null;
-		this.deletedMovies = new HashMap();
 		this.collaborations = new NonOrientedGraph();
 	}
 
@@ -824,9 +817,6 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 			return false;
 		else {
 			KeyValueElement item = new KeyValueElement(title, null);
-
-			// Insertion of the deleted key in the hashmap in order to keep track of it.
-			this.deletedMovies.insert(item);
 
 			// Removal of actors that have no more collaborations with other actors.
 			String[] removedNodes = this.deleteCollaboration(movie.getCast());
