@@ -17,7 +17,7 @@ public class Test {
 	 * @attention This function should not be called and there's no check of the index value.
 	 */
     private static void __hashTest(String toHash, int length, Integer[] store, int index) {
-        int hashTmp = HashMap.hash(toHash) % length;
+        int hashTmp = Hash.hash(toHash) % length;
         store[index] = hashTmp;
         System.out.println(toHash + ": " + hashTmp);
     }
@@ -148,7 +148,7 @@ public class Test {
         System.out.println("Insertion of \"LiAngelo Ball\" key");
 		hashmap.insert(new KeyValueElement("LiAngelo Ball", data));
 
-		if (null == hashmap.search("Lonzo Ball"))
+		if (null != hashmap.search("Lonzo Ball"))
 			throw new Exception("search() error: there is no element with key Lonzo Ball.");
 
         System.out.println("");
@@ -162,7 +162,7 @@ public class Test {
 		if (null == hashmap.search(item.getKey()))
 			throw new Exception("search() error: an element with key \"Markief Morris\" exists.");
 
-		hashmpa.delete(item.getKey());
+		hashmap.delete(item.getKey());
 
 		if (null != hashmap.search(item.getKey()))
 			throw new Exception("search() or delete() error: HashMap does not allow duplicates.");

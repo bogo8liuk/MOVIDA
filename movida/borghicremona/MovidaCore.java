@@ -121,7 +121,7 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		this.algorithm = null;
 	}
 
-	private boolean setSort(SortingAlgorithm algorithm) {
+	public boolean setSort(SortingAlgorithm algorithm) {
 		if (null == algorithm) {
 			System.err.println("Invalid map value: aborting");
 			System.exit(-1);
@@ -140,7 +140,7 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		return true;
 	}
 
-	private boolean setMap(MapImplementation map) {
+	public boolean setMap(MapImplementation map) {
 		if (null == map) {
 			System.err.println("Invalid map value: aborting");
 			System.exit(-1);
@@ -518,13 +518,13 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 						Movie movie = new Movie(title, year, votes, cast, director);
 
 						// Overwriting of Movie in the active dictionary.
-						this.doOn(DictionaryOperation.DELETE, KeyType.MOVIE, HashIndirizzamentoAperto, title, null);
-						this.doOn(DictionaryOperation.INSERT, KeyType.MOVIE, HashIndirizzamentoAperto, title, movie);
-						this.doOn(DictionaryOperation.DELETE, KeyType.MOVIE, ABR, title, null);
-						this.doOn(DictionaryOperation.INSERT, KeyType.MOVIE, ABR, title, movie);
+						this.doOn(DictionaryOperation.DELETE, KeyType.MOVIE, MapImplementation.HashIndirizzamentoAperto, title, null);
+						this.doOn(DictionaryOperation.INSERT, KeyType.MOVIE, MapImplementation.HashIndirizzamentoAperto, title, movie);
+						this.doOn(DictionaryOperation.DELETE, KeyType.MOVIE, MapImplementation.ABR, title, null);
+						this.doOn(DictionaryOperation.INSERT, KeyType.MOVIE, MapImplementation.ABR, title, movie);
 
 						// Insertion of collaborations between every actor just parsed.
-						this.insertCollaborations(cast);
+						this.insertCollaboration(cast);
 						break;
 
 					default:
@@ -559,9 +559,9 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 			for (int j = 0; people.length > j; ++j) {
 				String actorName = people[j].getName();
 
-				if (null == this.doOn(DictionaryOperation.SEARCH, KeyType.PERSON, HashIndirizzamentoAperto, actorName, null)) {
-					this.doOn(DictionaryOperation.INSERT, KeyType.PERSON, HashIndirizzamentoAperto, actorName, null);
-					this.doOn(DictionaryOperation.INSERT, KeyType.PERSON, ABR, actorName, null);
+				if (null == this.doOn(DictionaryOperation.SEARCH, KeyType.PERSON, MapImplementation.HashIndirizzamentoAperto, actorName, null)) {
+					this.doOn(DictionaryOperation.INSERT, KeyType.PERSON, MapImplementation.HashIndirizzamentoAperto, actorName, null);
+					this.doOn(DictionaryOperation.INSERT, KeyType.PERSON, MapImplementation.ABR, actorName, null);
 				}
 
 				PairPersonMovie actorMovie = new PairPersonMovie(people[j], movies[i]);
@@ -570,9 +570,9 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 
 			// Director arranging.
 			String directorName = movies[i].getDirector().getName();
-			if (null == this.doOn(DictionaryOperation.SEARCH, KeyType.PERSON, HashIndirizzamentoAperto, directorName, null)) {
-				this.doOn(DictionaryOperation.INSERT, KeyType.PERSON, HashIndirizzamentoAperto, directorName, null);
-				this.doOn(DictionaryOperation.INSERT, KeyType.PERSON, ABR, directorName, null);
+			if (null == this.doOn(DictionaryOperation.SEARCH, KeyType.PERSON, MapImplementation.HashIndirizzamentoAperto, directorName, null)) {
+				this.doOn(DictionaryOperation.INSERT, KeyType.PERSON, MapImplementation.HashIndirizzamentoAperto, directorName, null);
+				this.doOn(DictionaryOperation.INSERT, KeyType.PERSON, MapImplementation.ABR, directorName, null);
 			}
 
 			PairPersonMovie directorMovie = new PairPersonMovie(movies[i].getDirector(), movies[i]);
@@ -747,10 +747,10 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		LinkedList<PairPersonMovie> listActors = new LinkedList<PairPersonMovie>();
 		LinkedList<PairPersonMovie> listDirectors = new LinkedList<PairPersonMovie>();
 
-		PairIntMovie[] arrayYears = this.arrayData[YEARS].getArray();
-		PairIntMovie[] arrayVotes = this.arrayData[VOTES].getArray();
-		PairPersonMovie[] arrayActors = this.arrayData[ACTORS].getArray();
-		PairPersonMovie[] arrayDirectors = this.arrayData[DIRECTORS].getArray();
+		PairIntMovie[] arrayYears = (PairIntMovie[]) this.arrayData[YEARS].getArray();
+		PairIntMovie[] arrayVotes = (PairIntMovie[]) this.arrayData[VOTES].getArray();
+		PairPersonMovie[] arrayActors = (PairPersonMovie[]) this.arrayData[ACTORS].getArray();
+		PairPersonMovie[] arrayDirectors = (PairPersonMovie[]) this.arrayData[DIRECTORS].getArray();
 
 		// Discarding elements that have movie as associated data.
 		for (int i = 0; arrayYears.length > i; ++i) {
@@ -773,10 +773,10 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 				listDirectors.add(arrayDirectors[i]);
 		}
 
-		this.arrayData[YEARS] = (0 == listYears.size()) ? null : (PairIntMovie[]) listYears.toArray();
-		this.arrayData[VOTES] = (0 == listVotes.size()) ? null : (PairIntMovie[]) listVotes.toArray();
-		this.arrayData[ACTORS] = (0 == listActors.size()) ? null : (PairPersonMovie[]) listActors.toArray();
-		this.arrayData[DIRECTORS] = (0 == listDirectors.size()) ? null : (PairPersonMovie[]) listDirectors.toArray();
+		this.arrayData[YEARS] = (0 == listYears.size()) ? null : new Vector((PairIntMovie[]) listYears.toArray());
+		this.arrayData[VOTES] = (0 == listVotes.size()) ? null : new Vector((PairIntMovie[]) listVotes.toArray());
+		this.arrayData[ACTORS] = (0 == listActors.size()) ? null : new Vector((PairPersonMovie[]) listActors.toArray());
+		this.arrayData[DIRECTORS] = (0 == listDirectors.size()) ? null : new Vector((PairPersonMovie[]) listDirectors.toArray());
 	}
 
 	/**
@@ -786,12 +786,12 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 	 */
 	private void deleteDirector(Person director) {
 		// If the vector of directors in arrayData is null, then the director has to be removed.
-		if (null == this.arrayData[DIRECTOR]) {
-			this.doOn(DictionaryOperation.DELETE, KeyType.PERSON, HashIndirizzamentoAperto, director.getName(), null);
-			this.doOn(DictionaryOperation.DELETE, KeyType.PERSON, ABR, director.getName(), null);
+		if (null == this.arrayData[DIRECTORS]) {
+			this.doOn(DictionaryOperation.DELETE, KeyType.PERSON, MapImplementation.HashIndirizzamentoAperto, director.getName(), null);
+			this.doOn(DictionaryOperation.DELETE, KeyType.PERSON, MapImplementation.ABR, director.getName(), null);
 		}
 
-		PairPersonMovie[] directors = this.arrayData[DIRECTORS].getArray();
+		PairPersonMovie[] directors = (PairPersonMovie[]) this.arrayData[DIRECTORS].getArray();
 
 		boolean found = false;
 		for (int i = 0; directors.length > i; ++i) {
@@ -802,8 +802,8 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		}
 
 		if (!found) {
-			this.doOn(DictionaryOperation.DELETE, KeyType.PERSON, HashIndirizzamentoAperto, director.getName(), null);
-			this.doOn(DictionaryOperation.DELETE, KeyType.PERSON, ABR, director.getName(), null);
+			this.doOn(DictionaryOperation.DELETE, KeyType.PERSON, MapImplementation.HashIndirizzamentoAperto, director.getName(), null);
+			this.doOn(DictionaryOperation.DELETE, KeyType.PERSON, MapImplementation.ABR, director.getName(), null);
 		}
 	}
 
@@ -817,8 +817,8 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 			return false;
 
 		// An operation of edit on a dictionary has to be performed also on the other dictionary.
-		Movie movie = (Movie) this.doOn(DictionaryOperation.DELETE, KeyType.MOVIE, HashIndirizzamentoAperto, title, null);
-		this.doOn(DictionaryOperation.DELETE, KeyType.MOVIE, ABR, title, null);
+		Movie movie = (Movie) this.doOn(DictionaryOperation.DELETE, KeyType.MOVIE, MapImplementation.HashIndirizzamentoAperto, title, null);
+		this.doOn(DictionaryOperation.DELETE, KeyType.MOVIE, MapImplementation.ABR, title, null);
 
 		if (null == movie)
 			return false;
@@ -832,8 +832,8 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 			String[] removedNodes = this.deleteCollaboration(movie.getCast());
 			if (null != removedNodes) {
 				for (int i = 0; removedNodes.length > i; ++i) {
-					this.doOn(DictionaryOperation.DELETE, KeyType.PERSON, HashIndirizzamentoAperto, removedNodes[i], null);
-					this.doOn(DictionaryOperation.DELETE, KeyType.PERSON, ABR, removedNodes[i], null);
+					this.doOn(DictionaryOperation.DELETE, KeyType.PERSON, MapImplementation.HashIndirizzamentoAperto, removedNodes[i], null);
+					this.doOn(DictionaryOperation.DELETE, KeyType.PERSON, MapImplementation.ABR, removedNodes[i], null);
 				}
 			}
 
@@ -1181,8 +1181,8 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 			   granted to exist because each arch of directCollaborations exists. */
 			String actorName = (String) this.collaborations.opposite(name, directCollaborations[i]);
 
-			Person actor = new Person(actorName);
-			collaborators[i] = actor;
+			Person coactor = new Person(actorName);
+			collaborators[i] = coactor;
 		}
 
 		return collaborators;
@@ -1226,7 +1226,7 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		Person actorA = new Person((String) nameA);
 		Person actorB = new Person((String) nameB);
 
-		PairPersonMovie[] actors = this.arrayData[ACTORS].getArray();
+		PairPersonMovie[] actors = (PairPersonMovie[]) this.arrayData[ACTORS].getArray();
 		Collaboration collab = new Collaboration(actorA, actorB);
 
 		/* Looking at the first actor having as name the value of nameA or nameB and from there calculating
@@ -1246,7 +1246,7 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 					// Adding the movies with the actors that have nameB as their name.
 					for (int j = 0; cast.length > j; ++j) {
 						if (actorB.getName() == cast[j].getName())
-							collab.add(movie);
+							collab.addMovie(movie);
 							break;
 					}
 
@@ -1263,7 +1263,7 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 
 					for (int j = 0; cast.length > j; ++j) {
 						if (actorA.getName() == cast[j].getName())
-							collab.add(movie);
+							collab.addMovie(movie);
 							break;
 					}
 
@@ -1298,7 +1298,7 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 			return null;
 
 		Weight weight = (nodeA, nodeB) -> countScore(nodeA, nodeB);
-		Arch archs = this.collaborations.spanningTree(actor.getName(), MAX, weight);
+		Arch[] archs = this.collaborations.spanningTree(actor.getName(), NodeFind.MAX, weight);
 
 		if (null == archs)
 			return null;
@@ -1306,7 +1306,7 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		Collaboration[] collaborations = new Collaboration[archs.length];
 
 		for (int i = 0; archs.length > i; ++i) {
-			Comparable[] edges = archs.getArchNodes();
+			Comparable[] edges = archs[i].getArchNodes();
 
 			collaborations[i] = this.getCollaboration(edges[0], edges[1]);
 		}

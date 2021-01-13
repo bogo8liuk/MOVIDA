@@ -94,7 +94,7 @@ public class BinarySearchTree implements Dictionary {
 		 * @return the data associated with the key, if key is found, null otherwise.
 		 */
 		public Object __search(Comparable key, Node tree) {
-			if (null == tree)
+			if (null == tree || null == tree.entry)
 				return null;
 
 			else {
