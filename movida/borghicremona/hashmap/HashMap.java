@@ -13,10 +13,10 @@ import java.util.*;
  * inconsistent state of an object or the throwing of particular exceptions. 
  */
 public class HashMap implements Dictionary {
-    private KeyValueElement[] table;
+	private KeyValueElement[] table;
 
 	// Label to replace removed elements.
-    private final static KeyValueElement _DELETED_ = new KeyValueElement("_DELETED_", null);
+	private final static KeyValueElement _DELETED_ = new KeyValueElement("_DELETED_", null);
 
 	/**
 	 * If the key has a value equal to _DELETED_ label, it throws an IllegalArgumentException and it handles it,
@@ -43,7 +43,7 @@ public class HashMap implements Dictionary {
 		this.table = new KeyValueElement[20];
 	}
 
-    public HashMap(int length) {
+	public HashMap(int length) {
 		try {
 			if (0 >= length) throw new IllegalArgumentException("Cannot have a negative length: aborting");
 		} catch (IllegalArgumentException exception) {
@@ -59,7 +59,7 @@ public class HashMap implements Dictionary {
 		else return 0;
 	}
 
-    public Object search(Comparable key) {
+	public Object search(Comparable key) {
 		try {
 			Assert.notNullKey(key);
 		} catch (IllegalArgumentException exception) {
@@ -68,21 +68,21 @@ public class HashMap implements Dictionary {
 		}
 		__assertNotDeletedKey(key);
 
-        int index = Hash.hash((String) key) % this.table.length;
+		int index = Hash.hash((String) key) % this.table.length;
 
 		// Linear inspection: every time the inspection gets a collision, the index is incremented by 1.
-        for (int attempt = 0; this.table.length > attempt; ++attempt) {
-            int i = (index + attempt) % this.table.length;
+		for (int attempt = 0; this.table.length > attempt; ++attempt) {
+			int i = (index + attempt) % this.table.length;
 
-            if (null == this.table[i])
+			if (null == this.table[i])
 				return null;
 
-            else if ((String) this.table[i].getKey() == (String) key)
+			else if ((String) this.table[i].getKey() == (String) key)
 				return this.table[i].getValue();
-        }
+		}
 
-        return null;
-    }
+		return null;
+	}
 
 	/**
 	 * It inserts an item in a table, if the latter is not full.
@@ -95,30 +95,30 @@ public class HashMap implements Dictionary {
 	 * @return true if the insertion is successful, false otherwise.
 	 */
 	private static Boolean __insert(KeyValueElement[] table, KeyValueElement item) {
-        boolean inserted = false;
+		boolean inserted = false;
 
-        int index = Hash.hash((String) item.getKey()) % table.length;
+		int index = Hash.hash((String) item.getKey()) % table.length;
 		// Linear inspection: every time the inspection gets a collision, the index is incremented by 1.
-        for (int attempt = 0; table.length > attempt; ++attempt) {
-            int i = (index + attempt) % table.length;
+		for (int attempt = 0; table.length > attempt; ++attempt) {
+			int i = (index + attempt) % table.length;
 
-            if (null == table[i] || _DELETED_ == table[i]) {
-                table[i] = item;
-                inserted = true;
-                break;
-            }
+			if (null == table[i] || _DELETED_ == table[i]) {
+				table[i] = item;
+				inserted = true;
+				break;
+			}
 
 			// Duplicates not allowed.
 			else if (0 == table[i].getKey().compareTo(item.getKey())) {
 				inserted = true;
 				break;
 			}
-        }
+		}
 
-        return inserted;
-    }
+		return inserted;
+	}
 
-    public void insert(KeyValueElement item) {
+	public void insert(KeyValueElement item) {
 		try {
 			Assert.notNullData(item);
 		} catch (IllegalArgumentException exception) {
@@ -144,7 +144,7 @@ public class HashMap implements Dictionary {
 		}
 	}
 
-    public Object delete(Comparable key) {
+	public Object delete(Comparable key) {
 		try {
 			Assert.notNullKey(key);
 		} catch (IllegalArgumentException exception) {
@@ -153,32 +153,32 @@ public class HashMap implements Dictionary {
 		}
 		__assertNotDeletedKey(key);
 
-        int index = Hash.hash((String) key) % this.table.length;
+		int index = Hash.hash((String) key) % this.table.length;
 
-        if (null == this.table[index]) return null;
+		if (null == this.table[index]) return null;
 
 		// Linear inspection: every time the inspection gets a collision, the index is incremented by 1
-        for (int attempt = 0; this.table.length > attempt; ++attempt) {
-            int i = (index + attempt) % this.table.length;
+		for (int attempt = 0; this.table.length > attempt; ++attempt) {
+			int i = (index + attempt) % this.table.length;
 
-            if ((String) this.table[i].getKey() == (String) key) {
+			if ((String) this.table[i].getKey() == (String) key) {
 				Object value = this.table[i].getValue();
-                this.table[i] = _DELETED_;
-                return value;
-            }
-        }
+				this.table[i] = _DELETED_;
+				return value;
+			}
+		}
 
 		return null;
-    }
+	}
 
-    public void printTable() {
-        for (int i = 0; this.table.length > i; ++i) {
-            if (null == this.table[i])
-                System.out.println(i + ": _NULL_");
-            else
-                System.out.println(i + ": " + this.table[i].getKey());
-        }
-    }
+	public void printTable() {
+		for (int i = 0; this.table.length > i; ++i) {
+			if (null == this.table[i])
+				System.out.println(i + ": _NULL_");
+			else
+				System.out.println(i + ": " + this.table[i].getKey());
+		}
+	}
 
 	/**
 	 * It gathers all the values in the hashmap in an array.

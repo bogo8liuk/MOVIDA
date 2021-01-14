@@ -3,6 +3,7 @@ package movida.borghicremona;
 import movida.borghicremona.hashmap.HashMap;
 import movida.borghicremona.sort.Vector;
 import movida.borghicremona.bstree.BinarySearchTree;
+import movida.borghicremona.graph.*;
 
 public class Test {
 
@@ -16,93 +17,93 @@ public class Test {
 	 *
 	 * @attention This function should not be called and there's no check of the index value.
 	 */
-    private static void __hashTest(String toHash, int length, Integer[] store, int index) {
-        int hashTmp = Hash.hash(toHash) % length;
-        store[index] = hashTmp;
-        System.out.println(toHash + ": " + hashTmp);
-    }
+	private static void __hashTest(String toHash, int length, Integer[] store, int index) {
+		int hashTmp = Hash.hash(toHash) % length;
+		store[index] = hashTmp;
+		System.out.println(toHash + ": " + hashTmp);
+	}
 	
 	/**
 	 * It prints the results of collisions between 50 names, given the hash function of HashMap class.
 	 */
-    public static void collisionTestHashMap() {
+	public static void collisionTestHashMap() {
 
-        System.out.println("Testing the number of collision with an hashmap with " + 50 + " elements and 50 different strings:\n");
+		System.out.println("Testing the number of collision with an hashmap with " + 50 + " elements and 50 different strings:\n");
 
-        Integer[] hashValues = new Integer[50];
-        int index = 0;
+		Integer[] hashValues = new Integer[50];
+		int index = 0;
 
 		// Printing the results of the number of collisions given by the strings of names of random people
-        __hashTest("Scottie Pippen", 50, hashValues, index++);
-        __hashTest("Patrick Ewing", 50, hashValues, index++);
-        __hashTest("Hakeem Olajuwon", 50, hashValues, index++);
-        __hashTest("Allen Iverson", 50, hashValues, index++);
-        __hashTest("Juan Carlos Navarro", 50, hashValues, index++);
-        __hashTest("Carmelo Anthony", 50, hashValues, index++);
-        __hashTest("Zion Williamson", 50, hashValues, index++);
-        __hashTest("Oscar Schmidt", 50, hashValues, index++);
-        __hashTest("JaVale McGee", 50, hashValues, index++);
-        __hashTest("Rudy Gobert", 50, hashValues, index++);
-        __hashTest("Lebron James", 50, hashValues, index++);
-        __hashTest("Kobe Bryant", 50, hashValues, index++);
-        __hashTest("Carlton Myers", 50, hashValues, index++);
-        __hashTest("Yao Ming", 50, hashValues, index++);
-        __hashTest("Ja Morant", 50, hashValues, index++);
-        __hashTest("Kelly Olynyk", 50, hashValues, index++);
-        __hashTest("John Stockton", 50, hashValues, index++);
-        __hashTest("Nando De Colo", 50, hashValues, index++);
-        __hashTest("Kevin Garnett", 50, hashValues, index++);
-        __hashTest("Tim Duncan", 50, hashValues, index++);
-        __hashTest("Manu Ginobili", 50, hashValues, index++);
-        __hashTest("Vasilis Spanoulis", 50, hashValues, index++);
-        __hashTest("Dario Saric", 50, hashValues, index++);
-        __hashTest("Chris Bosh", 50, hashValues, index++);
-        __hashTest("Danilo Gallinari", 50, hashValues, index++);
-        __hashTest("Dirk Nowitzki", 50, hashValues, index++);
-        __hashTest("James Harden", 50, hashValues, index++);
-        __hashTest("Joakim Noah", 50, hashValues, index++);
-        __hashTest("Pete Maravich", 50, hashValues, index++);
-        __hashTest("Chauncey Billups", 50, hashValues, index++);
-        __hashTest("Jeremy Lin", 50, hashValues, index++);
-        __hashTest("Boris Diaw", 50, hashValues, index++);
-        __hashTest("Stephen Curry", 50, hashValues, index++);
-        __hashTest("Nikola Jokic", 50, hashValues, index++);
-        __hashTest("Michael Jordan", 50, hashValues, index++);
-        __hashTest("Shaquille O'Neal", 50, hashValues, index++);
-        __hashTest("Ray Allen", 50, hashValues, index++);
-        __hashTest("Klay Thompson", 50, hashValues, index++);
-        __hashTest("Glenn Robinson III", 50, hashValues, index++);
-        __hashTest("Marco Belinelli", 50, hashValues, index++);
-        __hashTest("Tim Hardaway Jr.", 50, hashValues, index++);
-        __hashTest("Dennis Rodman", 50, hashValues, index++);
-        __hashTest("Steve Nash", 50, hashValues, index++);
-        __hashTest("Nathan Jawai", 50, hashValues, index++);
-        __hashTest("Nate Robinson", 50, hashValues, index++);
-        __hashTest("Felipe Reyes", 50, hashValues, index++);
-        __hashTest("Bol Bol", 50, hashValues, index++);
-        __hashTest("Paul Pierce", 50, hashValues, index++);
-        __hashTest("Chris Paul", 50, hashValues, index++);
-        __hashTest("Jason Kidd", 50, hashValues, index++);
+		__hashTest("Scottie Pippen", 50, hashValues, index++);
+		__hashTest("Patrick Ewing", 50, hashValues, index++);
+		__hashTest("Hakeem Olajuwon", 50, hashValues, index++);
+		__hashTest("Allen Iverson", 50, hashValues, index++);
+		__hashTest("Juan Carlos Navarro", 50, hashValues, index++);
+		__hashTest("Carmelo Anthony", 50, hashValues, index++);
+		__hashTest("Zion Williamson", 50, hashValues, index++);
+		__hashTest("Oscar Schmidt", 50, hashValues, index++);
+		__hashTest("JaVale McGee", 50, hashValues, index++);
+		__hashTest("Rudy Gobert", 50, hashValues, index++);
+		__hashTest("Lebron James", 50, hashValues, index++);
+		__hashTest("Kobe Bryant", 50, hashValues, index++);
+		__hashTest("Carlton Myers", 50, hashValues, index++);
+		__hashTest("Yao Ming", 50, hashValues, index++);
+		__hashTest("Ja Morant", 50, hashValues, index++);
+		__hashTest("Kelly Olynyk", 50, hashValues, index++);
+		__hashTest("John Stockton", 50, hashValues, index++);
+		__hashTest("Nando De Colo", 50, hashValues, index++);
+		__hashTest("Kevin Garnett", 50, hashValues, index++);
+		__hashTest("Tim Duncan", 50, hashValues, index++);
+		__hashTest("Manu Ginobili", 50, hashValues, index++);
+		__hashTest("Vasilis Spanoulis", 50, hashValues, index++);
+		__hashTest("Dario Saric", 50, hashValues, index++);
+		__hashTest("Chris Bosh", 50, hashValues, index++);
+		__hashTest("Danilo Gallinari", 50, hashValues, index++);
+		__hashTest("Dirk Nowitzki", 50, hashValues, index++);
+		__hashTest("James Harden", 50, hashValues, index++);
+		__hashTest("Joakim Noah", 50, hashValues, index++);
+		__hashTest("Pete Maravich", 50, hashValues, index++);
+		__hashTest("Chauncey Billups", 50, hashValues, index++);
+		__hashTest("Jeremy Lin", 50, hashValues, index++);
+		__hashTest("Boris Diaw", 50, hashValues, index++);
+		__hashTest("Stephen Curry", 50, hashValues, index++);
+		__hashTest("Nikola Jokic", 50, hashValues, index++);
+		__hashTest("Michael Jordan", 50, hashValues, index++);
+		__hashTest("Shaquille O'Neal", 50, hashValues, index++);
+		__hashTest("Ray Allen", 50, hashValues, index++);
+		__hashTest("Klay Thompson", 50, hashValues, index++);
+		__hashTest("Glenn Robinson III", 50, hashValues, index++);
+		__hashTest("Marco Belinelli", 50, hashValues, index++);
+		__hashTest("Tim Hardaway Jr.", 50, hashValues, index++);
+		__hashTest("Dennis Rodman", 50, hashValues, index++);
+		__hashTest("Steve Nash", 50, hashValues, index++);
+		__hashTest("Nathan Jawai", 50, hashValues, index++);
+		__hashTest("Nate Robinson", 50, hashValues, index++);
+		__hashTest("Felipe Reyes", 50, hashValues, index++);
+		__hashTest("Bol Bol", 50, hashValues, index++);
+		__hashTest("Paul Pierce", 50, hashValues, index++);
+		__hashTest("Chris Paul", 50, hashValues, index++);
+		__hashTest("Jason Kidd", 50, hashValues, index++);
 
-        System.out.println("");
+		System.out.println("");
 
-        for (int i = 0; i < hashValues.length; ++i) {
-            if (null != hashValues[i]) {
-                int sameHash = 1;
+		for (int i = 0; i < hashValues.length; ++i) {
+			if (null != hashValues[i]) {
+				int sameHash = 1;
 
-                System.out.print("For " + hashValues[i] + ", there are");
-                for (int j = i + 1; j < hashValues.length; ++j) {
-                    if (hashValues[j] == hashValues[i]) {
-                        ++sameHash;
-                        hashValues[j] = null;
-                    }
-                }
-                System.out.println(": " + sameHash + " equal hash values");
-            }
-        }
+				System.out.print("For " + hashValues[i] + ", there are");
+				for (int j = i + 1; j < hashValues.length; ++j) {
+					if (hashValues[j] == hashValues[i]) {
+						++sameHash;
+						hashValues[j] = null;
+					}
+				}
+				System.out.println(": " + sameHash + " equal hash values");
+			}
+		}
 
-        System.out.println("");
-    }
+		System.out.println("");
+	}
 	
 	/**
 	 * It tests the consistency of HashMap data structure, printing every successful result.
@@ -110,7 +111,7 @@ public class Test {
 	 * @attention It throws an Exception if the status is not consistent.
 	 * @attention There's no warranty that successful return of this function makes the implementation of HashMap correct.
 	 */
-    public static void implementationTestHashMap() throws Exception {
+	public static void implementationTestHashMap() throws Exception {
 		String data = "data";
 		System.out.println("Testing the implementation of HashMap\n");
 
@@ -139,21 +140,21 @@ public class Test {
 		System.out.println("Insertion of \"Bo McCalebb\" key");
 		hashmap.insert(new KeyValueElement("Bo McCalebb", data));
 
-        System.out.println("Insertion of \"Bill Russell\" key");
+		System.out.println("Insertion of \"Bill Russell\" key");
 		hashmap.insert(new KeyValueElement("Bill Russell", data));
 
-        System.out.println("Insertion of \"Marcus Morris\" key");
+		System.out.println("Insertion of \"Marcus Morris\" key");
 		hashmap.insert(new KeyValueElement("Marcus Morris", data));
 
-        System.out.println("Insertion of \"LiAngelo Ball\" key");
+		System.out.println("Insertion of \"LiAngelo Ball\" key");
 		hashmap.insert(new KeyValueElement("LiAngelo Ball", data));
 
 		if (null != hashmap.search("Lonzo Ball"))
 			throw new Exception("search() error: there is no element with key Lonzo Ball.");
 
-        System.out.println("");
-        hashmap.printTable();
-        System.out.println("");
+		System.out.println("");
+		hashmap.printTable();
+		System.out.println("");
 
 		KeyValueElement item = new KeyValueElement("Markieff Morris", data);
 		hashmap.insert(item);
@@ -167,9 +168,9 @@ public class Test {
 		if (null != hashmap.search(item.getKey()))
 			throw new Exception("search() or delete() error: HashMap does not allow duplicates.");
 
-        System.out.println("");
-        hashmap.printTable();
-        System.out.println("");
+		System.out.println("");
+		hashmap.printTable();
+		System.out.println("");
 		
 		hashmap = new HashMap(3);
 		int length = hashmap.length();
@@ -182,11 +183,11 @@ public class Test {
 			throw new Exception("length must be modified coherently after adding more elements beyond the hashmap initial length.");
 
 		System.out.println("");
-        hashmap.printTable();
-        System.out.println("");
+		hashmap.printTable();
+		System.out.println("");
 		
-        System.out.println("HashMap implementation test terminated successfully!\n");
-    }
+		System.out.println("HashMap implementation test terminated successfully!\n");
+	}
 
 	/**
 	 * It checks if an array of Integers is sorted.
@@ -373,19 +374,110 @@ public class Test {
 
 		System.out.println("BinarySearchTree implementation test terminated successfully!\n");
 	}
+	
+	public static void implementationTestNonOrientedGraph() throws Exception {
+		System.out.println("Testing NonOrientedGraph implementation\n");
+		
+		NonOrientedGraph graph = new NonOrientedGraph();
+		
+		System.out.println("Adding node1 to the graph");
+		String node1 = "node1";
+		graph.addNode(node1);
+		
+		if (graph.nodesNumber() != 1) 
+			throw new Exception("addNode() or nodesNumber() error : there should be 1 node");
+	
+		System.out.println("Removing and reinserting node1");
 
-    public static void main(String[] args) {
+		graph.removeNode(node1);
 
-        // To test the number of collisions due to hash function of HashMap class.
-        collisionTestHashMap();
+		if (graph.nodesNumber() != 0)
+			throw new Exception ("removeNode() error : we removed the only node in the graph");
 
-        // To test the implementation of Dictionary interface is correct.
-        try {
-            implementationTestHashMap();
-        } catch (Exception exception) {
-            System.err.println(exception.getMessage());
+		graph.addNode(node1);
+	
+		System.out.println("Adding node2 and creating arch with node1");
+		
+		String node2 = "node2";
+		graph.addNode(node2);
+		Arch arch1_2 = new Arch (node1, node2);
+		Comparable[] archNodes1_2 = arch1_2.getArchNodes();
+		graph.addArch(archNodes1_2[0], archNodes1_2[1]);
+		
+		if (graph.archsNumber() != 1)
+			throw new Exception("archsNumber() error : there should be 1 arch");
+
+		System.out.println("Removing and reinserting arch1_2");
+	
+		graph.removeArch(arch1_2);
+
+		if (graph.archsNumber() != 0)
+			throw new Exception("removeArch() error : we removed the Arch arch1_2");
+		
+		graph.addArch(archNodes1_2[0], archNodes1_2[1]);
+		
+		System.out.println("Adding 1 more node and creating another arch with the new node and node1");
+		String node3 = "node3";
+		graph.addNode(node3);
+		Arch arch1_3 = new Arch (node1, node3);
+		Comparable[] archNodes1_3 = arch1_3.getArchNodes();
+		graph.addArch(archNodes1_3[0], archNodes1_3[1]);
+		
+		if (graph.archsNumber() != 2)
+			throw new Exception("archsNumber() error : there should be 2 archs now.");
+
+		if (graph.grade("node1") != 2)
+			throw new Exception("grade() error : node1 has 2 adjacents nodes");
+		
+		System.out.println("Adding 1 more node and creating a new arch with node2");
+
+		String node4 = "node4";
+		Arch arch2_4 = new Arch (node2, node4);
+		graph.addNode(node4);
+		Comparable[] archNodes2_4 = arch2_4.getArchNodes();
+		graph.addArch(archNodes2_4[0], archNodes2_4[1]);
+
+		System.out.println("Testing opposite method");
+
+		if (graph.opposite(archNodes2_4[0], arch2_4) != archNodes2_4[1])
+			throw new Exception("opposite() error : node4 should be the opposite of node2 in the arch2_4");
+		System.out.println("Testing edges method");
+		Comparable[] edge = graph.edges(arch2_4);
+	
+		if (null == edge)
+			throw new Exception("edges() error : arch2_4 exists ");
+	
+		if (0 != edge[0].compareTo(archNodes2_4[0]) && 0 != edge[1].compareTo(archNodes2_4[1]))
+			throw new Exception("edges() error : node2 and node4 are the edges of arch2_4");
+	
+		System.out.println("Testing incidentsArch method");
+		
+		Arch[] incident4 = graph.incidentArchs(node4);
+		if (incident4[0] != arch2_4)
+			throw new Exception("incidentsArch() error : node4 has an arch with node2"); 
+		
+		System.out.println("Testing areAdjacents method");
+		if (graph.areAdjacent(node1, node2) != true)
+			throw new Exception("areAdjacent() error : node1 and node2 are adjacent");
+
+		if (graph.areAdjacent(node2, node3) == true)
+			throw new Exception("areAdjacent() error : node2 and node3 aren't adjacent");
+	
+		System.out.println("Testing breadthFirstVisit method");
+	}
+	
+	public static void main(String[] args) {
+
+		// To test the number of collisions due to hash function of HashMap class.
+		collisionTestHashMap();
+
+		// To test the implementation of Dictionary interface is correct.
+		try {
+			implementationTestHashMap();
+		} catch (Exception exception) {
+			System.err.println(exception.getMessage());
 			System.exit(-1);
-        }
+		}
 
 		// To test the sorting algorithms really sort arrays.
 		try {
@@ -401,6 +493,15 @@ public class Test {
 			System.err.println(exception.getMessage());
 			System.exit(-1);
 		}
-    }
+		
+		try {
+			implementationTestNonOrientedGraph();
+		} catch (Exception exception) {
+			System.err.println(exception.getMessage());
+			System.exit(-1);
+		}
+
+	}
+
 }
 
