@@ -138,7 +138,7 @@ public class MovidaCoreTest {
 		}
 
 		if (8 != base.searchMostVotedMovies(11).length) {
-			System.err.println("searchMostVotedMovies error: there are less than 11 movies");
+			System.err.println("searchMostVotedMovies() error: there are less than 11 movies");
 			System.exit(-1);
 		}
 
@@ -148,10 +148,62 @@ public class MovidaCoreTest {
 		}
 
 		if (8 != base.searchMostRecentMovies(11).length) {
-			System.err.println("searchMostRecentMovies error: there are less than 11 movies");
+			System.err.println("searchMostRecentMovies() error: there are less than 11 movies");
 			System.exit(-1);
 		}
 
-		
+		if (8 != base.searchMostActiveActors(8).length) {
+			System.err.println("searchMostActiveActors() error: the query requires 8 actors");
+			System.exit(-1);
+		}
+
+		if (21 != base.searchMostActiveActors(50).length) {
+			System.err.println("searchMostActiveActors() error: there are less than 50 actors");
+			System.exit(-1);
+		}
+
+		Person[] direct_collab_ford = base.getDirectCollaboratorsOf(new Person("Harrison Ford"));
+
+		if (null == direct_collab_ford) {
+			System.err.println("getDirectCollaboratorsOf() error: Harrison Ford exists and has collaborations");
+			System.exit(-1);
+		}
+
+		boolean found = false;
+
+		for (int i = 0; direct_collab_ford.length > i; ++i) {
+			if (0 == direct_collab_ford[i].getName().compareTo("John Travolta")) {
+				System.err.println("getDirectCollaboratorsOf() error: Harrison Ford has not John Travolta as direct collaborator");
+				System.exit(-1);
+			}
+
+			if (0 == direct_collab_ford[i].getName().compareTo("Katharine Towne"))
+				found = true;
+		}
+
+		if (!found) {
+			System.err.println("getDirectCollaboratorsOf() error: Katharine Towne is a direct collaborator of Harrison Ford");
+			System.exit(-1);
+		}
+
+		found = false;
+		Person[] team_skerritt = base.getTeamOf(new Person("Tom Skerritt"));
+
+		for (int i = 0; team_skerritt.length > i; ++i) {
+			if (0 == team_skerritt[i].getName().compareTo("Sela Ward")) {
+				System.err.println("getTeamOf() error: Sela Ward is not part of the team of Tom Skerritt");
+				System.exit(-1);
+			}
+
+			if (0 == team_skerritt[i].getName().compareTo("Juliette Lewis"))
+				found = true;
+		}
+
+		if (!found) {
+			System.err.println("getTeamOf() error: Juliette Lewis is part of Tom Skerritt");
+			System.exit(-1);
+		}
+
+		System.out.println("MovidaCore test terminated successfully!");
 	}
 }

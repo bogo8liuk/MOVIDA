@@ -103,6 +103,10 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 	// Arrays to keep track of data about movies
 	private Vector[] arrayData;
 
+	// It keeps track of actors that attended in movies where they acted alone.
+	private HashMap aloneActors;
+
+	// Graph to mantain the collaborations between actors in same movies.
 	private NonOrientedGraph collaborations;
 
 	public MovidaCore() {
@@ -111,6 +115,7 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		this.treeMovie = null;
 		this.treePerson = null;
 		this.arrayData = null;
+		this.aloneActors = new HashMap();
 		this.collaborations = new NonOrientedGraph();
 		this.dictionary = null;
 		this.algorithm = null;
@@ -163,7 +168,12 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 			System.exit(-1);
 		}
 
+		this.tableMovie = null;
+		this.tablePerson = null;
+		this.treeMovie = null;
+		this.treePerson = null;
 		this.arrayData = null;
+		this.aloneActors = new HashMap();
 		this.collaborations = new NonOrientedGraph();
 	}
 
@@ -385,12 +395,12 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 	}
 
 	/**
-	 * It removes from the Graph instance the arch between the people in a cast and if a node has no more
+	 * It removes from the Graph instance the archs between the people in a cast and if a node has no more
 	 * incident archs after the previous operation, then the node is removed as well.
 	 *
 	 * @param cast The people from which removing the archs.
 	 *
-	 * @return The node that have been removed.
+	 * @return The nodes that have been removed.
 	 */
 	private String[] deleteCollaboration(Person[] cast) {
 		String[] names = new String[cast.length];
@@ -399,6 +409,11 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		for (int i = 0; cast.length > i; ++i)
 			names[i] = cast[i].getName();
 
+		if (1 == names.length) {
+			Integer occurrences = (Integer) this.aloneActors.search(names[0]);
+			occurrences -= 1;
+		}
+
 		for (int i = 0; names.length - 1 > i; ++i) {
 			for (int j = i + 1; names.length > j; ++j) {
 				Arch arch = new Arch(names[i], names[j]);
@@ -406,8 +421,11 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 				this.collaborations.removeArch(arch);
 			}
 
-			// Removal of the node.
-			if (null == this.collaborations.incidentArchs(names[i])) {
+			Object occurrences = (Object) this.aloneActors.search(names[i]);
+
+			/* Removal of the node: it can be done only if the node representing the i-th actor has no adjacent nodes and the actor
+			   did not act in movie as alone actor. */
+			if (0 == this.collaborations.grade(names[i]) && null == occurrences) {
 				this.collaborations.removeNode(names[i]);
 				removedNodes.add(names[i]);
 			}
@@ -415,7 +433,9 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 
 		// Removal of the last node: in the previous loop, the last node is not checked.
 		String last = names[names.length - 1];
-		if (null == this.collaborations.incidentArchs(last)) {
+		Object occurrences = this.aloneActors.search(last);
+
+		if (0 == this.collaborations.grade(last) && null == occurrences) {
 			this.collaborations.removeNode(last);
 			removedNodes.add(last);
 		}
@@ -468,6 +488,8 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 
 				switch (keys[0]) {
 					case "Title":
+						if (boolmap[0] || boolmap[1] || boolmap[2] || boolmap[3])
+							throw new MovidaFileException();
 						boolmap[0] = true;
 
 						title = keys[1].trim();
@@ -518,8 +540,6 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 						this.doOn(DictionaryOperation.DELETE, KeyType.MOVIE, MapImplementation.ABR, title, null);
 						this.doOn(DictionaryOperation.INSERT, KeyType.MOVIE, MapImplementation.ABR, title, movie);
 
-						// Insertion of collaborations between every actor just parsed.
-						this.insertCollaboration(cast);
 						break;
 
 					default:
@@ -555,6 +575,23 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		for (int i = 0; movies.length > i; ++i) {
 			Person[] people = movies[i].getCast();
 
+			// If the actor acted alone.
+			if (1 == people.length) {
+				String name = people[0].getName();
+				Object res = this.aloneActors.search(name);
+
+				// If the actor never acted alone before.
+				if (null == res) {
+					KeyValueElement item = new KeyValueElement(name, new Integer(1));
+					this.aloneActors.insert(item);
+				}
+
+				else {
+					Integer occurrences = (Integer) res;
+					occurrences += 1;
+				}
+			}
+
 			// Cast arranging.
 			for (int j = 0; people.length > j; ++j) {
 				String actorName = people[j].getName();
@@ -567,6 +604,8 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 				PairPersonMovie actorMovie = new PairPersonMovie(people[j], movies[i]);
 				listActors.add(actorMovie);
 			}
+			// Insertion of collaborations between every actor in the cast.
+			this.insertCollaboration(people);
 
 			// Director arranging.
 			String directorName = movies[i].getDirector().getName();
@@ -700,6 +739,7 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		this.tablePerson = null;
 		this.treePerson = null;
 		this.arrayData = null;
+		this.aloneActors = new HashMap();
 		this.collaborations = new NonOrientedGraph();
 	}
 
@@ -837,6 +877,7 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 
 			// Removal of actors that have no more collaborations with other actors.
 			String[] removedNodes = this.deleteCollaboration(movie.getCast());
+
 			if (null != removedNodes) {
 				for (int i = 0; removedNodes.length > i; ++i) {
 					this.doOn(DictionaryOperation.DELETE, KeyType.PERSON, MapImplementation.HashIndirizzamentoAperto, removedNodes[i], null);
@@ -1091,7 +1132,7 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		return mostRecentMovies;
 	}
 
-	// To keep track the number of occurences of a Person in a particular context.
+	// To keep track the number of occurrences of a Person in a particular context.
 	private class PairIntPerson implements Comparable<PairIntPerson> {
 		private Integer index;
 		private Person person;
@@ -1134,7 +1175,7 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		LinkedList<PairIntPerson> list = new LinkedList<PairIntPerson>();
 
 		/* Insertion of people in a list in order to avoid duplicates and keeping track of
-		   all the occurences of every person. */
+		   all the occurrences of every person. */
 		for (int i = 0; actors.length > i; ++i) {
 			Person actor = actors[i].getPerson();
 
