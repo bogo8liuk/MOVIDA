@@ -101,7 +101,7 @@ public class MovidaCoreTest {
 			System.exit(-1);
 		}
 
-		if (base.getMovieByTitle("Cape Fear") != base.searchMovieByTitle("Cape Fear")[0]) {
+		if (base.getMovieByTitle("Cape Fear") != base.searchMoviesByTitle("Cape Fear")[0]) {
 			System.err.println("getMovieByTitle() and searchMovieByTitle() should return the same");
 			System.exit(-1);
 		}
@@ -125,7 +125,7 @@ public class MovidaCoreTest {
 			System.exit(-1);
 		}
 
-		Movies[] movies_with_willis = base.searchMoviesStarredBy("Bruce Willis");
+		Movie[] movies_with_willis = base.searchMoviesStarredBy("Bruce Willis");
 
 		if (null == movies_with_willis || 1 != movies_with_willis.length) {
 			System.err.println("searchMoviesDirectedBy() error: Willis attended one movie");

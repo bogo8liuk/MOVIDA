@@ -420,7 +420,8 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 			removedNodes.add(last);
 		}
 
-		return (0 == removedNodes.size()) ? null : (String[]) removedNodes.toArray();
+		String[] arrayType = new String[1];
+		return (0 == removedNodes.size()) ? null : removedNodes.toArray(arrayType);
 	}
 
 	public void loadFromFile(File f) throws MovidaFileException {
@@ -527,16 +528,21 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 			}
 		}
 
-		Movie[] movies;
+		Object[] array;
 
 		try {
-			movies = (Movie[]) this.getArray(KeyType.MOVIE);
+			array = this.getArray(KeyType.MOVIE);
 		} catch (RuntimeException exception) {
 			throw new MovidaFileException();
 		}
 
-		if (null == movies)
+		if (null == array)
 			return;
+
+		Movie[] movies = new Movie[array.length];
+
+		for (int i = 0; array.length > i; ++i)
+			movies[i] = (Movie) array[i];
 
 		// List to populate arrays of arrayData, in order to keep track of data about movies.
 		LinkedList<PairIntMovie> listYears = new LinkedList<PairIntMovie>();
@@ -642,13 +648,13 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 	}
 
 	public void saveToFile(File f) throws MovidaFileException {
-		Movie[] movies;
-
 		if (!this.movieDictIstanceExist(KeyType.MOVIE))
 			throw new MovidaFileException();
 
+		Object[] array;
+
 		try {
-			movies = (Movie[]) getArray(KeyType.MOVIE);
+			array = this.getArray(KeyType.MOVIE);
 		} catch(RuntimeException exception) {
 			throw new MovidaFileException();
 		}
@@ -663,7 +669,7 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 			throw new MovidaFileException();
 
 		// If there's no Movie, then write simply a newline, cancelling all the previous lines.
-		if (null == movies) {
+		if (null == array) {
 			try {
 				Files.write(file, "\n".getBytes(), StandardOpenOption.TRUNCATE_EXISTING);
 				return;
@@ -674,6 +680,11 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 
 		// Lines are overwrited.
 		else {
+			Movie[] movies = new Movie[array.length];
+
+			for (int i = 0; array.length > i; ++i)
+				movies[i] = (Movie) array[i];
+
 			try {
 				for (int i = 0; movies.length < i; ++i) 
 					Files.write(file, movieToBytes(movies[i]), StandardOpenOption.TRUNCATE_EXISTING);
@@ -766,10 +777,16 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 				listDirectors.add(arrayDirectors[i]);
 		}
 
-		this.arrayData[YEARS] = (0 == listYears.size()) ? null : new Vector((PairIntMovie[]) listYears.toArray());
-		this.arrayData[VOTES] = (0 == listVotes.size()) ? null : new Vector((PairIntMovie[]) listVotes.toArray());
-		this.arrayData[ACTORS] = (0 == listActors.size()) ? null : new Vector((PairPersonMovie[]) listActors.toArray());
-		this.arrayData[DIRECTORS] = (0 == listDirectors.size()) ? null : new Vector((PairPersonMovie[]) listDirectors.toArray());
+		// Assigning vectors in arrayData.
+		PairIntMovie[] arrayTypeInt = new PairIntMovie[1];
+		this.arrayData[YEARS] = (0 == listYears.size()) ? null : new Vector<PairIntMovie>(listYears.toArray(arrayTypeInt));
+
+		this.arrayData[VOTES] = (0 == listVotes.size()) ? null : new Vector<PairIntMovie>(listVotes.toArray(arrayTypeInt));
+
+		PairPersonMovie[] arrayTypePerson = new PairPersonMovie[1];
+		this.arrayData[ACTORS] = (0 == listActors.size()) ? null : new Vector<PairPersonMovie>(listActors.toArray(arrayTypePerson));
+
+		this.arrayData[DIRECTORS] = (0 == listDirectors.size()) ? null : new Vector<PairPersonMovie>(listDirectors.toArray(arrayTypePerson));
 	}
 
 	/**
@@ -866,15 +883,24 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 			System.exit(-1);
 		}
 
+		Object[] array = null;
+
 		try {
-			return (Movie[]) this.getArray(KeyType.MOVIE);
+			array = this.getArray(KeyType.MOVIE);
 		} catch (RuntimeException exception) {
 			System.err.println("Invalid set dictionary: aborting");
 			System.exit(-1);
 		}
 
-		// Unreachable: to quiet the compiler.
-		return null;
+		if (null == array)
+			return null;
+
+		Movie[] res = new Movie[array.length];
+
+		for (int i = 0; array.length > i; ++i)
+			res[i] = (Movie) array[i];
+
+		return res;
 	}
 
 	public Person[] getAllPeople() {
@@ -883,15 +909,24 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 			System.exit(-1);
 		}
 
+		Object[] array = null;
+
 		try {
-			return (Person[]) this.getArray(KeyType.PERSON);
+			array = this.getArray(KeyType.PERSON);
 		} catch (RuntimeException exception) {
 			System.err.println("Invalid set dictionary: aborting");
 			System.exit(-1);
 		}
 
-		// Unreachable: to quiet the compiler.
-		return null;
+		if (null == array)
+			return null;
+
+		Person[] res = new Person[array.length];
+
+		for (int i = 0; array.length > i; ++i)
+			res[i] = (Person) array[i];
+
+		return res;
 	}
 
 	public Movie[] searchMoviesByTitle(String title) {
@@ -954,10 +989,8 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		}
 
 		// Conversion of the list in an array.
-		if (0 != list.size())
-			return (Movie[]) list.toArray();
-		else
-			return null;
+		Movie[] arrayType = new Movie[1];
+		return (0 == list.size()) ? null : list.toArray(arrayType);
 	}
 
 	public Movie[] searchMoviesDirectedBy(String name) {
@@ -980,10 +1013,8 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		}
 
 		// Conversion of the list in an array.
-		if (0 != list.size())
-			return (Movie[]) list.toArray();
-		else
-			return null;
+		Movie[] arrayType = new Movie[1];
+		return (0 == list.size()) ? null : list.toArray(arrayType);
 	}
 
 	public Movie[] searchMoviesStarredBy(String name) {
@@ -1006,10 +1037,8 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		}
 
 		// Conversion of the list in an array.
-		if (0 != list.size())
-			return (Movie[]) list.toArray();
-		else
-			return null;
+		Movie[] arrayType = new Movie[1];
+		return (0 == list.size()) ? null : list.toArray(arrayType);
 	}
 
 	public Movie[] searchMostVotedMovies(Integer N) {
@@ -1120,7 +1149,8 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		}
 
 		// Construction and sorting of vector with every person and all its occurrences (of the given person).
-		PairIntPerson[] occurrences = (PairIntPerson []) list.toArray();
+		PairIntPerson[] arrayType = new PairIntPerson[1];
+		PairIntPerson[] occurrences = list.toArray(arrayType);
 		Vector<PairIntPerson> v = new Vector(occurrences);
 
 		switch (this.algorithm) {
@@ -1189,21 +1219,21 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		/* At this point, there's no need to do a specific operation on visited nodes, so the function
 		   passed to the visit algorithm does nothing. */
 		NodeOperation op = n -> {};
-		String[] teamNames = (String[]) this.collaborations.breadthFirstVisit(op, actor.getName());
+		Comparable[] array = this.collaborations.breadthFirstVisit(op, actor.getName());
 
-		if (null == teamNames)
+		if (null == array)
 			return null;
 
-		Person[] team = new Person[teamNames.length];
+		Person[] team = new Person[array.length];
 
-		for (int i = 0; team.length > i; ++i)
-			team[i] = new Person(teamNames[i]);
+		for (int i = 0; array.length > i; ++i)
+			team[i] = new Person((String) array[i]);
 
 		return team;
 	}
 
 	/**
-	 * It builds a collaboration from two actors by .
+	 * It builds a collaboration from two actors by looking at the data about actors in arrayData.
 	 *
 	 * @param nameA The name of the first actor.
 	 * @param nameB The name of the second actor.

@@ -43,11 +43,11 @@ public class NonOrientedGraph implements Graph {
 		int i = Hash.hash(nodeKey) % this.adjacencyLists.length;
 		boolean found = false;
 
-		for (int attempt = 0; this.adjacencyLists.length < attempt; ++attempt) {
+		for (int attempt = 0; this.adjacencyLists.length > attempt; ++attempt) {
 			int index = (i + attempt) % this.adjacencyLists.length;
 
 			// If the index-th node is null, the searched node does not exist.
-			if (null == this.adjacencyLists[index] || _DELETED_ == this.adjacencyLists[index])
+			if (null == this.adjacencyLists[index])
 				throw new RuntimeException();
 			else if (nodeKey == (String) this.adjacencyLists[index].getKey()) {
 				found = true;
@@ -71,10 +71,10 @@ public class NonOrientedGraph implements Graph {
 	private void __assertInexistentNode(String nodeKey) throws RuntimeException {
 		int i = Hash.hash(nodeKey) % this.adjacencyLists.length;
 
-		for (int attempt = 0; this.adjacencyLists.length < attempt; ++attempt) {
+		for (int attempt = 0; this.adjacencyLists.length > attempt; ++attempt) {
 			int index = (i + attempt) % this.adjacencyLists.length;
 
-			if (null == this.adjacencyLists[index] || _DELETED_ == this.adjacencyLists[index])
+			if (null == this.adjacencyLists[index])
 				break;
 			else if (nodeKey == (String) this.adjacencyLists[index].getKey())
 				throw new RuntimeException();
@@ -86,30 +86,32 @@ public class NonOrientedGraph implements Graph {
 	 *
 	 * @param arch The arch to look for.
 	 *
-	 * @throws RuntimeException If the searched arch does not exist
+	 * @throws RuntimeException If the searched arch does not exist.
 	 */
 	private void __assertArchExists(Arch arch) throws RuntimeException {
 		if (null == arch)
 			throw new RuntimeException();
 
-		String[] archNodes = (String[]) arch.getArchNodes();
+		Comparable[] archNodes = arch.getArchNodes();
+		String archNodes0 = (String) archNodes[0];
+		String archNodes1 = (String) archNodes[1];
 
-		if (null == archNodes[0] || null == archNodes[1])
+		if (null == archNodes0 || null == archNodes1)
 			throw new RuntimeException();
 
 		LinkedList<String> adjList0;
 		boolean found = false;
 		int index = 0;
 
-		int i = Hash.hash(archNodes[0]) % this.adjacencyLists.length;
+		int i = Hash.hash(archNodes0) % this.adjacencyLists.length;
 
 		// Looking for the node first node of the arch.
-		for (int attempt = 0; this.adjacencyLists.length < attempt; ++attempt) {
+		for (int attempt = 0; this.adjacencyLists.length > attempt; ++attempt) {
 			index = (i + attempt) % this.adjacencyLists.length;
 
-			if (null == this.adjacencyLists[index] || _DELETED_ == this.adjacencyLists[index])
+			if (null == this.adjacencyLists[index])
 				throw new RuntimeException();
-			else if (archNodes[0] == (String) this.adjacencyLists[index].getKey()) {
+			else if (archNodes0 == (String) this.adjacencyLists[index].getKey()) {
 				found = true;
 				break;
 			}
@@ -122,7 +124,7 @@ public class NonOrientedGraph implements Graph {
 		/* If the second node of the arch does not exist in the adjacency list of the first node,
 		   then even the arch does not exist. */
 		adjList0 = (LinkedList<String>) this.adjacencyLists[index].getValue();
-		if (-1 == adjList0.indexOf(archNodes[1]))
+		if (-1 == adjList0.indexOf(archNodes1))
 			throw new RuntimeException();
 
 		/* The check must not be carried out on the second node, because we grant that if a node A
@@ -142,7 +144,7 @@ public class NonOrientedGraph implements Graph {
 		int i = Hash.hash((String) nodeKey) % this.adjacencyLists.length;
 
 		/* This loop is granted to terminate and not to encounter a _DELETED_ or null node only in the case
-		   that nodeKey is a valid and existtent node. */
+		   that nodeKey is a valid and existent node. */
 		while (0 != nodeKey.compareTo(this.adjacencyLists[i].getKey()))
 			i = (i + 1) % this.adjacencyLists.length;
 
@@ -168,11 +170,12 @@ public class NonOrientedGraph implements Graph {
 	public int archsNumber() {
 		int counter = 0;
 
-		for (KeyValueElement k: this.adjacencyLists)
+		for (KeyValueElement k: this.adjacencyLists) {
 			if (null != k && _DELETED_ != k) {
 				LinkedList<String> list = (LinkedList<String>) k.getValue();
 				counter += list.size();
 			}
+		}
 
 		/* The presence of a node A in the adjacency list of another node B implies that the node B
 		   stands in the adjacency list of the node A, so every node is counted twice. */
@@ -309,7 +312,7 @@ public class NonOrientedGraph implements Graph {
 	 * @attention The allocation of the parameters is an unchecked runtime error.
 	 */
 	private static Boolean insertNode(KeyValueElement[] table, KeyValueElement item) {
-		int i = Hash.hash((String) item.getKey()) % table.length;
+		int i = Hash.hash((String) item.getKey());
 
 		for (int attempt = 0; table.length > attempt; ++attempt) {
 			int index = (i + attempt) % table.length;
@@ -417,22 +420,29 @@ public class NonOrientedGraph implements Graph {
 			System.exit(-1);
 		}
 
-		__assertNodeExists((String) nodeKey);
+		try {
+			__assertNodeExists((String) nodeKey);
+		} catch (RuntimeException exception) {
+			return;
+		}
 
 		int i = this.getIndex(nodeKey);
 
 		LinkedList<String> list = (LinkedList<String>) this.adjacencyLists[i].getValue();
-		Iterator<String> iter = list.iterator();
 
-		/* Deletion of the archs of the node to remove: the adjacency list of every node involved in the
-		   archs has to be modified. */
-		while (iter.hasNext()) {
-			String cur = iter.next();
+		if (0 != list.size()) {
+			Iterator<String> iter = list.iterator();
 
-			int j = this.getIndex(cur);
+			/* Deletion of the archs of the node to remove: the adjacency list of every node involved in the
+			   archs has to be modified. */
+			while (iter.hasNext()) {
+				String cur = iter.next();
 
-			LinkedList<String> curList = (LinkedList<String>) this.adjacencyLists[j].getValue();
-			curList.remove((String) nodeKey);
+				int j = this.getIndex(cur);
+
+				LinkedList<String> curList = (LinkedList<String>) this.adjacencyLists[j].getValue();
+				curList.remove((String) nodeKey);
+			}
 		}
 
 		this.adjacencyLists[i] = _DELETED_;
@@ -488,21 +498,24 @@ public class NonOrientedGraph implements Graph {
 			int i = this.getIndex(cur);
 			LinkedList<String> adjList = (LinkedList<String>) this.adjacencyLists[i].getValue();
 
-			Iterator<String> iter = adjList.iterator();
-			// "For each adjacent node"
-			while (iter.hasNext()) {
-				String node = iter.next();
+			if (0 != adjList.size()) {
+				Iterator<String> iter = adjList.iterator();
+				// "For each adjacent node"
+				while (iter.hasNext()) {
+					String node = iter.next();
 
-				int j = this.getIndex(node);
-				// If the j-th node is not marked, then add it to the queue and mark it.
-				if (!boolmap[j]) {
-					boolmap[j] = true;
-					queue.add(node);
+					int j = this.getIndex(node);
+					// If the j-th node is not marked, then add it to the queue and mark it.
+					if (!boolmap[j]) {
+						boolmap[j] = true;
+						queue.add(node);
+					}
 				}
 			}
 		}
 
-		return (String[]) list.toArray();
+		String[] arrayType = new String[1];
+		return (0 == list.size()) ? null : list.toArray(arrayType);
 	}
 
 	/**
@@ -707,6 +720,7 @@ public class NonOrientedGraph implements Graph {
 			}
 		}
 
-		return (0 == list.size()) ? null : (Arch[]) list.toArray();
+		Arch[] arrayType = new Arch[1];
+		return (0 == list.size()) ? null : list.toArray(arrayType);
 	}
 }

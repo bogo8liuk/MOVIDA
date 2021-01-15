@@ -383,7 +383,7 @@ public class Test {
 		System.out.println("Adding node1 to the graph");
 		String node1 = "node1";
 		graph.addNode(node1);
-		
+
 		if (graph.nodesNumber() != 1) 
 			throw new Exception("addNode() or nodesNumber() error : there should be 1 node");
 	
@@ -392,7 +392,7 @@ public class Test {
 		graph.removeNode(node1);
 
 		if (graph.nodesNumber() != 0)
-			throw new Exception ("removeNode() error : we removed the only node in the graph");
+			throw new Exception("removeNode() error : we removed the only node in the graph");
 
 		graph.addNode(node1);
 	
@@ -400,15 +400,15 @@ public class Test {
 		
 		String node2 = "node2";
 		graph.addNode(node2);
-		Arch arch1_2 = new Arch (node1, node2);
+		Arch arch1_2 = new Arch(node1, node2);
 		Comparable[] archNodes1_2 = arch1_2.getArchNodes();
 		graph.addArch(archNodes1_2[0], archNodes1_2[1]);
-		
+
 		if (graph.archsNumber() != 1)
 			throw new Exception("archsNumber() error : there should be 1 arch");
 
 		System.out.println("Removing and reinserting arch1_2");
-	
+
 		graph.removeArch(arch1_2);
 
 		if (graph.archsNumber() != 0)
@@ -419,9 +419,7 @@ public class Test {
 		System.out.println("Adding 1 more node and creating another arch with the new node and node1");
 		String node3 = "node3";
 		graph.addNode(node3);
-		Arch arch1_3 = new Arch (node1, node3);
-		Comparable[] archNodes1_3 = arch1_3.getArchNodes();
-		graph.addArch(archNodes1_3[0], archNodes1_3[1]);
+		graph.addArch(node1, node3);
 		
 		if (graph.archsNumber() != 2)
 			throw new Exception("archsNumber() error : there should be 2 archs now.");
@@ -432,7 +430,7 @@ public class Test {
 		System.out.println("Adding 1 more node and creating a new arch with node2");
 
 		String node4 = "node4";
-		Arch arch2_4 = new Arch (node2, node4);
+		Arch arch2_4 = new Arch(node2, node4);
 		graph.addNode(node4);
 		Comparable[] archNodes2_4 = arch2_4.getArchNodes();
 		graph.addArch(archNodes2_4[0], archNodes2_4[1]);
@@ -441,6 +439,7 @@ public class Test {
 
 		if (graph.opposite(archNodes2_4[0], arch2_4) != archNodes2_4[1])
 			throw new Exception("opposite() error : node4 should be the opposite of node2 in the arch2_4");
+
 		System.out.println("Testing edges method");
 		Comparable[] edge = graph.edges(arch2_4);
 	
@@ -457,13 +456,15 @@ public class Test {
 			throw new Exception("incidentsArch() error : node4 has an arch with node2"); 
 		
 		System.out.println("Testing areAdjacents method");
-		if (graph.areAdjacent(node1, node2) != true)
+		if (!graph.areAdjacent(node1, node2))
 			throw new Exception("areAdjacent() error : node1 and node2 are adjacent");
 
-		if (graph.areAdjacent(node2, node3) == true)
+		if (graph.areAdjacent(node2, node3))
 			throw new Exception("areAdjacent() error : node2 and node3 aren't adjacent");
 	
 		System.out.println("Testing breadthFirstVisit method");
+
+		System.out.println("NonOrientedGraph implementation test terminated successfully!\n");
 	}
 	
 	public static void main(String[] args) {
