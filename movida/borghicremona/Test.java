@@ -372,6 +372,25 @@ public class Test {
 		tree.inOrderVisitPrint();
 		System.out.println("");
 
+		System.out.println("Inserting elements with keys 100, 75, 82, 40, 43, 49, 60");
+		tree.insert(new KeyValueElement(100, data));
+		tree.insert(new KeyValueElement(75, data));
+		tree.insert(new KeyValueElement(82, data));
+		tree.insert(new KeyValueElement(40, data));
+		tree.insert(new KeyValueElement(43, data));
+		tree.insert(new KeyValueElement(49, data));
+		tree.insert(new KeyValueElement(60, data));
+
+		System.out.println("Deleting the element with key 75");
+		tree.delete(75);
+
+		if (null == tree.search(60))
+			throw new Exception("delete() error: the tree has to keep the property of binary search tree");
+
+		System.out.println("");
+		tree.inOrderVisitPrint();
+		System.out.println("");
+
 		System.out.println("BinarySearchTree implementation test terminated successfully!\n");
 	}
 	
@@ -416,7 +435,7 @@ public class Test {
 		
 		graph.addArch(archNodes1_2[0], archNodes1_2[1]);
 		
-		System.out.println("Adding 1 more node and creating another arch with the new node and node1");
+		System.out.println("Adding node3 and creating another arch with the new node and node1");
 		String node3 = "node3";
 		graph.addNode(node3);
 		graph.addArch(node1, node3);
@@ -427,7 +446,7 @@ public class Test {
 		if (graph.grade("node1") != 2)
 			throw new Exception("grade() error : node1 has 2 adjacents nodes");
 		
-		System.out.println("Adding 1 more node and creating a new arch with node2");
+		System.out.println("Adding node4 and creating a new arch with the new node and node2");
 
 		String node4 = "node4";
 		Arch arch2_4 = new Arch(node2, node4);
@@ -452,7 +471,9 @@ public class Test {
 		System.out.println("Testing incidentsArch method");
 		
 		Arch[] incident4 = graph.incidentArchs(node4);
-		if (incident4[0] != arch2_4)
+		Comparable[] archNodesInc4 = incident4[0].getArchNodes();
+		if (!(0 == archNodes2_4[0].compareTo(archNodesInc4[0]) && 0 == archNodes2_4[1].compareTo(archNodesInc4[1])) &&
+		    !(0 == archNodes2_4[0].compareTo(archNodesInc4[1]) && 0 == archNodes2_4[1].compareTo(archNodesInc4[0])))
 			throw new Exception("incidentsArch() error : node4 has an arch with node2"); 
 		
 		System.out.println("Testing areAdjacents method");
@@ -462,9 +483,77 @@ public class Test {
 		if (graph.areAdjacent(node2, node3))
 			throw new Exception("areAdjacent() error : node2 and node3 aren't adjacent");
 	
-		System.out.println("Testing breadthFirstVisit method");
+		System.out.println("Adding 17 new nodes");
+		for (Integer i = 5; 22 > i; ++i) {
+			String ithNode = "node" + i.toString();
 
-		System.out.println("NonOrientedGraph implementation test terminated successfully!\n");
+			graph.addNode(ithNode);
+		}
+
+		if (21 != graph.nodesNumber())
+			throw new Exception("addNode() error: there should be 21 nodes");
+
+		System.out.println("Adding arch between node6 and node21");
+		graph.addArch("node6", "node21");
+		System.out.println("Adding arch between node13 and node6");
+		graph.addArch("node13", "node6");
+		System.out.println("Adding arch between node6 and node9");
+		graph.addArch("node6", "node9");
+		System.out.println("Adding arch between node17 and node8");
+		graph.addArch("node17", "node8");
+
+		System.out.println("Testing grade() and edges()");
+		if (3 != graph.grade("node6"))
+			throw new Exception("addArch() error: node6 has 3 incident archs");
+
+		if (null == graph.edges(new Arch("node8", "node17")))
+			throw new Exception("edges() error: the arch between node8 and node17");
+
+		System.out.println("Trying to adding node8");
+		graph.addNode("node8");
+
+		System.out.println("Removing node8");
+		graph.removeNode("node8");
+
+		System.out.println("Testing incidentArchs()");
+		if (null != graph.incidentArchs("node17"))
+			throw new Exception("incidentArchs() error: node8 has been deleted, so node17 has no more archs");
+
+		System.out.println("Creating a new graph with node1, node2, node3, node4, node5, node6");
+
+		graph = new NonOrientedGraph();
+		for (Integer i = 1; 7 > i; ++i) {
+			String ithNode = "node" + i.toString();
+
+			graph.addNode(ithNode);
+		}
+
+		System.out.println("Adding arch between node6 and node2");
+		graph.addArch("node6", "node2");
+		System.out.println("Adding arch between node5 and node1");
+		graph.addArch("node5", "node1");
+		System.out.println("Adding arch between node5 and node3");
+		graph.addArch("node5", "node3");
+		System.out.println("Adding arch between node3 and node4");
+		graph.addArch("node3", "node4");
+		System.out.println("Adding arch between node1 and node3");
+		graph.addArch("node1", "node3");
+		System.out.println("Adding arch between node5 and node100");
+		graph.addArch("node5", "node100");
+
+		System.out.println("Testing breadthFirstVisit method");
+		NodeOperation op = n -> {};
+		Comparable[] visitedNodes = graph.breadthFirstVisit(op, "node5");
+
+		if (4 != visitedNodes.length)
+			throw new Exception("breadthFirstVisit() error: the visited nodes should be 4");
+
+		for (int i = 0; visitedNodes.length > i; ++i) {
+			if (0 == visitedNodes[i].compareTo("node2") || 0 == visitedNodes[i].compareTo("node6"))
+				throw new Exception("breadthFirstVisit() error: node2 and node6 should not have been visited");
+		}
+
+		System.out.println("\nNonOrientedGraph implementation test terminated successfully!\n");
 	}
 	
 	public static void main(String[] args) {

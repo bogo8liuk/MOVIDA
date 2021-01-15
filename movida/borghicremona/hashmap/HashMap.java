@@ -28,10 +28,8 @@ public class HashMap implements Dictionary {
 	 * non-checked runtime error.
 	 */
 	private static void __assertNotDeletedKey(Comparable key) {
-		try {
-			if ("_DELETED_" == (String) key) throw new IllegalArgumentException("Illegal key: aborting");
-		} catch (IllegalArgumentException exception) {
-			System.err.println(exception.getMessage());
+		if (0 == _DELETED_.getKey().compareTo(key)) {
+			System.err.println("Invalid key: aborting");
 			System.exit(-1);
 		}
 	}
@@ -44,10 +42,8 @@ public class HashMap implements Dictionary {
 	}
 
 	public HashMap(int length) {
-		try {
-			if (0 >= length) throw new IllegalArgumentException("Cannot have a negative length: aborting");
-		} catch (IllegalArgumentException exception) {
-			System.err.println(exception.getMessage());
+		if (0 >= length) {
+			System.err.println("Invalid length of HashMap: aborting");
 			System.exit(-1);
 		}
 
@@ -77,7 +73,7 @@ public class HashMap implements Dictionary {
 			if (null == this.table[i])
 				return null;
 
-			else if ((String) this.table[i].getKey() == (String) key)
+			else if (0 == this.table[i].getKey().compareTo(key))
 				return this.table[i].getValue();
 		}
 
@@ -95,6 +91,10 @@ public class HashMap implements Dictionary {
 	 * @return true if the insertion is successful, false otherwise.
 	 */
 	private static Boolean __insert(KeyValueElement[] table, KeyValueElement item) {
+		// _DELETED_ label or null item are not allowed to be inserted.
+		if (null == item || _DELETED_ == item)
+			return true;
+
 		boolean inserted = false;
 
 		int index = Hash.hash((String) item.getKey()) % table.length;
@@ -161,7 +161,7 @@ public class HashMap implements Dictionary {
 		for (int attempt = 0; this.table.length > attempt; ++attempt) {
 			int i = (index + attempt) % this.table.length;
 
-			if ((String) this.table[i].getKey() == (String) key) {
+			if (0 == this.table[i].getKey().compareTo(key)) {
 				Object value = this.table[i].getValue();
 				this.table[i] = _DELETED_;
 				return value;

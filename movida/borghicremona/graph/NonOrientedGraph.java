@@ -49,7 +49,7 @@ public class NonOrientedGraph implements Graph {
 			// If the index-th node is null, the searched node does not exist.
 			if (null == this.adjacencyLists[index])
 				throw new RuntimeException();
-			else if (nodeKey == (String) this.adjacencyLists[index].getKey()) {
+			else if (0 == this.adjacencyLists[index].getKey().compareTo(nodeKey)) {
 				found = true;
 				break;
 			}
@@ -111,7 +111,7 @@ public class NonOrientedGraph implements Graph {
 
 			if (null == this.adjacencyLists[index])
 				throw new RuntimeException();
-			else if (archNodes0 == (String) this.adjacencyLists[index].getKey()) {
+			else if (0 == this.adjacencyLists[index].getKey().compareTo(archNodes0)) {
 				found = true;
 				break;
 			}
@@ -198,7 +198,7 @@ public class NonOrientedGraph implements Graph {
 			return -1;
 		}
 
-		int i = Hash.hash((String) nodeKey) % this.adjacencyLists.length;
+		int i = this.getIndex((String) nodeKey);
 
 		LinkedList<String> list = (LinkedList<String>) this.adjacencyLists[i].getValue();
 		return list.size();
@@ -220,7 +220,7 @@ public class NonOrientedGraph implements Graph {
 			return null;
 		}
 
-		int i = Hash.hash((String) nodeKey) % this.adjacencyLists.length;
+		int i = this.getIndex((String) nodeKey);
 		LinkedList<String> list = (LinkedList<String>) this.adjacencyLists[i].getValue();
 
 		if (0 == list.size())
@@ -312,6 +312,10 @@ public class NonOrientedGraph implements Graph {
 	 * @attention The allocation of the parameters is an unchecked runtime error.
 	 */
 	private static Boolean insertNode(KeyValueElement[] table, KeyValueElement item) {
+		// _DELETED_ label or null item are not allowed to be inserted.
+		if (null == item || _DELETED_ == item)
+			return true;
+
 		int i = Hash.hash((String) item.getKey());
 
 		for (int attempt = 0; table.length > attempt; ++attempt) {
@@ -480,11 +484,10 @@ public class NonOrientedGraph implements Graph {
 		// Queue to keep track of the nodes to visit.
 		LinkedList<String> queue = new LinkedList<String>();
 
-		list.add(startNode);
 		queue.add(startNode);
 
 		// The first node has to be marked.
-		int startIndex = getIndex(start);
+		int startIndex = this.getIndex(start);
 		boolmap[startIndex] = true;
 
 		// If the queue is empty, then all the reachable nodes have been visited.
