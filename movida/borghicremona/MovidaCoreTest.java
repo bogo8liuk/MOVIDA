@@ -1,11 +1,19 @@
 package movida.borghicremona;
 
 import java.io.File;
+import java.net.URL;
 import movida.commons.*;
 
 public class MovidaCoreTest {
+	private File getFile(String path) {
+		URL url = this.getClass().getResource(path);
+
+		return new File(url.getPath());
+	}
+
 	public static void main(String[] args) {
 		MovidaCore base = new MovidaCore();
+		MovidaCoreTest test = new MovidaCoreTest();
 
 		if (!base.setSort(SortingAlgorithm.SelectionSort)) {
 			System.err.println("setSort() returning false");
@@ -18,14 +26,11 @@ public class MovidaCoreTest {
 		}
 
 		try {
-			base.loadFromFile(new File("/home/luca/Workspace/Uni/MOVIDA/movida/borghicremona/movies.txt"));
+			base.loadFromFile(test.getFile("movies.txt"));
 		} catch (MovidaFileException exception) {
 			System.err.println("loadFromFile() throwing MovidaFileException");
 			System.exit(-1);
 		}
-
-		// TODO: saveToFile()
-		// TODO: clear()
 
 		if (10 != base.countMovies()) {
 			System.err.println("countMovies() returning a wrong number of movies");
@@ -204,6 +209,15 @@ public class MovidaCoreTest {
 
 		if (!found) {
 			System.err.println("getTeamOf() error: Juliette Lewis is part of Tom Skerritt");
+			System.exit(-1);
+		}
+
+		//TODO: maximizeCollaborationsInTheTeamOf()
+
+		try {
+			base.saveToFile(test.getFile("test.txt"));
+		} catch (MovidaFileException exception) {
+			System.err.println("saveToFile() throwing MovidaFileException");
 			System.exit(-1);
 		}
 

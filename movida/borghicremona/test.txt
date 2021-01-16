@@ -1,0 +1,1 @@
+File used by MovidaCoreTest where to write data about movies.

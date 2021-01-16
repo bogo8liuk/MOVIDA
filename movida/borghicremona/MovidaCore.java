@@ -1,6 +1,7 @@
 package movida.borghicremona;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Files;
@@ -661,29 +662,34 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 	}
 
 	/**
-	 * It turns the data of a Movie into an array of bytes according to Movida file format.
+	 * It turns the data of an array of Movie into a String according to Movida file format.
 	 *
-	 * @param movie The Movie object to convert.
+	 * @param movies The Movie array to convert.
 	 *
-	 * @return An array of bytes containing all the data about the movie parameter.
+	 * @return A String containing all the data in movies.
 	 */
-	private static byte[] movieToBytes(Movie movie) {
-		Person[] cast = movie.getCast();
+	private static String moviesToString(Movie[] movies) {
+		String data = "";
 
-		String data = "Title: " + movie.getTitle() + "\n";
-		data += "Year: " + movie.getYear().toString() + "\n";
-		data += "Director: " + movie.getDirector().getName() + "\n";
-		for (int i = 0; cast.length > 0; ++i) {
-			if (0 != i)
-				data += ", ";
+		for (int i = 0; movies.length > i; ++i) {
+			Person[] cast = movies[i].getCast();
 
-			data += cast[i].getName();
+			data += "Title: " + movies[i].getTitle() + "\n";
+			data += "Year: " + movies[i].getYear().toString() + "\n";
+			data += "Director: " + movies[i].getDirector().getName() + "\n";
+			data += "Cast: ";
+			for (int j = 0; cast.length > j; ++j) {
+				if (0 != j)
+					data += ", ";
+
+				data += cast[j].getName();
+			}
+			data += "\n";
+			data += "Votes: " + movies[i].getVotes().toString() + "\n";
+			data += "\n";
 		}
-		data += "\n";
-		data += "Votes: " + movie.getVotes().toString() + "\n";
-		data += "\n";
 
-		return data.getBytes();
+		return data;
 	}
 
 	public void saveToFile(File f) throws MovidaFileException {
@@ -710,14 +716,16 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		// If there's no Movie, then write simply a newline, cancelling all the previous lines.
 		if (null == array) {
 			try {
-				Files.write(file, "\n".getBytes(), StandardOpenOption.TRUNCATE_EXISTING);
+				FileWriter fw = new FileWriter(f, false);
+				fw.write("\n");
+				fw.close();
 				return;
 			} catch (IOException | UnsupportedOperationException exception) {
 				throw new MovidaFileException();
 			}
 		}
 
-		// Lines are overwrited.
+		// Lines are overwritten.
 		else {
 			Movie[] movies = new Movie[array.length];
 
@@ -725,8 +733,9 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 				movies[i] = (Movie) array[i];
 
 			try {
-				for (int i = 0; movies.length < i; ++i) 
-					Files.write(file, movieToBytes(movies[i]), StandardOpenOption.TRUNCATE_EXISTING);
+				FileWriter fw = new FileWriter(f, false);
+				fw.write(moviesToString(movies));
+				fw.close();
 			} catch (IOException | UnsupportedOperationException exception) {
 				throw new MovidaFileException();
 			}
@@ -971,6 +980,11 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 	}
 
 	public Movie[] searchMoviesByTitle(String title) {
+		if (!this.movieDictIstanceExist(KeyType.MOVIE)) {
+			System.err.println("Dictionary not set: aborting");
+			System.exit(-1);
+		}
+
 		if (null == title)
 			return null;
 
@@ -1221,6 +1235,11 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 	}
 
 	public Person[] getDirectCollaboratorsOf(Person actor) {
+		if (!this.movieDictIstanceExist(KeyType.PERSON)) {
+			System.err.println("Dictionary not set: aborting");
+			System.exit(-1);
+		}
+
 		if (null == actor)
 			return null;
 
@@ -1250,6 +1269,11 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 	}
 
 	public Person[] getTeamOf(Person actor) {
+		if (!this.movieDictIstanceExist(KeyType.PERSON)) {
+			System.err.println("Dictionary not set: aborting");
+			System.exit(-1);
+		}
+
 		if (null == actor)
 			return null;
 
@@ -1351,6 +1375,11 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 	}
 
 	public Collaboration[] maximizeCollaborationsInTheTeamOf(Person actor) {
+		if (!this.movieDictIstanceExist(KeyType.PERSON)) {
+			System.err.println("Dictionary not set: aborting");
+			System.exit(-1);
+		}
+
 		if (null == actor)
 			return null;
 
