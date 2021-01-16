@@ -18,7 +18,7 @@ public class MovidaCoreTest {
 		}
 
 		try {
-			base.loadFromFile(new File("movies.txt"));
+			base.loadFromFile(new File("/home/luca/Workspace/Uni/MOVIDA/movida/borghicremona/movies.txt"));
 		} catch (MovidaFileException exception) {
 			System.err.println("loadFromFile() throwing MovidaFileException");
 			System.exit(-1);
@@ -37,15 +37,18 @@ public class MovidaCoreTest {
 			System.exit(-1);
 		}
 
-		base.deleteMovieByTitle("Die Hard");
+		if (!base.deleteMovieByTitle("Die Hard")) {
+			System.err.println("deleteMovieByTitle() error: Die Hard is an existing movie");
+			System.exit(-1);
+		}
 
 		if (9 != base.countMovies()) {
 			System.err.println("countMovies() or deleteMovieByTitle() error: a movie should have been deleted");
 			System.exit(-1);
 		}
 
-		base.deleteMovieByTitle("The Avengers");
 		int peopleNo = base.countPeople();
+		base.deleteMovieByTitle("The Avengers");
 
 		if (9 != base.countMovies()) {
 			System.err.println("countMovies() or deleteMovieByTitle() error: no movie should have been deleted");

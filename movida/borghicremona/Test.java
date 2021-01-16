@@ -182,6 +182,18 @@ public class Test {
 		if (length == hashmap.length())
 			throw new Exception("length must be modified coherently after adding more elements beyond the hashmap initial length.");
 
+		if (null == hashmap.search("Dennis Rodman"))
+			throw new Exception("search() error: element with key \"Dennis Rodman\" exists.");
+
+		if (null == hashmap.search("Kevin Garnett"))
+			throw new Exception("search() error: element with key \"Kevin Garnett\" exists.");
+
+		if (null == hashmap.search("Kobe Bryant"))
+			throw new Exception("search() error: element with key \"Kobe Bryant\" exists.");
+
+		if (null == hashmap.search("Coby White"))
+			throw new Exception("search() error: element with key \"Coby White\" exists.");
+
 		System.out.println("");
 		hashmap.printTable();
 		System.out.println("");

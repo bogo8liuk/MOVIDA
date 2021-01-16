@@ -155,11 +155,12 @@ public class HashMap implements Dictionary {
 
 		int index = Hash.hash((String) key) % this.table.length;
 
-		if (null == this.table[index]) return null;
-
 		// Linear inspection: every time the inspection gets a collision, the index is incremented by 1
 		for (int attempt = 0; this.table.length > attempt; ++attempt) {
 			int i = (index + attempt) % this.table.length;
+
+			if (null == this.table[i])
+				return null;
 
 			if (0 == this.table[i].getKey().compareTo(key)) {
 				Object value = this.table[i].getValue();

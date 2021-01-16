@@ -367,7 +367,6 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 	private static Person[] parseCast(String tmpCast) {
 		// Parsing Cast keys because of many Person (people).
 		String[] splitting = tmpCast.split(",");
-		// Person (people) are one more than comma characters.
 		Person[] cast = new Person[splitting.length];
 
 		for (int i = 0; splitting.length > i; ++i)
@@ -597,8 +596,8 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 				String actorName = people[j].getName();
 
 				if (null == this.doOn(DictionaryOperation.SEARCH, KeyType.PERSON, MapImplementation.HashIndirizzamentoAperto, actorName, null)) {
-					this.doOn(DictionaryOperation.INSERT, KeyType.PERSON, MapImplementation.HashIndirizzamentoAperto, actorName, null);
-					this.doOn(DictionaryOperation.INSERT, KeyType.PERSON, MapImplementation.ABR, actorName, null);
+					this.doOn(DictionaryOperation.INSERT, KeyType.PERSON, MapImplementation.HashIndirizzamentoAperto, actorName, people[j]);
+					this.doOn(DictionaryOperation.INSERT, KeyType.PERSON, MapImplementation.ABR, actorName, people[j]);
 				}
 
 				PairPersonMovie actorMovie = new PairPersonMovie(people[j], movies[i]);
@@ -608,10 +607,11 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 			this.insertCollaboration(people);
 
 			// Director arranging.
-			String directorName = movies[i].getDirector().getName();
+			Person director = movies[i].getDirector();
+			String directorName = director.getName();
 			if (null == this.doOn(DictionaryOperation.SEARCH, KeyType.PERSON, MapImplementation.HashIndirizzamentoAperto, directorName, null)) {
-				this.doOn(DictionaryOperation.INSERT, KeyType.PERSON, MapImplementation.HashIndirizzamentoAperto, directorName, null);
-				this.doOn(DictionaryOperation.INSERT, KeyType.PERSON, MapImplementation.ABR, directorName, null);
+				this.doOn(DictionaryOperation.INSERT, KeyType.PERSON, MapImplementation.HashIndirizzamentoAperto, directorName, director);
+				this.doOn(DictionaryOperation.INSERT, KeyType.PERSON, MapImplementation.ABR, directorName, director);
 			}
 
 			PairPersonMovie directorMovie = new PairPersonMovie(movies[i].getDirector(), movies[i]);
@@ -990,7 +990,7 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 	 * @attention The correctness of arrayIndex is a checked runtime error.
 	 */
 	private void sort(Integer arrayIndex) {
-		if (YEARS != arrayIndex || VOTES != arrayIndex || DIRECTORS != arrayIndex || ACTORS != arrayIndex) {
+		if (YEARS != arrayIndex && VOTES != arrayIndex && DIRECTORS != arrayIndex && ACTORS != arrayIndex) {
 			System.err.println("sort() default case: aborting");
 			System.exit(-1);
 		}
@@ -1024,8 +1024,8 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 
 		/* Insertion of elements with the year equal to the parameter from the array of
 		   arrayData to the list. */
-		for (int i = 0; years.length < i; ++i) {
-			if (year == years[i].getIndex())
+		for (int i = 0; years.length > i; ++i) {
+			if (0 == years[i].getIndex().compareTo(year))
 				list.add(years[i].getMovie());
 		}
 
@@ -1048,8 +1048,8 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 
 		/* Insertion of elements with the name equal to the parameter from the array of
 		   arrayData to the list. */
-		for (int i = 0; directors.length < i; ++i) {
-			if (name == directors[i].getPerson().getName())
+		for (int i = 0; directors.length > i; ++i) {
+			if (0 == directors[i].getPerson().getName().compareTo(name))
 				list.add(directors[i].getMovie());
 		}
 
@@ -1072,8 +1072,8 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 
 		/* Insertion of elements with the name equal to the parameter from the array of
 		   arrayData to the list. */
-		for (int i = 0; actors.length < i; ++i) {
-			if (name == actors[i].getPerson().getName())
+		for (int i = 0; actors.length > i; ++i) {
+			if (0 == actors[i].getPerson().getName().compareTo(name))
 				list.add(actors[i].getMovie());
 		}
 
@@ -1101,7 +1101,7 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		Movie[] mostVotedMovies = new Movie[length];
 
 		// Taking the last N movies, because of the hypothesis of the sorted array.
-		for (Integer i = length - 1; 0 < i; ++i)
+		for (Integer i = length - 1; 0 < i; --i)
 			mostVotedMovies[i] = votes[i].getMovie();
 
 		return mostVotedMovies;
@@ -1179,8 +1179,8 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		for (int i = 0; actors.length > i; ++i) {
 			Person actor = actors[i].getPerson();
 
-			int j = 0;
-			while (actors.length > i && actor == actors[i].getPerson()) {
+			int j = 1;
+			while (actors.length > i + 1 && 0 == actors[i + 1].getPerson().getName().compareTo(actor.getName())) {
 				++j;
 				++i;
 			}
@@ -1192,7 +1192,7 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		// Construction and sorting of vector with every person and all its occurrences (of the given person).
 		PairIntPerson[] arrayType = new PairIntPerson[1];
 		PairIntPerson[] occurrences = list.toArray(arrayType);
-		Vector<PairIntPerson> v = new Vector(occurrences);
+		Vector<PairIntPerson> v = new Vector<PairIntPerson>(occurrences);
 
 		switch (this.algorithm) {
 			case SelectionSort:
@@ -1295,18 +1295,18 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 		   their name, are all positioned sequentially. */
 		for (int i = 0; actors.length > i; ++i) {
 			String name = actors[i].getPerson().getName();
-			if (name != actorA.getName() && name != actorB.getName())
+			if (0 != actorA.getName().compareTo(name) && 0 != actorB.getName().compareTo(name))
 				continue;
 
-			else if (name == actorA.getName()) {
+			else if (0 == actorA.getName().compareTo(name)) {
 				// Found the actors with nameA.
 				while (actors.length > i && actors[i].getPerson().getName() == name) {
 					Movie movie = actors[i].getMovie();
-					Person[] cast = actors[i].getMovie().getCast();
+					Person[] cast = movie.getCast();
 
 					// Adding the movies with the actors that have nameB as their name.
 					for (int j = 0; cast.length > j; ++j) {
-						if (actorB.getName() == cast[j].getName())
+						if (0 == actorB.getName().compareTo(cast[j].getName()))
 							collab.addMovie(movie);
 							break;
 					}
@@ -1320,10 +1320,10 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 			else {
 				while (actors.length > i && actors[i].getPerson().getName() == name) {
 					Movie movie = actors[i].getMovie();
-					Person[] cast = actors[i].getMovie().getCast();
+					Person[] cast = movie.getCast();
 
 					for (int j = 0; cast.length > j; ++j) {
-						if (actorA.getName() == cast[j].getName())
+						if (0 == actorA.getName().compareTo(cast[j].getName()))
 							collab.addMovie(movie);
 							break;
 					}
