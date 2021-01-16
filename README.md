@@ -1,6 +1,6 @@
 # MOVIDA
 
-Movida is a project with educational purposes, as part of the exam of the course "Algoritmi e Strutture dati" at Alma Mater Studiorum University of Bologna. The idea behind MOVIDA is to apply various algorithms and data structures in order to
+Movida is a project with educational purposes, as part of the exam of the course "Algoritmi e Strutture dati" at Alma Mater Studiorum University of Bologna. The idea behind MOVIDA is to apply various algorithms and data structures in order to interact with a knowledge-base about movies.
 
 ##### Authors
 
