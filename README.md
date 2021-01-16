@@ -8,33 +8,42 @@ Luca Borghi, Stefano Cremona.
 
 ### Build
 
-The project has been developed using openjdk-8. In order to install this version use the command below :
-```bash
-$ sudo apt-get install openjdk-8-jre
-```
-To build the project, move to the root directory MOVIDA/ then launch the command:
+The project has been developed using openjdk-8.
+To build the project, move to the root directory MOVIDA/ and follow the guide:
 
+When you will build the project, some warnings are given by the java compiler, just ignore them, they are generated
+by safe casts in the code.
+
+The options "-b" and "-b=all" allow to compile all the files in the paths movida/commons/ and movida/borghicremona/.
 ```bash
 $ ./build.sh -b
 ```
-The options "-b" | "-b=all" allow to compile all the files in the paths movida/commons/ and movida/borghicremona/.
+
+```bash
+$ ./build.sh -b=all
+```
 
 The following options, allow to compile the files contained in the directory specified after the symbol "-b="
 ```bash
 $ ./build.sh -b=borghicremona
 ```
+
 ```bash
 $ ./build.sh -b=commons
 ```
+
 ```bash
 $ ./build.sh -b=hashmap
 ```
+
 ```bash
 $ ./build.sh -b=graph
 ```
+
 ```bash
 $ ./build.sh -b=sort 
 ```
+
 ```bash
 $ ./build.sh -b=bstree
 ```
@@ -44,9 +53,18 @@ The option "-u" unbuild the project, deleting all the files previously compiled.
 $ ./build.sh -u
 ```
 
-Alternatevely, users can compile files manually moving to the root directory of the project and calling the javac command as shown in the example below :
+Alternatevely, users can compile files manually moving to the root directory of the project and execute the javac command as shown in the example below :
 ```bash
-$ javac movida/borghicremona/MovidaCore.java
+$ javac movida/borghicremona/MovidaCore.java movida/borghicremona/Test.java movida/borghicremona/MovidaCoreTest.java
+```
+
+If you want to run one of the test, move to the root directory of the project and execute one of the following command:
+```bash
+$ java movida.borghicremona.Test
+```
+
+```bash
+$ java movida.borghicremona.MovidaCoreTest
 ```
 
 ### Project Structure
@@ -61,34 +79,35 @@ External files, provided by professors.
 
 Files in this directory comprehend : 
 
-- Assert.java : auxiliary class that allows to declare assertions;
+- KeyValueElement.java : class that represents an element that have both a key and a value;
 
-- Dictionary.java : ccontains interfaces that our structures have to implement;
+- Dictionary.java : the interface that our structures (HashMap and BinarySearchTree) have to implement;
 
-- Hash.java : 
+- Assert.java : auxiliary class that allows to call some assertions;
 
-- KeyValueElement.java : class implemented to represents elements that have both a key and a value;
+- Hash.java : class that offers a hash function and a method of growing to classes that uses hashmap implemented
+with an array of KeyValueElement;
 
-- MovidaCoreTest.java : 
+- Test.java : tests for the implementations of : hashmaps, binary search trees, non-oriented graphs and sort algorithms;
 
-- MovidaCore.java : 
+- MovidaCore.java : core class of the project that represents a knowledge-base about movies;
 
-- Test.java : contains tests for the implementations of : hashmaps, binary search trees, non-oriented graphs and sort algorithms.
+- MovidaCoreTest.java : tests for MovidaCore.
 
-There are also 4 sub-directories :
+There are also 4 sub-modules :
 
-##### sort/ 
+#### sort/ 
+Contains Vector.java, namely a class that encapsulates an array of generics and it offers methods like selectionSort,
+quickSort and shuffle.
 
-Contains the implementation of the Vector class;
+#### bstree/
+Contains BinarySearchTree.java, namely a class that implements a binary search tree; it implemets the Dictionary interface.
 
-##### bstree/ 
+#### graph/
+Contains the implementation of the Graph interface, including also Arch.java (representing the arch of a graph) and other
+useful facilities for graphs.
 
-Contains the implementation of the BinarySearchTree class;
+#### hashmap/
+Contains HashMap.java, namely a class that implements a open addressing hashmap.
 
-##### graph/
-
-Contains the implementation of the Graph class, includes auxiliary classes such as Arch.java, NodeFind.java, etc. ;
-
-##### hashmap/
-
-Contains the implementation of the HashMap class.
+ATTENTION: NonOrientedGraph and HashMap use only keys with type String, do not use other types of key.
