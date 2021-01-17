@@ -1,19 +1,11 @@
 package movida.borghicremona;
 
 import java.io.File;
-import java.net.URL;
 import movida.commons.*;
 
 public class MovidaCoreTest {
-	private File getFile(String path) {
-		URL url = this.getClass().getResource(path);
-
-		return new File(url.getPath());
-	}
-
 	public static void main(String[] args) {
 		MovidaCore base = new MovidaCore();
-		MovidaCoreTest test = new MovidaCoreTest();
 
 		if (!base.setSort(SortingAlgorithm.SelectionSort)) {
 			System.err.println("setSort() returning false");
