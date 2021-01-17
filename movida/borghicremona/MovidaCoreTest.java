@@ -26,18 +26,18 @@ public class MovidaCoreTest {
 		}
 
 		try {
-			base.loadFromFile(test.getFile("movies.txt"));
+			base.loadFromFile(new File("./movida/borghicremona/movies.txt"));
 		} catch (MovidaFileException exception) {
 			System.err.println("loadFromFile() throwing MovidaFileException");
 			System.exit(-1);
 		}
 
-		if (10 != base.countMovies()) {
+		if (13 != base.countMovies()) {
 			System.err.println("countMovies() returning a wrong number of movies");
 			System.exit(-1);
 		}
 
-		if (33 != base.countPeople()) {
+		if (35 != base.countPeople()) {
 			System.err.println("countPeople() returning a wrong number of people");
 			System.exit(-1);
 		}
@@ -47,7 +47,7 @@ public class MovidaCoreTest {
 			System.exit(-1);
 		}
 
-		if (9 != base.countMovies()) {
+		if (12 != base.countMovies()) {
 			System.err.println("countMovies() or deleteMovieByTitle() error: a movie should have been deleted");
 			System.exit(-1);
 		}
@@ -55,7 +55,7 @@ public class MovidaCoreTest {
 		int peopleNo = base.countPeople();
 		base.deleteMovieByTitle("The Avengers");
 
-		if (9 != base.countMovies()) {
+		if (12 != base.countMovies()) {
 			System.err.println("countMovies() or deleteMovieByTitle() error: no movie should have been deleted");
 			System.exit(-1);
 		}
@@ -140,32 +140,32 @@ public class MovidaCoreTest {
 			System.exit(-1);
 		}
 
-		if (8 != base.searchMostVotedMovies(8).length) {
-			System.err.println("searchMostVotedMovies() error: there are 8 movies");
+		if (11 != base.searchMostVotedMovies(11).length) {
+			System.err.println("searchMostVotedMovies() error: there are 11 movies");
 			System.exit(-1);
 		}
 
-		if (8 != base.searchMostVotedMovies(11).length) {
-			System.err.println("searchMostVotedMovies() error: there are less than 11 movies");
+		if (11 != base.searchMostVotedMovies(15).length) {
+			System.err.println("searchMostVotedMovies() error: there are less than 15 movies");
 			System.exit(-1);
 		}
 
-		if (8 != base.searchMostRecentMovies(8).length) {
-			System.err.println("searchMostRecentMovies() error: there are 8 movies");
+		if (11 != base.searchMostRecentMovies(11).length) {
+			System.err.println("searchMostRecentMovies() error: there are 11 movies");
 			System.exit(-1);
 		}
 
-		if (8 != base.searchMostRecentMovies(11).length) {
-			System.err.println("searchMostRecentMovies() error: there are less than 11 movies");
+		if (11 != base.searchMostRecentMovies(15).length) {
+			System.err.println("searchMostRecentMovies() error: there are less than 15 movies");
 			System.exit(-1);
 		}
 
-		if (8 != base.searchMostActiveActors(8).length) {
-			System.err.println("searchMostActiveActors() error: the query requires 8 actors");
+		if (11 != base.searchMostActiveActors(11).length) {
+			System.err.println("searchMostActiveActors() error: the query requires 11 actors");
 			System.exit(-1);
 		}
 
-		if (21 != base.searchMostActiveActors(50).length) {
+		if (22 != base.searchMostActiveActors(50).length) {
 			System.err.println("searchMostActiveActors() error: there are less than 50 actors");
 			System.exit(-1);
 		}
@@ -231,8 +231,42 @@ public class MovidaCoreTest {
 			System.exit(-1);
 		}
 
+		if (!base.deleteMovieByTitle("Mistery 3")) {
+			System.err.println("deleteMovieByTitle() error: Mistery 2 is an existent movie");
+			System.exit(-1);
+		}
+
+		if (!base.deleteMovieByTitle("Mistery 1")) {
+			System.err.println("deleteMovieByTitle() error: Mistery 1 is an existent movie");
+			System.exit(-1);
+		}
+
+		if (null == base.getPersonByName("John Doe")) {
+			System.err.println("getPersonByName() returning null even if John Doe acted in three movies and only " + 
+"two of them have been deleted");
+			System.exit(-1);
+		}
+
+		Person[] team_doe = base.getTeamOf(new Person("John Doe"));
+
+		if (null == team_doe) {
+			System.err.println("getTeamOf() error: John Doe has a non-empty team");
+			System.exit(-1);
+		}
+
+		found = false;
+		for (int i = 0; team_doe.length > i; ++i) {
+			if (0 == team_doe[i].getName().compareTo("Harrison Ford"))
+				found = true;
+		}
+
+		if (!found) {
+			System.err.println("getTeamOf(): Harrison Ford should stand in the team of John Doe");
+			System.exit(-1);
+		}
+
 		try {
-			base.saveToFile(test.getFile("test.txt"));
+			base.saveToFile(new File("./movida/borghicremona/test.txt"));
 		} catch (MovidaFileException exception) {
 			System.err.println("saveToFile() throwing MovidaFileException");
 			System.exit(-1);

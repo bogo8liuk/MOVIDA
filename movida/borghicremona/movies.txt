@@ -46,6 +46,12 @@ Director: Brian De Palma
 Cast: Al Pacino, Michelle Pfeiffer, Steven Bauer
 Votes: 703754		
 
+Title: Mistery 3
+Year: 1999
+Director: Carlo Verdone
+Cast: John Doe
+Votes: 66854
+
 Title: What Lies Beneath 	
 Year: 2000  
 Director: Robert Zemeckis  	
@@ -69,3 +75,15 @@ Year: 1993
 Director: Andrew Davis  	
 Cast: Harrison Ford, Tommy Lee Jones, Sela Ward 
 Votes: 256213
+
+Title: Mistery 1
+Year: 1990
+Director: Wolfgang Petersen
+Cast: John Doe
+Votes: 171080
+
+Title: Mistery 2
+Year: 1993
+Director: Wolfgang Petersen
+Cast: John Doe, Harrison Ford
+Votes: 303207
