@@ -527,38 +527,38 @@ public class NonOrientedGraph implements Graph {
 	 * @param find If MIN, it returns the index of the element with lowest value, else it returns
 	 * the index of the element with highest value.
 	 * @param array The array to iterate over.
+	 * @param boolmap If the i-th element is true, then the i-th element has not to be considered
+	 * in the search.
 	 *
 	 * @return The index of the element with highest or lowest value in array, according to find.
 	 *
 	 * @attention The parameters != null is an unchecked runtime error.
 	 * @attention It is assumed that in array there is at least a non-null element.
 	 */
-	private static int findIndex(NodeFind find, Double[] array) {
+	private static int findIndex(NodeFind find, Double[] array, boolean[] boolmap) {
 		switch (find) {
 			case MIN:
-				Integer min = -1;
+				int min = -1;
 				for (int i = 0; array.length > i; ++i) {
-					if (null == array[i])
+					if (null == array[i] || boolmap[i])
 						continue;
 
-					else if (-1 == min || array[min] < array[i])
+					else if (-1 == min || array[min] > array[i])
 						min = i;
 				}
 
-				array[min] = null;
 				return min;
 
 			case MAX:
-				Integer max = -1;
+				int max = -1;
 				for (int i = 0; array.length > i; ++i) {
-					if (null == array[i])
+					if (null == array[i] || boolmap[i])
 						continue;
 
 					else if (-1 == max || array[max] < array[i])
 						max = i;
 				}
 
-				array[max] = null;
 				return max;
 		}
 
@@ -649,9 +649,13 @@ public class NonOrientedGraph implements Graph {
 		   node is in the queue, else it is not in the queue (because it is not been yet inserted or it is
 		   already been removed). */
 		boolean[] queue = new boolean[this.adjacencyLists.length];
+		/* An array of boolean: to keep track of nodes already discarded by the queue. In a certain point of
+		   the code, the node with minimum/maximum weight has to be found, but every node that has been already
+		   arranged and discarded from the queue has not to be considered. */
+		boolean[] boolmap = new boolean[this.adjacencyLists.length];
 
 		for (int i = 0; this.adjacencyLists.length > i; ++i) {
-			if (0 == this.adjacencyLists[i].getKey().compareTo(start)) {
+			if (null != this.adjacencyLists[i] && 0 == this.adjacencyLists[i].getKey().compareTo(start)) {
 				// The start node is already inserted in the queue.
 				queue[i] = true;
 				fathers[i] = ROOT_NODE;
@@ -662,6 +666,8 @@ public class NonOrientedGraph implements Graph {
 				fathers[i] = null;
 				tmpWeights[i] = null;
 			}
+
+			boolmap[i] = false;
 		}
 
 		// Counter to keep track which node enters the queue and which node exits from the queue.
@@ -671,8 +677,10 @@ public class NonOrientedGraph implements Graph {
 			counter -= 1;
 
 			// It finds the max/min index and it removes it from the queue.
-			int index = findIndex(finder, tmpWeights);
+			int index = findIndex(finder, tmpWeights, boolmap);
 			queue[index] = false;
+			// The index-th node gets visited.
+			boolmap[index] = true;
 
 			/* If index does not represent the start node, then it creates a new Arch with index node's father to
 			   add to the list of archs to return. The start node has not a father, so it can't create a new Arch. */
@@ -682,10 +690,12 @@ public class NonOrientedGraph implements Graph {
 			}
 
 			// It iterates over the adjacent nodes.
-			int[] adjacentNodes = adjacentNodesIndexes(index);
+			int[] adjacentNodes = this.adjacentNodesIndexes(index);
+
 			if (null != adjacentNodes) {
 				for (int i = 0; adjacentNodes.length > i; ++i) {
 					int j = adjacentNodes[i];
+
 					Double weight = op.weight(this.adjacencyLists[index].getKey(), this.adjacencyLists[j].getKey());
 
 					// In this case, the node is not been yet inserted.

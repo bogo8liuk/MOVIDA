@@ -1324,15 +1324,16 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 
 			else if (0 == actorA.getName().compareTo(name)) {
 				// Found the actors with nameA.
-				while (actors.length > i && actors[i].getPerson().getName() == name) {
+				while (actors.length > i && 0 == actors[i].getPerson().getName().compareTo(name)) {
 					Movie movie = actors[i].getMovie();
 					Person[] cast = movie.getCast();
 
 					// Adding the movies with the actors that have nameB as their name.
 					for (int j = 0; cast.length > j; ++j) {
-						if (0 == actorB.getName().compareTo(cast[j].getName()))
+						if (0 == actorB.getName().compareTo(cast[j].getName())) {
 							collab.addMovie(movie);
 							break;
+						}
 					}
 
 					++i;
@@ -1342,14 +1343,15 @@ public class MovidaCore implements IMovidaDB, IMovidaConfig, IMovidaSearch, IMov
 			}
 
 			else {
-				while (actors.length > i && actors[i].getPerson().getName() == name) {
+				while (actors.length > i && 0 == actors[i].getPerson().getName().compareTo(name)) {
 					Movie movie = actors[i].getMovie();
 					Person[] cast = movie.getCast();
 
 					for (int j = 0; cast.length > j; ++j) {
-						if (0 == actorA.getName().compareTo(cast[j].getName()))
+						if (0 == actorA.getName().compareTo(cast[j].getName())) {
 							collab.addMovie(movie);
 							break;
+						}
 					}
 
 					++i;

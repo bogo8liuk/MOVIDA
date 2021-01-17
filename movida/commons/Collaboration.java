@@ -37,7 +37,7 @@ public class Collaboration {
 	}
 
 	public void addMovie(Movie m) {
-		if (-1 != this.movies.indexOf(m))
+		if (-1 == this.movies.indexOf(m))
 			this.movies.add(m);
 	}
 }

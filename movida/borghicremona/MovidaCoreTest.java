@@ -212,7 +212,24 @@ public class MovidaCoreTest {
 			System.exit(-1);
 		}
 
-		//TODO: maximizeCollaborationsInTheTeamOf()
+		Person[] team_mcconaughey = base.getTeamOf(new Person("Matthew McConaughey"));
+		Collaboration[] maxicc_mcconaughey = base.maximizeCollaborationsInTheTeamOf(new Person("Matthew McConaughey"));
+
+		if (null == team_mcconaughey) {
+			System.err.println("getTeamOf() error: Matthew McConaughey exists");
+			System.exit(-1);
+		}
+
+		if (null == maxicc_mcconaughey) {
+			System.err.println("maximizeCollaborationsInTheTeamOf() error: Matthew McConaughey exists");
+			System.exit(-1);
+		}
+
+		if (team_mcconaughey.length - 1 != maxicc_mcconaughey.length) {
+			System.err.println("maximizeCollaborationsInTheTeamOf() error: the number of actors is one more than " + 
+"that one of collaborations in a ICC");
+			System.exit(-1);
+		}
 
 		try {
 			base.saveToFile(test.getFile("test.txt"));
